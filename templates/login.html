@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Login - Our Journey{% endblock %}
+{% block content %}
+<div class="login-box card-3d">
+  <div class="card-inner">
+    <h2>Sign in</h2>
+    <form method="post" class="stack">
+      <input name="username" placeholder="Username (admin or guest)" required>
+      <input name="password" type="password" placeholder="Password" required>
+      <button class="btn" type="submit">Sign in</button>
+    </form>
+    <p class="muted">Admin account: <strong>admin / admin</strong></p>
+    <p class="muted">Guest account: <strong>guest / guest</strong></p>
+  </div>
+</div>
+{% endblock %}

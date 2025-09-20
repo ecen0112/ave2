@@ -1,0 +1,37 @@
+{
+    "users": [
+        {
+            "username": "admin",
+            "password": "admin",
+            "role": "admin"
+        },
+        {
+            "username": "guest",
+            "password": "guest",
+            "role": "guest"
+        }
+    ],
+    "ideas": [
+        "xaxaxx",
+        "Go for a picnic",
+        "Watch a movie together"
+    ],
+    "memories": [
+        "Our first date",
+        "Trip to the beach"
+    ],
+    "notes": [
+        "Don\u2019t forget the anniversary gift!",
+        "Plan next weekend"
+    ],
+    "gallery": [
+        {
+            "filename": "e52057ae842c43619d336941ecd10e93_547283380_694025507058378_1555488525928090813_n.jpg",
+            "uploaded_at": "2025-09-19T22:37:31.615027"
+        },
+        {
+            "filename": "547283380_694025507058378_1555488525928090813_n.jpg",
+            "uploaded_at": "2025-09-19T22:17:52.290082"
+        }
+    ]
+}

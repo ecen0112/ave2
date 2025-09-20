@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Notes - Our Journey{% endblock %}
+{% block content %}
+<h1 class="page-title">Notes</h1>
+
+<div class="content-grid">
+  <article class="card-3d">
+    <div class="card-inner">
+      <h3>Add Note</h3>
+      {% if session.get('role') == 'admin' %}
+      <form method="post" class="stack">
+        <textarea name="note" rows="3" placeholder="Write something..."></textarea>
+        <button class="btn" type="submit">Add Note</button>
+      </form>
+      {% else %}
+        <p class="muted">Only admin can add notes.</p>
+      {% endif %}
+    </div>
+  </article>
+
+  <article class="card-3d" style="grid-column: 1 / -1;">
+    <div class="card-inner">
+      <h3>All Notes</h3>
+      {% if notes %}
+        <div class="stack">
+          {% for note in notes %}
+            <div class="note-card">
+              <h3>Note {{ loop.revindex }}</h3>
+              <p>{{ note }}</p>
+              {% if session.get('role') == 'admin' %}
+                <form method="post" action="{{ url_for('delete_note', idx=loop.index0) }}" onsubmit="return confirm('Delete this note?')">
+                  <button class="btn" type="submit" style="margin-top:10px">Delete</button>
+                </form>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="muted">No notes yet.</p>
+      {% endif %}
+    </div>
+  </article>
+</div>
+{% endblock %}

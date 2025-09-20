@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Our Journey{% endblock %}
+{% block content %}
+<div class="dashboard-container">
+  <h1 class="page-title">✨ Welcome, {{ profile.name }} ✨</h1>
+
+  <!-- Main Info Grid -->
+  <div class="content-grid">
+    <!-- About -->
+    <article class="card-3d">
+      <div class="card-inner">
+        <h3>About</h3>
+        <p>{{ profile.bio }}</p>
+        <p class="muted">Together since <strong>{{ relationship_start }}</strong></p>
+        <p class="muted">{{ days_text }}</p>
+        <div class="card-actions">
+          <a class="btn" href="{{ url_for('memories') }}">View Memories</a>
+          <a class="btn" href="{{ url_for('gallery') }}">Open Gallery</a>
+        </div>
+      </div>
+    </article>
+
+    <!-- Next Anniversary -->
+    <article class="card-3d">
+      <div class="card-inner">
+        <h3>Next Anniversary</h3>
+        <p class="big">{{ next_anniversary }}</p>
+        <p class="muted">Countdown runs on the client side</p>
+        <div class="card-actions">
+          <a class="btn" href="{{ url_for('ideas') }}">Date Ideas</a>
+        </div>
+      </div>
+    </article>
+
+    <!-- Gallery -->
+    <article class="card-3d">
+      <div class="card-inner">
+        <h3>Recent Photos</h3>
+        <div class="mini-gallery">
+          {% if gallery %}
+            {% for img in gallery %}
+              <a href="{{ url_for('view_image', idx=loop.index0) }}">
+                <img src="{{ url_for('static', filename='uploads/' + img.filename) }}" alt="{{ img.filename }}">
+              </a>
+            {% endfor %}
+          {% else %}
+            <p class="muted">No photos yet. Upload some in Gallery.</p>
+          {% endif %}
+        </div>
+        <div class="card-actions">
+          <a class="btn" href="{{ url_for('gallery') }}">Open Gallery</a>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <!-- Games Section -->
+  <section class="games-section">
+    <h2>🎮 Fun & Games</h2>
+    <div class="games-grid">
+      <article class="card-3d">
+        <div class="card-inner">
+          <h3>Fireworks</h3>
+          <p>Launch colorful fireworks on the screen!</p>
+          <div class="card-actions">
+            <a class="btn" href="{{ url_for('fireworks') }}">Watch Now</a>
+          </div>
+        </div>
+      </article>
+      <article class="card-3d">
+        <div class="card-inner">
+          <h3>Butterflies</h3>
+          <p>Relax with floating, animated butterflies 🦋</p>
+          <div class="card-actions">
+            <a class="btn" href="{{ url_for('butterfly') }}">Watch Now</a>
+          </div>
+        </div>
+      </article>
+      <article class="card-3d">
+        <div class="card-inner">
+          <h3>Arrow Game</h3>
+          <p>Test your reflexes with this fun arrow shooting game!</p>
+          <div class="card-actions">
+            <a class="btn" href="{{ url_for('arrow_game') }}">Play Now</a>
+          </div>
+        </div>
+      </article>
+      <article class="card-3d">
+        <div class="card-inner">
+          <h3>Snake Game</h3>
+          <p>Guide the snake to eat food and grow!</p>
+          <div class="card-actions">
+            <a class="btn" href="{{ url_for('snake_game') }}">Play Now</a>
+          </div>
+        </div>
+      </article>
+      <article class="card-3d">
+        <div class="card-inner">
+          <h3>Chicken Game</h3>
+          <p>Try to dodge obstacles and score points!</p>
+          <div class="card-actions">
+            <a class="btn" href="{{ url_for('chicken_game') }}">Play Now</a>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+</div>
+{% endblock %}

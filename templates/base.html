@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{% block title %}Our Journey{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="animated-roses" aria-hidden="true"></div>
+
+  <header class="navbar">
+    <div class="nav-inner">
+      <a class="brand" href="{{ url_for('dashboard') }}">💖 Our Journey</a>
+
+      <nav class="nav-links">
+        <a href="{{ url_for('dashboard') }}">Home</a>
+        <a href="{{ url_for('memories') }}">Memories</a>
+        <a href="{{ url_for('gallery') }}">Gallery</a>
+        <a href="{{ url_for('notes') }}">Notes</a>
+        <a href="{{ url_for('ideas') }}">Ideas</a>
+
+        <span class="datetime" id="datetime"></span>
+
+        {% if session.get('username') %}
+          <span class="role-badge">{{ session.get('username') }}</span>
+          <a class="logout-btn" href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+          <a class="login-btn" href="{{ url_for('login') }}">Login</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="content">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-area">
+            {% for cat, msg in messages %}
+              <div class="flash flash-{{ cat }}">{{ msg }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

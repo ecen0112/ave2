@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Gallery - Our Journey{% endblock %}
+{% block content %}
+<h1 class="page-title">Gallery</h1>
+
+<div class="content-grid">
+  <article class="card-3d">
+    <div class="card-inner">
+      <h3>Upload Photo</h3>
+      {% if session.get('role') == 'admin' %}
+      <form method="post" enctype="multipart/form-data" class="stack" id="uploadForm">
+        <input id="fileInput" type="file" name="image" accept="image/*" onchange="previewLocal(this)" required>
+        <img id="preview" style="width:100%;display:none;border-radius:12px;max-height:280px;object-fit:cover" alt="preview">
+        <button class="btn" type="submit">Upload</button>
+      </form>
+      {% else %}
+        <p class="muted">Only admin can upload images. Sign in as admin to upload.</p>
+      {% endif %}
+    </div>
+  </article>
+
+  <article class="card-3d" style="grid-column: 1 / -1;">
+    <div class="card-inner">
+      <h3>Your Photos</h3>
+      {% if gallery %}
+        <div class="gallery">
+          {% for img in gallery %}
+            <div>
+              <a href="{{ url_for('view_image', idx=loop.index0) }}">
+              <img src="{{ url_for('static', filename='uploads/' + img.filename) }}" alt="{{ img.filename }}">
+              </a>
+              {% if session.get('role') == 'admin' %}
+                <form method="post" action="{{ url_for('delete_image', idx=loop.index0) }}" onsubmit="return confirm('Delete this image?');">
+                  <button class="btn" type="submit" style="margin-top:8px">Delete</button>
+                </form>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="muted">No images uploaded yet.</p>
+      {% endif %}
+    </div>
+  </article>
+</div>
+{% endblock %}

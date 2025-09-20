@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}View Photo - Our Journey{% endblock %}
+{% block content %}
+<h1 class="page-title">Photo</h1>
+<div style="text-align:center">
+  <img src="{{ url_for('static', filename='uploads/' + image.filename) }}" alt="{{ image.filename }}"style="max-width:95%; border-radius:18px; box-shadow:0 14px 40px rgba(0,0,0,0.35)">
+  {% if session.get('role') == 'admin' %}
+    <form method="post" action="{{ url_for('delete_image', idx=idx) }}" style="margin-top:14px" onsubmit="return confirm('Delete this image?');">
+      <button class="btn" type="submit">Delete Photo</button>
+    </form>
+  {% endif %}
+</div>
+{% endblock %}
