@@ -155,3 +155,98 @@ input::placeholder, textarea::placeholder { color: rgba(0,0,0,0.45); font-style:
   .gallery img { height:160px; }
   .mini-gallery img { width:54px; height:54px; }
 }
+/* ---------- responsive tweaks ---------- */
+
+/* Tablets */
+@media (max-width: 1024px) {
+  .nav-inner {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .nav-links {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+  .page {
+    padding: 28px 14px;
+  }
+  .content {
+    padding: 20px;
+  }
+  .page-title {
+    font-size: 1.6rem;
+  }
+}
+
+/* Phones */
+@media (max-width: 720px) {
+  .page {
+    padding: 20px 10px;
+  }
+  .content {
+    padding: 16px;
+    border-radius: 14px;
+  }
+  .page-title {
+    font-size: 1.3rem;
+  }
+  .card-inner {
+    padding: 16px;
+    gap: 10px;
+  }
+  .card-inner h3 {
+    font-size: 1rem;
+  }
+  .big {
+    font-size: 1.25rem;
+  }
+  .gallery {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+  }
+  .gallery img {
+    height: 140px;
+    border-radius: 10px;
+  }
+  .mini-gallery img {
+    width: 50px;
+    height: 50px;
+  }
+  .games-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .btn {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    border-radius: 10px;
+  }
+}
+
+/* Very small phones */
+@media (max-width: 480px) {
+  .nav-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .nav-links {
+    flex-direction: column;
+    width: 100%;
+    gap: 6px;
+  }
+  .games-grid {
+    grid-template-columns: 1fr;
+  }
+  .gallery {
+    grid-template-columns: 1fr;
+  }
+  .gallery img {
+    height: 180px;
+  }
+  .card-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
