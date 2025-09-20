@@ -21,16 +21,21 @@
     </article>
 
     <!-- Next Anniversary -->
-    <article class="card-3d">
-      <div class="card-inner">
-        <h3>Next Anniversary</h3>
-        <p class="big">{{ next_anniversary }}</p>
-        <p class="muted">Countdown runs on the client side</p>
-        <div class="card-actions">
+  <div class="card-3d">
+  <div class="card-inner">
+    <h3>Next Anniversary</h3>
+    <div id="countdown" class="countdown">
+      <span id="days">00</span>d :
+      <span id="hours">00</span>h :
+      <span id="minutes">00</span>m :
+      <span id="seconds">00</span>s
+    </div>
+   <div class="card-actions">
           <a class="btn" href="{{ url_for('ideas') }}">Date Ideas</a>
         </div>
-      </div>
-    </article>
+  </div>
+</div>
+
 
     <!-- Gallery -->
     <article class="card-3d">
@@ -106,4 +111,35 @@
     </div>
   </section>
 </div>
+<script>
+  function startCountdown() {
+    const targetDate = new Date("2025-10-13T00:00:00").getTime();
+
+    function updateCountdown() {
+      const now = new Date().getTime();
+      const diff = targetDate - now;
+
+      if (diff <= 0) {
+        document.getElementById("countdown").innerHTML = "🎉 It's Anniversary Day!";
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      document.getElementById("days").textContent = days.toString().padStart(2, '0');
+      document.getElementById("hours").textContent = hours.toString().padStart(2, '0');
+      document.getElementById("minutes").textContent = minutes.toString().padStart(2, '0');
+      document.getElementById("seconds").textContent = seconds.toString().padStart(2, '0');
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  }
+
+  startCountdown();
+</script>
+
 {% endblock %}

@@ -3,222 +3,260 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Snake Game</title>
+  <title>Snake Game 💖</title>
   <style>
     body {
       margin: 0;
-      background: #000;
-      color: #fff;
-      font-family: 'Poppins', sans-serif;
       display: flex;
       flex-direction: column;
+      justify-content: center;
       align-items: center;
-      justify-content: flex-start;
       height: 100vh;
-      overflow: hidden;
+      background: #000;
+      font-family: Arial, sans-serif;
+      color: #fff;
     }
 
     h1 {
-      margin: 20px 0 10px;
-      font-size: 1.8rem;
-      color: #00ff88;
-      text-shadow: 0 0 10px #00ff88;
-    }
-
-    #score {
-      font-size: 1.3rem;
+      color: #0f0;
       margin-bottom: 10px;
-      color: #ff4081;
-      text-shadow: 0 0 8px #ff4081;
+      text-shadow: 0 0 10px #0f0;
     }
 
-    canvas {
-      border: 2px solid #00ff88;
-      box-shadow: 0 0 20px #00ff88;
-      background: #111;
-      max-width: 95vw;
-      max-height: 70vh;
-    }
-
-    /* Controls */
-    .controls {
-      margin-top: 20px;
+    #gameContainer {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
-    }
-    .btn-row {
-      display: flex;
-      gap: 20px;
-    }
-    .ctrl-btn {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: #222;
-      border: 2px solid #00ff88;
-      color: #00ff88;
-      font-size: 1.5rem;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 12px #00ff88;
-      cursor: pointer;
-      user-select: none;
-      transition: 0.2s;
-    }
-    .ctrl-btn:active {
-      background: #00ff88;
-      color: #000;
-      box-shadow: 0 0 20px #00ff88;
     }
 
-    /* Popup message */
-    .popup {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(0.8);
-      background: rgba(0, 0, 0, 0.85);
-      border: 2px solid #ff4081;
-      padding: 20px 30px;
-      border-radius: 12px;
-      text-align: center;
-      font-size: 1.5rem;
-      color: #fff;
-      text-shadow: 0 0 10px #ff4081;
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.4s ease;
-      z-index: 10;
+    canvas {
+      background: #111;
+      border: 3px solid #0f0;
+      display: block;
     }
-    .popup.show {
-      opacity: 1;
-      transform: translate(-50%, -50%) scale(1);
+
+    #score {
+      font-size: 18px;
+      margin: 8px;
+      font-weight: bold;
+    }
+
+    /* Mobile Controls Grid */
+    .controls {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: 80px 80px 80px;
+      grid-template-rows: 80px 80px;
+      gap: 15px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .control-btn {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #0f0, #030);
+      border: 2px solid #0f0;
+      color: #fff;
+      font-size: 28px;
+      font-weight: bold;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 20px #0f0, inset 0 0 10px #060;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.15s, box-shadow 0.2s;
+    }
+
+    .control-btn:active {
+      transform: scale(0.9);
+      box-shadow: 0 0 30px #0f0, inset 0 0 15px #090;
+    }
+
+    /* Milestone Popup */
+    #popup {
+      position: fixed;
+      top: 20%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 255, 0, 0.9);
+      color: #000;
+      font-size: 24px;
+      font-weight: bold;
+      padding: 20px 40px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px #0f0;
+      display: none;
+      z-index: 1000;
+    }
+
+    /* Game Over Overlay */
+    #gameOverOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    #gameOverOverlay h2 {
+      color: #f00;
+      font-size: 36px;
+      margin-bottom: 20px;
+      text-shadow: 0 0 15px #f00;
+    }
+
+    #gameOverOverlay button {
+      margin-top: 10px;
+      padding: 14px 30px;
+      font-size: 20px;
+      font-weight: bold;
+      background: #0f0;
+      color: #000;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 0 20px #0f0;
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    #gameOverOverlay button:hover {
+      transform: scale(1.1);
+      background: #55ff55;
     }
   </style>
 </head>
 <body>
-  <h1>💚 Snake Game 💚</h1>
-  <div id="score">Score: 0</div>
-  <canvas id="gameCanvas" width="400" height="400"></canvas>
+  <h1>💖 Snake Game 💖</h1>
 
-  <!-- Mobile Controls -->
-  <div class="controls">
-    <div class="btn-row">
-      <button class="ctrl-btn" onclick="changeDirection('UP')">⬆</button>
-    </div>
-    <div class="btn-row">
-      <button class="ctrl-btn" onclick="changeDirection('LEFT')">⬅</button>
-      <button class="ctrl-btn" onclick="changeDirection('RIGHT')">➡</button>
-    </div>
-    <div class="btn-row">
-      <button class="ctrl-btn" onclick="changeDirection('DOWN')">⬇</button>
+  <div id="gameContainer">
+    <div id="score">Score: 0</div>
+    <canvas id="gameCanvas" width="420" height="420"></canvas>
+
+    <!-- Mobile Controls -->
+    <div class="controls">
+      <div></div>
+      <div class="control-btn" onclick="changeDirection('UP')">⬆️</div>
+      <div></div>
+      <div class="control-btn" onclick="changeDirection('LEFT')">⬅️</div>
+      <div class="control-btn" onclick="changeDirection('DOWN')">⬇️</div>
+      <div class="control-btn" onclick="changeDirection('RIGHT')">➡️</div>
     </div>
   </div>
 
-  <div id="popup" class="popup"></div>
+  <!-- Milestone Popup -->
+  <div id="popup"></div>
+
+  <!-- Game Over Overlay -->
+  <div id="gameOverOverlay">
+    <h2>💔 Game Over 💔</h2>
+    <button onclick="initGame()">🔄 Restart</button>
+  </div>
 
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     const scoreDisplay = document.getElementById("score");
     const popup = document.getElementById("popup");
+    const gameOverOverlay = document.getElementById("gameOverOverlay");
 
-    const box = 20; // size of each snake part
-    let snake = [{ x: 9 * box, y: 10 * box }];
-    let food = {
-      x: Math.floor(Math.random() * 19) * box,
-      y: Math.floor(Math.random() * 19) * box
-    };
-    let direction;
-    let score = 0;
+    const box = 20;
+    let snake, food, dx, dy, score, game;
 
-    document.addEventListener("keydown", e => {
-      if (e.key === "ArrowUp" && direction !== "DOWN") direction = "UP";
-      else if (e.key === "ArrowDown" && direction !== "UP") direction = "DOWN";
-      else if (e.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
-      else if (e.key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
-    });
-
-    function changeDirection(dir) {
-      if (dir === "UP" && direction !== "DOWN") direction = "UP";
-      else if (dir === "DOWN" && direction !== "UP") direction = "DOWN";
-      else if (dir === "LEFT" && direction !== "RIGHT") direction = "LEFT";
-      else if (dir === "RIGHT" && direction !== "LEFT") direction = "RIGHT";
-    }
-
-    function showPopup(message) {
-      popup.innerText = message;
-      popup.classList.add("show");
-      setTimeout(() => popup.classList.remove("show"), 2000);
+    function initGame() {
+      snake = [{ x: 9 * box, y: 10 * box }];
+      food = {
+        x: Math.floor(Math.random() * 20) * box,
+        y: Math.floor(Math.random() * 20) * box
+      };
+      dx = box;
+      dy = 0;
+      score = 0;
+      scoreDisplay.textContent = "Score: " + score;
+      gameOverOverlay.style.display = "none";
+      if (game) clearInterval(game);
+      game = setInterval(draw, 120);
     }
 
     function draw() {
       ctx.fillStyle = "#111";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Draw snake
       for (let i = 0; i < snake.length; i++) {
-        ctx.fillStyle = i === 0 ? "#00ff88" : "#33ffaa";
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = "#00ff88";
-        ctx.fillRect(snake[i].x, snake[i].y, box - 2, box - 2);
+        ctx.fillStyle = i === 0 ? "#0f0" : "#0a0";
+        ctx.fillRect(snake[i].x, snake[i].y, box, box);
       }
 
-      // Draw food
-      ctx.fillStyle = "#ff4081";
-      ctx.shadowBlur = 20;
-      ctx.shadowColor = "#ff4081";
-      ctx.fillRect(food.x, food.y, box - 2, box - 2);
+      ctx.fillStyle = "red";
+      ctx.fillRect(food.x, food.y, box, box);
 
-      // Old head position
-      let snakeX = snake[0].x;
-      let snakeY = snake[0].y;
+      let headX = snake[0].x + dx;
+      let headY = snake[0].y + dy;
 
-      if (direction === "LEFT") snakeX -= box;
-      if (direction === "UP") snakeY -= box;
-      if (direction === "RIGHT") snakeX += box;
-      if (direction === "DOWN") snakeY += box;
-
-      // Eat food
-      if (snakeX === food.x && snakeY === food.y) {
+      if (headX === food.x && headY === food.y) {
         score++;
-        scoreDisplay.innerText = "Score: " + score;
-
-        // Popup milestones
-        if (score % 10 === 0) {
-          showPopup("💖 You're awesome, my love! 💖");
-        }
-
+        scoreDisplay.textContent = "Score: " + score;
         food = {
-          x: Math.floor(Math.random() * 19) * box,
-          y: Math.floor(Math.random() * 19) * box
+          x: Math.floor(Math.random() * 20) * box,
+          y: Math.floor(Math.random() * 20) * box
         };
+
+        if ([10, 20, 30].includes(score)) {
+          showPopup(`You're awesome my love! 💖 Score: ${score}`);
+        }
       } else {
         snake.pop();
       }
 
-      const newHead = { x: snakeX, y: snakeY };
+      let newHead = { x: headX, y: headY };
 
-      // Game Over conditions
       if (
-        snakeX < 0 ||
-        snakeY < 0 ||
-        snakeX >= canvas.width ||
-        snakeY >= canvas.height ||
-        snake.some(part => part.x === newHead.x && part.y === newHead.y)
+        headX < 0 || headY < 0 ||
+        headX >= canvas.width || headY >= canvas.height ||
+        snake.some(segment => segment.x === headX && segment.y === headY)
       ) {
-        showPopup("💔 You lost, my love 💔");
         clearInterval(game);
+        gameOverOverlay.style.display = "flex";
+        return;
       }
 
       snake.unshift(newHead);
     }
 
-    const game = setInterval(draw, 120);
+    function changeDirection(dir) {
+      if (dir === "LEFT" && dx === 0) {
+        dx = -box; dy = 0;
+      } else if (dir === "UP" && dy === 0) {
+        dx = 0; dy = -box;
+      } else if (dir === "RIGHT" && dx === 0) {
+        dx = box; dy = 0;
+      } else if (dir === "DOWN" && dy === 0) {
+        dx = 0; dy = box;
+      }
+    }
+
+    document.addEventListener("keydown", event => {
+      if (event.key === "ArrowLeft") changeDirection("LEFT");
+      if (event.key === "ArrowUp") changeDirection("UP");
+      if (event.key === "ArrowRight") changeDirection("RIGHT");
+      if (event.key === "ArrowDown") changeDirection("DOWN");
+    });
+
+    function showPopup(message) {
+      popup.textContent = message;
+      popup.style.display = "block";
+      setTimeout(() => popup.style.display = "none", 2000);
+    }
+
+    initGame();
   </script>
 </body>
 </html>

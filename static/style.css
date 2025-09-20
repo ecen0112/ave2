@@ -250,3 +250,20 @@ input::placeholder, textarea::placeholder { color: rgba(0,0,0,0.45); font-style:
     align-items: stretch;
   }
 }
+.countdown {
+  font-size: 1.8rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 10px 0 15px;
+  background: linear-gradient(90deg, #ff4d6d, #ff9db0);
+  -webkit-background-clip: text;
+   background-clip: text; /* 添加标准 background-clip 属性 */
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 2px;
+  text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+.countdown span {
+  display: inline-block;
+  min-width: 45px;
+}
+
