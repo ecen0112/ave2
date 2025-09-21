@@ -4,6 +4,7 @@ from werkzeug.utils import secure_filename
 from datetime import datetime
 import uuid
 import json
+from functools import wraps
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -28,8 +29,8 @@ def load_db():
             return json.load(f)
     return {
         "users": [
-            {"username": "admin", "password": "admin", "role": "admin"},
-            {"username": "guest", "password": "guest", "role": "guest"}
+            {"username": "BUNBUN", "password": "BUNBUN", "role": "erl"},
+            {"username": "BUNNY", "password": "BUNNY", "role": "love"}
         ],
         "ideas": ["Go for a picnic", "Watch a movie together"],
         "memories": ["Our first date", "Trip to the beach"],
@@ -54,31 +55,54 @@ def load_gallery():
 db = load_db()
 db["gallery"] = load_gallery()
 
+# Login required decorator with debugging
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'username' not in session or not session['username']:
+            flash("Please log in to access this page.", "warning")
+            return redirect(url_for('login'))
+        print(f"Authenticated user: {session['username']}, Role: {session.get('role')}")  # Debug print
+        return f(*args, **kwargs)
+    return decorated_function
+
 # ---------- Auth ----------
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
+        session.clear()  # Clear any existing session before attempting login
         u = request.form.get("username", "").strip()
         p = request.form.get("password", "").strip()
         for user in db["users"]:
             if user["username"] == u and user["password"] == p:
                 session["username"] = u
                 session["role"] = user["role"]
-                flash(f"Signed in as {u}", "success")
+                flash(f"Signed in as {u} ({user['role']})", "success")
+                print(f"Login success: {u}, Role: {user['role']}")  # Debug print
                 return redirect(url_for("dashboard"))
-        flash("Invalid credentials", "danger")
+        flash("Invalid credentials. Use BUNBUN/BUNBUN or BUNNY/BUNNY.", "danger")
+        print(f"Login failed for username: {u}")  # Debug print
     return render_template("login.html")
 
 @app.route("/logout")
 def logout():
     session.clear()
-    flash("Logged out", "info")
+    flash("Logged out successfully.", "info")
     return redirect(url_for("login"))
+
+# ---------- Debug Route (remove in production) ----------
+@app.route("/debug")
+def debug():
+    return f"Session: {dict(session)}<br>DB Users: {db['users']}"
 
 # ---------- Dashboard ----------
 @app.route("/")
+@login_required
 def dashboard():
-    username = session.get("username", "Guest")
+    username = session.get("username")
+    if not username:
+        flash("Session error: No username found.", "error")
+        return redirect(url_for("login"))
     profile = {
         "name": username,
         "bio": "A curated place for our memories, ideas and photos.",
@@ -110,17 +134,19 @@ def dashboard():
         "dashboard.html",
         profile=profile,
         relationship_start=relationship_start_str,
-        days_text=f"{days_together} day{'s' if days_together != 1 else ''} together 💕",
+        days_text=f"{days_together} days{'s' if days_together != 1 else ''} together 💕",
         next_anniversary=next_anniv.strftime("%Y-%m-%d %H:%M:%S"),
         gallery=gallery_preview
     )
 
 # ---------- Ideas ----------
 @app.route("/ideas", methods=["GET", "POST"])
+@login_required
 def ideas():
     if request.method == "POST":
-        if session.get("role") != "admin":
-            flash("Only admin can add ideas.", "warning")
+        role = session.get("role")
+        if not role or role != "erl":
+            flash("Only users with 'erl' role can add ideas.", "warning")
             return redirect(url_for("ideas"))
         idea = request.form.get("idea", "").strip()
         if idea:
@@ -130,9 +156,11 @@ def ideas():
     return render_template("ideas.html", ideas=db["ideas"])
 
 @app.route("/delete_idea/<int:idx>", methods=["POST"])
+@login_required
 def delete_idea(idx):
-    if session.get("role") != "admin":
-        flash("Only admin can delete ideas.", "warning")
+    role = session.get("role")
+    if not role or role != "erl":
+        flash("Only users with 'erl' role can delete ideas.", "warning")
         return redirect(url_for("ideas"))
     if 0 <= idx < len(db["ideas"]):
         db["ideas"].pop(idx)
@@ -142,10 +170,12 @@ def delete_idea(idx):
 
 # ---------- Memories ----------
 @app.route("/memories", methods=["GET", "POST"])
+@login_required
 def memories():
     if request.method == "POST":
-        if session.get("role") != "admin":
-            flash("Only admin can add memories.", "warning")
+        role = session.get("role")
+        if not role or role != "erl":
+            flash("Only users with 'erl' role can add memories.", "warning")
             return redirect(url_for("memories"))
         memory = request.form.get("memory", "").strip()
         if memory:
@@ -155,9 +185,11 @@ def memories():
     return render_template("memories.html", memories=db["memories"])
 
 @app.route("/delete_memory/<int:idx>", methods=["POST"])
+@login_required
 def delete_memory(idx):
-    if session.get("role") != "admin":
-        flash("Only admin can delete memories.", "warning")
+    role = session.get("role")
+    if not role or role != "erl":
+        flash("Only users with 'erl' role can delete memories.", "warning")
         return redirect(url_for("memories"))
     if 0 <= idx < len(db["memories"]):
         db["memories"].pop(idx)
@@ -167,10 +199,12 @@ def delete_memory(idx):
 
 # ---------- Notes ----------
 @app.route("/notes", methods=["GET", "POST"])
+@login_required
 def notes():
     if request.method == "POST":
-        if session.get("role") != "admin":
-            flash("Only admin can add notes.", "warning")
+        role = session.get("role")
+        if not role or role != "erl":
+            flash("Only users with 'erl' role can add notes.", "warning")
             return redirect(url_for("notes"))
         note = request.form.get("note", "").strip()
         if note:
@@ -180,9 +214,11 @@ def notes():
     return render_template("notes.html", notes=db["notes"])
 
 @app.route("/delete_note/<int:idx>", methods=["POST"])
+@login_required
 def delete_note(idx):
-    if session.get("role") != "admin":
-        flash("Only admin can delete notes.", "warning")
+    role = session.get("role")
+    if not role or role != "erl":
+        flash("Only users with 'erl' role can delete notes.", "warning")
         return redirect(url_for("notes"))
     if 0 <= idx < len(db["notes"]):
         db["notes"].pop(idx)
@@ -192,10 +228,12 @@ def delete_note(idx):
 
 # ---------- Gallery ----------
 @app.route("/gallery", methods=["GET", "POST"])
+@login_required
 def gallery():
     if request.method == "POST":
-        if session.get("role") != "admin":
-            flash("Only admin can upload images.", "warning")
+        role = session.get("role")
+        if not role or role != "erl":
+            flash("Only users with 'erl' role can upload images.", "warning")
             return redirect(url_for("gallery"))
         file = request.files.get("image")
         if file and file.filename:
@@ -209,9 +247,11 @@ def gallery():
     return render_template("gallery.html", gallery=db["gallery"])
 
 @app.route("/delete_image/<int:idx>", methods=["POST"])
+@login_required
 def delete_image(idx):
-    if session.get("role") != "admin":
-        flash("Only admin can delete images.", "warning")
+    role = session.get("role")
+    if not role or role != "erl":
+        flash("Only users with 'erl' role can delete images.", "warning")
         return redirect(url_for("gallery"))
     if 0 <= idx < len(db["gallery"]):
         filename = db["gallery"][idx]["filename"]
@@ -224,6 +264,7 @@ def delete_image(idx):
     return redirect(url_for("gallery"))
 
 @app.route("/image/<int:idx>")
+@login_required
 def view_image(idx):
     if 0 <= idx < len(db["gallery"]):
         image = db["gallery"][idx]
@@ -233,23 +274,34 @@ def view_image(idx):
 
 # ---------- Games ----------
 @app.route("/game")
+@login_required
 def game():
-    return render_template("crossy_road.html")   # separate template for Crossy Road
+    return render_template("crossy_road.html")
 
 @app.route("/chicken-game")
+@login_required
 def chicken_game():
     return render_template("chicken_game.html")
+
 @app.route("/fireworks")
+@login_required
 def fireworks():
     return render_template("fireworks.html")
+
 @app.route("/butterfly")
+@login_required
 def butterfly():
     return render_template("butterfly.html")
+
 @app.route("/snake-game")
+@login_required
 def snake_game():
     return render_template("snake-game.html")
+
 @app.route("/arrow-game")
+@login_required
 def arrow_game():
     return render_template("arrow-game.html")
+
 if __name__ == "__main__":
     app.run(debug=True)
