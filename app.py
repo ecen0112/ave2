@@ -183,7 +183,7 @@ def ideas():
         if idea:
             db["ideas"].insert(0, {"text": idea, "status": status})
             save_db()
-            flash("Idea added.", "success")
+            flash("Idea added successfully!", "success")
     return render_template("ideas.html", ideas=db["ideas"])
 
 @app.route("/edit_idea/<int:idx>", methods=["POST"])
@@ -199,9 +199,9 @@ def edit_idea(idx):
             db["ideas"][idx]["text"] = new_text
             db["ideas"][idx]["timestamp"] = datetime.now().isoformat()  # Optional: Add timestamp if desired
             if save_db():
-                flash("Idea updated successfully.", "success")
+                flash("Idea updated successfully!", "success")
             else:
-                flash("Failed to save idea.", "error")
+                flash("Failed to update idea. Please try again.", "error")
     return redirect(url_for("ideas"))
 
 @app.route("/delete_idea/<int:idx>", methods=["POST"])
@@ -214,9 +214,9 @@ def delete_idea(idx):
     if 0 <= idx < len(db["ideas"]):
         db["ideas"].pop(idx)
         if save_db():
-            flash("Idea deleted.", "info")
+            flash("Idea deleted successfully.", "info")
         else:
-            flash("Failed to delete idea.", "error")
+            flash("Failed to delete idea. Please try again.", "error")
     return redirect(url_for("ideas"))
 
 @app.route("/toggle_idea_status/<int:idx>", methods=["POST"])
@@ -233,9 +233,9 @@ def toggle_idea_status(idx):
                 db["ideas"][idx] = {"text": db["ideas"][idx], "status": "Planned"}
             db["ideas"][idx]["status"] = new_status
             if save_db():
-                flash(f"Idea marked as {new_status}.", "success")
+                flash(f"Idea marked as {new_status} successfully!", "success")
             else:
-                flash("Failed to save status.", "error")
+                flash("Failed to update status. Please try again.", "error")
     return redirect(url_for("ideas"))
 
 # ---------- Memories ----------
@@ -265,9 +265,9 @@ def memories():
                 "photo": photo_filename
             })
             if save_db():
-                flash("Memory added successfully.", "success")
+                flash("Memory added successfully!", "success")
             else:
-                flash("Failed to save memory.", "error")
+                flash("Failed to save memory. Please try again.", "error")
     return render_template("memories.html", memories=db["memories"])
 
 @app.route("/edit_memory/<int:idx>", methods=["POST"])
@@ -283,9 +283,9 @@ def edit_memory(idx):
             db["memories"][idx]["text"] = new_text
             db["memories"][idx]["timestamp"] = datetime.now().isoformat()
             if save_db():
-                flash("Memory updated successfully.", "success")
+                flash("Memory updated successfully!", "success")
             else:
-                flash("Failed to save memory.", "error")
+                flash("Failed to update memory. Please try again.", "error")
     return redirect(url_for("memories"))
 
 @app.route("/delete_memory/<int:idx>", methods=["POST"])
@@ -300,7 +300,7 @@ def delete_memory(idx):
         if save_db():
             flash("Memory deleted successfully.", "info")
         else:
-            flash("Failed to delete memory.", "error")
+            flash("Failed to delete memory. Please try again.", "error")
     return redirect(url_for("memories"))
 
 # ---------- Notes ----------
@@ -316,9 +316,9 @@ def notes():
         if note:
             db["notes"].insert(0, {"text": note, "timestamp": datetime.now().isoformat()})
             if save_db():
-                flash("Note added successfully.", "success")
+                flash("Note added successfully!", "success")
             else:
-                flash("Failed to save note.", "error")
+                flash("Failed to save note. Please try again.", "error")
     return render_template("notes.html", notes=db["notes"])
 
 @app.route("/delete_note/<int:idx>", methods=["POST"])
@@ -333,13 +333,8 @@ def delete_note(idx):
         if save_db():
             flash("Note deleted successfully.", "info")
         else:
-            flash("Failed to delete note.", "error")
+            flash("Failed to delete note. Please try again.", "error")
     return redirect(url_for("notes"))
-
-# ---------- Gallery ----------
-# ... (previous imports remain unchanged)
-
-# ... (previous code up to routes remains unchanged)
 
 # ---------- Gallery ----------
 @app.route("/gallery", methods=["GET", "POST"])
@@ -358,7 +353,7 @@ def gallery():
             file.save(filepath)
             db["gallery"].insert(0, {"filename": unique_filename, "uploaded_at": datetime.now().isoformat(), "note": ""})
             save_db()
-            flash("Image uploaded successfully.", "success")
+            flash("Image uploaded successfully!", "success")
     return render_template("gallery.html", gallery=db["gallery"])
 
 @app.route("/image/<int:idx>", methods=["GET", "POST"])
@@ -376,13 +371,17 @@ def view_image(idx):
         note = request.form.get("note", "").strip()
         if note:
             try:
+                old_note = image.get("note", "")
                 image["note"] = note
-                if not save_db():
+                if save_db():
+                    if old_note:
+                        flash("Note updated successfully!", "success")
+                    else:
+                        flash("Note added successfully!", "success")
+                else:
                     raise Exception("Database save failed")
-                flash("Note added successfully.", "success")
-                print(f"Note added to image {idx}: {note} at {datetime.now().strftime('%H:%M:%S')}")
             except Exception as e:
-                flash(f"Failed to add note: {e}", "error")
+                flash(f"Failed to save note: {e}. Please try again.", "error")
                 print(f"Error adding note: {e} at {datetime.now().strftime('%H:%M:%S')}")
     return render_template("image_view.html", image=image, idx=idx)
 
@@ -401,10 +400,9 @@ def delete_image(idx):
         if save_db():
             flash("Image deleted successfully.", "info")
         else:
-            flash("Failed to delete image.", "error")
+            flash("Failed to delete image. Please try again.", "error")
     return redirect(url_for("gallery"))
 
-# ... (rest of the app.py remains unchanged)
 # ---------- Games ----------
 @app.route("/game")
 @login_required
