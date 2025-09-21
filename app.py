@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import os
 from werkzeug.utils import secure_filename
-from datetime import datetime
+from datetime import datetime, timedelta
 import uuid
 import json
 from functools import wraps
@@ -18,8 +18,11 @@ def format_datetime(value):
 
 # Upload folder setup
 UPLOAD_FOLDER = "static/uploads"
+MEMORIES_PHOTO_FOLDER = "static/memories"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(MEMORIES_PHOTO_FOLDER, exist_ok=True)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+app.config["MEMORIES_PHOTO_FOLDER"] = MEMORIES_PHOTO_FOLDER
 
 # DB file path
 DB_FILE = "data.json"
@@ -41,27 +44,21 @@ def load_db():
     if os.path.exists(DB_FILE):
         try:
             with open(DB_FILE, "r") as f:
-                return json.load(f)
+                loaded_db = json.load(f)
+                # Migrate existing ideas from strings to dictionaries if needed
+                if isinstance(loaded_db.get("ideas", []), list) and all(isinstance(i, str) for i in loaded_db.get("ideas", [])):
+                    loaded_db["ideas"] = [{"text": i, "status": "Planned"} for i in loaded_db["ideas"]]
+                return loaded_db
         except json.JSONDecodeError as e:
             print(f"Error decoding {DB_FILE}: {e}. Using default data at {datetime.now().strftime('%H:%M:%S')}")
-            return {
-                "users": [
-                    {"username": "BUNBUN", "password": "BUNBUN", "role": "erl"},
-                    {"username": "BUNNY", "password": "BUNNY", "role": "love"}
-                ],
-                "ideas": ["Go for a picnic", "Watch a movie together"],
-                "memories": ["Our first date", "Trip to the beach"],
-                "notes": ["Don’t forget the anniversary gift!", "Plan next weekend"],
-                "gallery": []
-            }
     return {
         "users": [
             {"username": "BUNBUN", "password": "BUNBUN", "role": "erl"},
             {"username": "BUNNY", "password": "BUNNY", "role": "love"}
         ],
-        "ideas": ["Go for a picnic", "Watch a movie together"],
-        "memories": ["Our first date", "Trip to the beach"],
-        "notes": ["Don’t forget the anniversary gift!", "Plan next weekend"],
+        "ideas": [{"text": "Go for a picnic", "status": "Planned"}, {"text": "Watch a movie together", "status": "Planned"}],
+        "memories": [{"text": "Our first date", "category": "Romantic", "timestamp": "2025-09-13T12:00:00", "photo": ""}],
+        "notes": [{"text": "Don’t forget the anniversary gift!", "timestamp": datetime.now().isoformat()}, {"text": "Plan next weekend", "timestamp": datetime.now().isoformat()}],
         "gallery": []
     }
 
@@ -98,7 +95,7 @@ def login_required(f):
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        session.clear()  # Clear any existing session before attempting login
+        session.clear()
         u = request.form.get("username", "").strip()
         p = request.form.get("password", "").strip()
         for user in db["users"]:
@@ -121,7 +118,7 @@ def logout():
 # ---------- Debug and Diagnose Routes (remove in production) ----------
 @app.route("/debug")
 def debug():
-    return f"Session: {dict(session)}<br>DB Users: {db['users']}<br>Gallery: {db['gallery']}"
+    return f"Session: {dict(session)}<br>DB Users: {db['users']}<br>Memories: {db['memories']}<br>Gallery: {db['gallery']}"
 
 @app.route("/diagnose")
 @login_required
@@ -130,6 +127,7 @@ def diagnose():
         f"Time: {datetime.now().strftime('%H:%M:%S')}<br>"
         f"User: {session.get('username')}<br>"
         f"Role: {session.get('role')}<br>"
+        f"Memories Count: {len(db['memories'])}<br>"
         f"Gallery Length: {len(db['gallery'])}<br>"
         f"DB File Exists: {os.path.exists(DB_FILE)}<br>"
         f"Upload Folder Exists: {os.path.exists(UPLOAD_FOLDER)}<br>"
@@ -149,13 +147,9 @@ def dashboard():
         "bio": "A curated place for our memories, ideas and photos.",
         "profile_pic": None
     }
-
-    # relationship start (example)
     relationship_start_str = "2025-09-13"
     relationship_start = datetime.strptime(relationship_start_str, "%Y-%m-%d")
     days_together = (datetime.now() - relationship_start).days
-
-    # next anniversary calculation
     anniv_month = relationship_start.month
     anniv_day = relationship_start.day
     today = datetime.now()
@@ -165,12 +159,7 @@ def dashboard():
             next_anniv = datetime(today.year + 1, 1, anniv_day)
         else:
             next_anniv = datetime(today.year, anniv_month + 1, anniv_day)
-
-    # gallery preview
-    gallery_preview = []
-    for i, img in enumerate(db["gallery"][:6]):
-        gallery_preview.append({"idx": i, "filename": img["filename"]})
-
+    gallery_preview = [{"idx": i, "filename": img["filename"]} for i, img in enumerate(db["gallery"][:6])]
     return render_template(
         "dashboard.html",
         profile=profile,
@@ -187,26 +176,66 @@ def ideas():
     if request.method == "POST":
         role = session.get("role")
         if not role or role != "erl":
-            flash("Only users with 'erl' role can add ideas.", "warning")
+            flash("Only admins can add ideas.", "warning")
             return redirect(url_for("ideas"))
         idea = request.form.get("idea", "").strip()
+        status = request.form.get("status", "Planned").strip()
         if idea:
-            db["ideas"].insert(0, idea)
+            db["ideas"].insert(0, {"text": idea, "status": status})
             save_db()
             flash("Idea added.", "success")
     return render_template("ideas.html", ideas=db["ideas"])
+
+@app.route("/edit_idea/<int:idx>", methods=["POST"])
+@login_required
+def edit_idea(idx):
+    role = session.get("role")
+    if not role or role != "erl":
+        flash("Only admins can edit ideas.", "warning")
+        return redirect(url_for("ideas"))
+    if 0 <= idx < len(db["ideas"]):
+        new_text = request.form.get("new_text", "").strip()
+        if new_text and new_text != db["ideas"][idx]["text"]:
+            db["ideas"][idx]["text"] = new_text
+            db["ideas"][idx]["timestamp"] = datetime.now().isoformat()  # Optional: Add timestamp if desired
+            if save_db():
+                flash("Idea updated successfully.", "success")
+            else:
+                flash("Failed to save idea.", "error")
+    return redirect(url_for("ideas"))
 
 @app.route("/delete_idea/<int:idx>", methods=["POST"])
 @login_required
 def delete_idea(idx):
     role = session.get("role")
     if not role or role != "erl":
-        flash("Only users with 'erl' role can delete ideas.", "warning")
+        flash("Only admins can delete ideas.", "warning")
         return redirect(url_for("ideas"))
     if 0 <= idx < len(db["ideas"]):
         db["ideas"].pop(idx)
-        save_db()
-        flash("Idea deleted.", "info")
+        if save_db():
+            flash("Idea deleted.", "info")
+        else:
+            flash("Failed to delete idea.", "error")
+    return redirect(url_for("ideas"))
+
+@app.route("/toggle_idea_status/<int:idx>", methods=["POST"])
+@login_required
+def toggle_idea_status(idx):
+    role = session.get("role")
+    if not role or role != "erl":
+        flash("Only admins can toggle idea status.", "warning")
+        return redirect(url_for("ideas"))
+    if 0 <= idx < len(db["ideas"]):
+        new_status = request.form.get("new_status", "Planned").strip()
+        if new_status in ["Planned", "Completed"]:
+            if isinstance(db["ideas"][idx], str):  # Migrate string to dict if needed
+                db["ideas"][idx] = {"text": db["ideas"][idx], "status": "Planned"}
+            db["ideas"][idx]["status"] = new_status
+            if save_db():
+                flash(f"Idea marked as {new_status}.", "success")
+            else:
+                flash("Failed to save status.", "error")
     return redirect(url_for("ideas"))
 
 # ---------- Memories ----------
@@ -216,26 +245,62 @@ def memories():
     if request.method == "POST":
         role = session.get("role")
         if not role or role != "erl":
-            flash("Only users with 'erl' role can add memories.", "warning")
+            flash("Only admins can add memories.", "warning")
             return redirect(url_for("memories"))
-        memory = request.form.get("memory", "").strip()
-        if memory:
-            db["memories"].insert(0, memory)
-            save_db()
-            flash("Memory added.", "success")
+        memory_text = request.form.get("memory", "").strip()
+        category = request.form.get("category", "Uncategorized").strip()
+        photo_filename = ""
+        file = request.files.get("photo")
+        if file and file.filename:
+            filename = secure_filename(file.filename)
+            unique_filename = f"{uuid.uuid4().hex}_{filename}"
+            filepath = os.path.join(app.config["MEMORIES_PHOTO_FOLDER"], unique_filename)
+            file.save(filepath)
+            photo_filename = unique_filename
+        if memory_text:
+            db["memories"].insert(0, {
+                "text": memory_text,
+                "category": category,
+                "timestamp": datetime.now().isoformat(),
+                "photo": photo_filename
+            })
+            if save_db():
+                flash("Memory added successfully.", "success")
+            else:
+                flash("Failed to save memory.", "error")
     return render_template("memories.html", memories=db["memories"])
+
+@app.route("/edit_memory/<int:idx>", methods=["POST"])
+@login_required
+def edit_memory(idx):
+    role = session.get("role")
+    if not role or role != "erl":
+        flash("Only admins can edit memories.", "warning")
+        return redirect(url_for("memories"))
+    if 0 <= idx < len(db["memories"]):
+        new_text = request.form.get("new_text", "").strip()
+        if new_text and new_text != db["memories"][idx]["text"]:
+            db["memories"][idx]["text"] = new_text
+            db["memories"][idx]["timestamp"] = datetime.now().isoformat()
+            if save_db():
+                flash("Memory updated successfully.", "success")
+            else:
+                flash("Failed to save memory.", "error")
+    return redirect(url_for("memories"))
 
 @app.route("/delete_memory/<int:idx>", methods=["POST"])
 @login_required
 def delete_memory(idx):
     role = session.get("role")
     if not role or role != "erl":
-        flash("Only users with 'erl' role can delete memories.", "warning")
+        flash("Only admins can delete memories.", "warning")
         return redirect(url_for("memories"))
     if 0 <= idx < len(db["memories"]):
         db["memories"].pop(idx)
-        save_db()
-        flash("Memory deleted.", "info")
+        if save_db():
+            flash("Memory deleted successfully.", "info")
+        else:
+            flash("Failed to delete memory.", "error")
     return redirect(url_for("memories"))
 
 # ---------- Notes ----------
@@ -245,13 +310,15 @@ def notes():
     if request.method == "POST":
         role = session.get("role")
         if not role or role != "erl":
-            flash("Only users with 'erl' role can add notes.", "warning")
+            flash("Only admins can add notes.", "warning")
             return redirect(url_for("notes"))
         note = request.form.get("note", "").strip()
         if note:
-            db["notes"].insert(0, note)
-            save_db()
-            flash("Note added.", "success")
+            db["notes"].insert(0, {"text": note, "timestamp": datetime.now().isoformat()})
+            if save_db():
+                flash("Note added successfully.", "success")
+            else:
+                flash("Failed to save note.", "error")
     return render_template("notes.html", notes=db["notes"])
 
 @app.route("/delete_note/<int:idx>", methods=["POST"])
@@ -259,59 +326,29 @@ def notes():
 def delete_note(idx):
     role = session.get("role")
     if not role or role != "erl":
-        flash("Only users with 'erl' role can delete notes.", "warning")
-        return redirect(url_for("view_image", idx=idx))
-    if 0 <= idx < len(db["gallery"]):
-        if db["gallery"][idx].get("note"):
-            db["gallery"][idx]["note"] = ""
-            if save_db():
-                flash("Note deleted successfully.", "success")
-                print(f"Note deleted from image {idx} at {datetime.now().strftime('%H:%M:%S')}")
-            else:
-                flash("Failed to delete note (database not saved).", "error")
-        else:
-            flash("No note to delete.", "warning")
-    else:
-        flash("Invalid image index.", "warning")
-    return redirect(url_for("view_image", idx=idx))
-
-@app.route("/delete_image/<int:idx>", methods=["POST"])
-@login_required
-def delete_image(idx):
-    role = session.get("role")
-    if not role or role != "erl":
-        flash("Only users with 'erl' role can delete images.", "warning")
-        print(f"Role check failed for {session.get('username')} at {datetime.now().strftime('%H:%M:%S')}")
-        return redirect(url_for("gallery" if request.referrer and "gallery" in request.referrer else "view_image", idx=idx))
-    if not (0 <= idx < len(db["gallery"])):
-        flash("Invalid image index.", "warning")
-        print(f"Invalid index {idx} for gallery length {len(db['gallery'])} at {datetime.now().strftime('%H:%M:%S')}")
-        return redirect(url_for("gallery" if request.referrer and "gallery" in request.referrer else "view_image", idx=idx))
-    try:
-        image_to_delete = db["gallery"][idx]
-        filepath = os.path.join(app.config["UPLOAD_FOLDER"], image_to_delete["filename"])
-        if os.path.exists(filepath):
-            os.remove(filepath)
-            print(f"Deleted file {filepath} at {datetime.now().strftime('%H:%M:%S')}")
-        db["gallery"].pop(idx)
+        flash("Only admins can delete notes.", "warning")
+        return redirect(url_for("notes"))
+    if 0 <= idx < len(db["notes"]):
+        db["notes"].pop(idx)
         if save_db():
-            flash("Image deleted successfully.", "success")
-            print(f"Image deleted at index {idx} at {datetime.now().strftime('%H:%M:%S')}")
+            flash("Note deleted successfully.", "info")
         else:
-            flash("Image deletion failed (database not saved).", "error")
-            print(f"Database save failed at {datetime.now().strftime('%H:%M:%S')}")
-    except Exception as e:
-        flash(f"Failed to delete image: {e}", "error")
-        print(f"Error deleting image: {e} at {datetime.now().strftime('%H:%M:%S')}")
-    return redirect(url_for("gallery" if request.referrer and "gallery" in request.referrer else "view_image", idx=idx))
+            flash("Failed to delete note.", "error")
+    return redirect(url_for("notes"))
 
+# ---------- Gallery ----------
+# ... (previous imports remain unchanged)
+
+# ... (previous code up to routes remains unchanged)
+
+# ---------- Gallery ----------
 @app.route("/gallery", methods=["GET", "POST"])
 @login_required
 def gallery():
     if request.method == "POST":
         role = session.get("role")
         if not role or role != "erl":
-            flash("Only users with 'erl' role can upload images.", "warning")
+            flash("Only admins can upload images.", "warning")
             return redirect(url_for("gallery"))
         file = request.files.get("image")
         if file and file.filename:
@@ -334,7 +371,7 @@ def view_image(idx):
     if request.method == "POST":
         role = session.get("role")
         if not role or role != "erl":
-            flash("Only users with 'erl' role can add notes.", "warning")
+            flash("Only admins can add notes.", "warning")
             return redirect(url_for("view_image", idx=idx))
         note = request.form.get("note", "").strip()
         if note:
@@ -349,6 +386,25 @@ def view_image(idx):
                 print(f"Error adding note: {e} at {datetime.now().strftime('%H:%M:%S')}")
     return render_template("image_view.html", image=image, idx=idx)
 
+@app.route("/delete_image/<int:idx>", methods=["POST"])
+@login_required
+def delete_image(idx):
+    role = session.get("role")
+    if not role or role != "erl":
+        flash("Only admins can delete images.", "warning")
+        return redirect(url_for("gallery"))
+    if 0 <= idx < len(db["gallery"]):
+        filepath = os.path.join(app.config["UPLOAD_FOLDER"], db["gallery"][idx]["filename"])
+        if os.path.exists(filepath):
+            os.remove(filepath)
+        db["gallery"].pop(idx)
+        if save_db():
+            flash("Image deleted successfully.", "info")
+        else:
+            flash("Failed to delete image.", "error")
+    return redirect(url_for("gallery"))
+
+# ... (rest of the app.py remains unchanged)
 # ---------- Games ----------
 @app.route("/game")
 @login_required

@@ -16,7 +16,7 @@
     </div>
     <div class="photo-info">
       <p class="upload-timestamp">Uploaded: {{ image.uploaded_at|datetime }}</p>
-      <p class="file-name">File: {{ image.filename }}</p>
+   
     </div>
     {% if image.note %}
       <div class="note-display">
@@ -42,28 +42,38 @@
       </div>
     {% endif %}
     {% if session.get('role') == 'erl' %}
-      <form 
-        method="post" 
-        action="{{ url_for('view_image', idx=idx) }}" 
-        class="note-form" 
-        onsubmit="return confirm('Add this note to the image?');"
-      >
-        <textarea 
-          name="note" 
-          class="note-input" 
-          placeholder="Add a note about this photo..." 
-          rows="3"
-          required
-        ></textarea>
-        <button 
-          type="submit" 
-          class="btn note-btn" 
-          aria-label="Add note to this photo"
-        >
-          <span class="btn-text">Add Note</span>
-          <span class="loading-spinner" style="display:none;">⏳</span>
+      <div class="note-section">
+        <button type="button" class="btn toggle-note-btn" onclick="toggleNoteForm()">
+          <span class="btn-text">{% if image.note %}Edit Note{% else %}Add Note{% endif %}</span>
+          <span class="toggle-icon">▼</span>
         </button>
-      </form>
+        <form 
+          method="post" 
+          action="{{ url_for('view_image', idx=idx) }}" 
+          class="note-form" 
+          id="note-form"
+          style="display:none;"
+          onsubmit="return confirm('Add this note to the image?');"
+        >
+          <textarea 
+            name="note" 
+            class="note-input" 
+            placeholder="Add a note about this photo..." 
+            rows="3"
+            required
+            {% if image.note %}value="{{ image.note }}"{% endif %}
+          ></textarea>
+          <div class="char-counter">Characters: <span id="char-count">{% if image.note %}{{ image.note|length }}{% else %}0{% endif %}</span>/500</div>
+          <button 
+            type="submit" 
+            class="btn note-btn" 
+            aria-label="Add note to this photo"
+          >
+            <span class="btn-text">Save Note</span>
+            <span class="loading-spinner" style="display:none;">⏳</span>
+          </button>
+        </form>
+      </div>
       <form 
         method="post" 
         action="{{ url_for('delete_image', idx=idx) }}" 
@@ -198,27 +208,16 @@
     word-wrap: break-word;
   }
 
-  .note-form {
+  .note-section {
     margin-top: 20px;
     display: flex;
     flex-direction: column;
     gap: 10px;
+    align-items: center;
   }
 
-  .note-input {
-    width: 100%;
-    max-width: 500px;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid var(--accent);
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
-    resize: vertical;
-    margin: 0 auto;
-  }
-
-  .note-btn {
-    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  .toggle-note-btn {
+    background: linear-gradient(135deg, #2196F3, #42A5F5);
     color: white;
     padding: 10px 20px;
     border: none;
@@ -231,6 +230,74 @@
     justify-content: center;
     width: 100%;
     max-width: 200px;
+    margin: 0 auto;
+  }
+
+  .toggle-note-btn:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, #1976D2, #1E88E5);
+  }
+
+  .toggle-note-btn .toggle-icon {
+    transition: transform 0.3s ease;
+  }
+
+  .toggle-note-btn.active .toggle-icon {
+    transform: rotate(180deg);
+  }
+
+  .note-form {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    animation: slideIn 0.3s ease-out;
+    background: rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .note-input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--accent);
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    resize: vertical;
+    margin-bottom: 10px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .note-input:focus {
+    border-color: #ff5a7a;
+    box-shadow: 0 0 5px rgba(255, 90, 122, 0.5);
+    outline: none;
+  }
+
+  .char-counter {
+    font-size: 0.9rem;
+    color: #cccccc;
+    text-align: right;
+    margin-bottom: 10px;
+  }
+
+  .note-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.3s ease, background 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+    width: 100%;
+    max-width: 220px;
     margin: 0 auto;
   }
 
@@ -360,6 +427,11 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
   @media (max-width: 768px) {
     .page-title {
       font-size: 2rem;
@@ -373,9 +445,12 @@
     .note-input {
       max-width: 100%;
     }
-    .note-btn, .delete-btn, .delete-note-btn {
+    .note-btn, .delete-btn, .delete-note-btn, .toggle-note-btn {
       padding: 8px 16px;
       max-width: 150px;
+    }
+    .note-form {
+      padding: 10px;
     }
     .modal-content {
       width: 95%;
@@ -396,7 +471,7 @@
     .note-input {
       max-width: 100%;
     }
-    .note-btn, .delete-btn, .delete-note-btn {
+    .note-btn, .delete-btn, .delete-note-btn, .toggle-note-btn {
       padding: 6px 12px;
       max-width: 120px;
     }
@@ -443,6 +518,32 @@
     const modal = document.getElementById("delete-note-modal");
     if (modal) modal.style.display = "none";
   }
+
+  function toggleNoteForm() {
+    const form = document.getElementById("note-form");
+    const toggleBtn = document.querySelector(".toggle-note-btn");
+    if (form.style.display === "none") {
+      form.style.display = "block";
+      toggleBtn.classList.add("active");
+    } else {
+      form.style.display = "none";
+      toggleBtn.classList.remove("active");
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const textarea = document.querySelector('.note-input');
+    const charCount = document.getElementById('char-count');
+    if (textarea) {
+      textarea.addEventListener('input', () => {
+        charCount.textContent = textarea.value.length;
+      });
+      // Pre-fill character count if editing
+      if (textarea.value) {
+        charCount.textContent = textarea.value.length;
+      }
+    }
+  });
 </script>
 {% endblock %}
 {% endblock %}

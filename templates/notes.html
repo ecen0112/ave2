@@ -4,32 +4,38 @@
 <h1 class="page-title">Notes</h1>
 
 <div class="content-grid">
+  <!-- Add Note Card -->
   <article class="card-3d">
     <div class="card-inner">
-      <h3>Add Note</h3>
-      {% if session.get('role') == 'admin' %}
-      <form method="post" class="stack">
-        <textarea name="note" rows="3" placeholder="Write something..."></textarea>
-        <button class="btn" type="submit">Add Note</button>
-      </form>
+      <h3>Add New Note</h3>
+      {% if session.get('role') == 'erl' %}
+        <form method="post" class="stack add-note-form" novalidate>
+          <textarea name="note" rows="3" maxlength="500" placeholder="Write something... (max 500 characters)" required></textarea>
+          <div class="char-counter">Characters: <span id="char-count">0</span>/500</div>
+          <button class="btn add-btn" type="submit">Add Note</button>
+        </form>
       {% else %}
-        <p class="muted">Only admin can add notes.</p>
+        <p class="muted">Only admins can add notes. Sign in as BUNBUN to add.</p>
       {% endif %}
     </div>
   </article>
 
+  <!-- All Notes Card -->
   <article class="card-3d" style="grid-column: 1 / -1;">
     <div class="card-inner">
       <h3>All Notes</h3>
       {% if notes %}
-        <div class="stack">
+        <div class="stack note-list">
           {% for note in notes %}
-            <div class="note-card">
-              <h3>Note {{ loop.revindex }}</h3>
-              <p>{{ note }}</p>
-              {% if session.get('role') == 'admin' %}
-                <form method="post" action="{{ url_for('delete_note', idx=loop.index0) }}" onsubmit="return confirm('Delete this note?')">
-                  <button class="btn" type="submit" style="margin-top:10px">Delete</button>
+            <div class="note-card" data-timestamp="{{ note.timestamp }}">
+              <div class="note-header">
+                <h3>Note {{ loop.revindex }}</h3>
+                <span class="note-timestamp">{{ note.timestamp|datetime }}</span>
+              </div>
+              <p class="note-content">{{ note.text }}</p>
+              {% if session.get('role') == 'erl' %}
+                <form method="post" action="{{ url_for('delete_note', idx=loop.index0) }}" class="delete-form" onsubmit="return confirm('Are you sure you want to delete this note?')">
+                  <button class="btn delete-btn" type="submit">Delete</button>
                 </form>
               {% endif %}
             </div>
@@ -41,4 +47,206 @@
     </div>
   </article>
 </div>
+
+<style>
+  .content-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+
+  .page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 24px;
+    text-align: center;
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  .card-3d {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    border-radius: 18px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .card-3d:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25);
+  }
+
+  .card-inner {
+    text-align: center;
+  }
+
+  .stack {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .add-note-form textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--accent);
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  .char-counter {
+    font-size: 0.9rem;
+    color: #cccccc;
+    text-align: right;
+  }
+
+  .btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.3s ease, background 0.3s ease;
+    width: 100%;
+    max-width: 200px;
+    margin: 0 auto;
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, #ff4060, #8ba8e0);
+  }
+
+  .add-btn {
+    background: linear-gradient(135deg, #4CAF50, #8BC34A);
+  }
+
+  .add-btn:hover {
+    background: linear-gradient(135deg, #388E3C, #689F38);
+  }
+
+  .delete-btn {
+    background: linear-gradient(135deg, #ff4060, #8ba8e0);
+    padding: 8px 15px;
+    max-width: 100px;
+  }
+
+  .delete-btn:hover {
+    background: linear-gradient(135deg, #ff1a40, #6b88c0);
+  }
+
+  .muted {
+    color: #cccccc;
+    font-style: italic;
+  }
+
+  .note-list {
+    gap: 15px;
+  }
+
+  .note-card {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 15px;
+    border-radius: 10px;
+    border-left: 4px solid var(--accent);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .note-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  .note-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .note-header h3 {
+    font-size: 1.2rem;
+    color: var(--accent);
+    margin: 0;
+  }
+
+  .note-timestamp {
+    font-size: 0.8rem;
+    color: #cccccc;
+    font-style: italic;
+  }
+
+  .note-content {
+    font-size: 1rem;
+    color: #ffffff;
+    margin: 0 0 10px 0;
+    word-wrap: break-word;
+  }
+
+  .delete-form {
+    margin-top: 10px;
+    text-align: right;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 768px) {
+    .content-grid {
+      grid-template-columns: 1fr;
+    }
+    .btn {
+      padding: 8px 16px;
+      max-width: 150px;
+    }
+    .note-card {
+      padding: 10px;
+    }
+    .note-header h3 {
+      font-size: 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .page-title {
+      font-size: 1.5rem;
+    }
+    .btn {
+      padding: 6px 12px;
+      max-width: 120px;
+    }
+    .note-header {
+      flex-direction: column;
+      gap: 5px;
+    }
+    .note-content {
+      font-size: 0.9rem;
+    }
+  }
+</style>
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const textarea = document.querySelector('.add-note-form textarea');
+    const charCount = document.getElementById('char-count');
+    if (textarea) {
+      textarea.addEventListener('input', () => {
+        charCount.textContent = textarea.value.length;
+      });
+    }
+  });
+</script>
+{% endblock %}
 {% endblock %}

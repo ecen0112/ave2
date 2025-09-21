@@ -2,7 +2,7 @@
 {% block title %}Dashboard - Our Journey{% endblock %}
 {% block content %}
 <div class="dashboard-container">
-  <h1 class="page-title">✨ Welcome, {{ profile.name }} ✨</h1>
+  <h1 class="page-title">✨ Welcome, <span class="highlight">{{ profile.name }}</span> ✨</h1>
 
   <!-- Main Info Grid -->
   <div class="content-grid">
@@ -46,7 +46,7 @@
         </div>
         <p class="muted">Counting down to your special day 💕</p>
         <div class="card-actions">
-          <a class="btn" href="{{ url_for('ideas') }}">💡 Date Ideas</a>
+          <a class="btn primary-btn" href="{{ url_for('ideas') }}">💡 Date Ideas</a>
         </div>
       </div>
     </div>
@@ -75,53 +75,26 @@
 
   <!-- Games Section -->
   <section class="games-section">
-    <h2>🎮 Fun & Games</h2>
+    <h2 class="games-title">🎮 Fun & Games</h2>
     <div class="games-grid">
+      {% set games = [
+        {"icon": "🎆", "title": "Fireworks", "desc": "Launch colorful fireworks on the screen!", "url": "fireworks"},
+        {"icon": "🦋", "title": "Butterflies", "desc": "Relax with floating, animated butterflies", "url": "butterfly"},
+        {"icon": "🏹", "title": "Arrow Game", "desc": "Test your reflexes with this fun arrow shooting game!", "url": "arrow_game"},
+        {"icon": "🐍", "title": "Snake Game", "desc": "Guide the snake to eat food and grow!", "url": "snake_game"},
+        {"icon": "🐔", "title": "Chicken Game", "desc": "Try to dodge obstacles and score points!", "url": "chicken_game"}
+      ] %}
+      {% for g in games %}
       <article class="card-3d">
         <div class="card-inner">
-          <h3>🎆 Fireworks</h3>
-          <p>Launch colorful fireworks on the screen!</p>
+          <h3>{{ g.icon }} {{ g.title }}</h3>
+          <p>{{ g.desc }}</p>
           <div class="card-actions">
-            <a class="btn" href="{{ url_for('fireworks') }}">Watch Now</a>
+            <a class="btn secondary-btn" href="{{ url_for(g.url) }}">Play Now</a>
           </div>
         </div>
       </article>
-      <article class="card-3d">
-        <div class="card-inner">
-          <h3>🦋 Butterflies</h3>
-          <p>Relax with floating, animated butterflies</p>
-          <div class="card-actions">
-            <a class="btn" href="{{ url_for('butterfly') }}">Watch Now</a>
-          </div>
-        </div>
-      </article>
-      <article class="card-3d">
-        <div class="card-inner">
-          <h3>🏹 Arrow Game</h3>
-          <p>Test your reflexes with this fun arrow shooting game!</p>
-          <div class="card-actions">
-            <a class="btn" href="{{ url_for('arrow_game') }}">Play Now</a>
-          </div>
-        </div>
-      </article>
-      <article class="card-3d">
-        <div class="card-inner">
-          <h3>🐍 Snake Game</h3>
-          <p>Guide the snake to eat food and grow!</p>
-          <div class="card-actions">
-            <a class="btn" href="{{ url_for('snake_game') }}">Play Now</a>
-          </div>
-        </div>
-      </article>
-      <article class="card-3d">
-        <div class="card-inner">
-          <h3>🐔 Chicken Game</h3>
-          <p>Try to dodge obstacles and score points!</p>
-          <div class="card-actions">
-            <a class="btn" href="{{ url_for('chicken_game') }}">Play Now</a>
-          </div>
-        </div>
-      </article>
+      {% endfor %}
     </div>
   </section>
 </div>
@@ -135,7 +108,7 @@
       const diff = targetDate - now;
 
       if (diff <= 0) {
-        document.getElementById("countdown").innerHTML = "🎉 It's Anniversary Day!";
+        document.getElementById("countdown").innerHTML = "🎉 It's Anniversary Day! 💖";
         return;
       }
 

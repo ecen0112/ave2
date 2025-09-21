@@ -12,13 +12,32 @@
         }
     ],
     "ideas": [
-        "xaxaxx",
-        "Go for a picnic",
-        "Watch a movie together"
+        {
+            "text": "xaxaxx",
+            "status": "Completed"
+        },
+        {
+            "text": "Go for a picnic",
+            "status": "Completed"
+        },
+        {
+            "text": "Watch a movie together",
+            "status": "Planned"
+        }
     ],
     "memories": [
-        "Our first date",
-        "Trip to the beach"
+        {
+            "text": "dada",
+            "category": "Uncategorized",
+            "timestamp": "2025-09-21T20:57:30.414154",
+            "photo": "cf17b62e58ac4a4b8eaaa9ed791dceae_547283380_694025507058378_1555488525928090813_n.jpg"
+        },
+        {
+            "text": "xzxz",
+            "category": "Uncategorized",
+            "timestamp": "2025-09-21T20:57:12.718887",
+            "photo": "40e642cff7c54aea9d28a5afc1d3bca5_547283380_694025507058378_1555488525928090813_n.jpg"
+        }
     ],
     "notes": [
         "Don\u2019t forget the anniversary gift!",
@@ -26,9 +45,9 @@
     ],
     "gallery": [
         {
-            "filename": "547283380_694025507058378_1555488525928090813_n.jpg",
-            "uploaded_at": "2025-09-21T18:08:47.533492",
-            "note": "happened in cs day"
+            "filename": "f383e16f178d4099a68887c0c82130f7_547283380_694025507058378_1555488525928090813_n.jpg",
+            "uploaded_at": "2025-09-21T20:50:58.452966",
+            "note": "qsasas"
         }
     ]
 }
