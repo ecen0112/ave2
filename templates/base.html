@@ -188,7 +188,27 @@
   <div class="notification-container" id="notificationContainer" aria-live="polite"></div>
 
  
+<!-- In base.html -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="flash {{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
 
+<style>
+  .flash {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    text-align: center;
+  }
+  .flash.success { background-color: #d4edda; color: #155724; }
+  .flash.error { background-color: #f8d7da; color: #721c24; }
+  .flash.warning { background-color: #fff3cd; color: #856404; }
+  .flash.info { background-color: #cce5ff; color: #004085; }
+</style>
   <!-- Enhanced styles for new features -->
   <style>
     :root {

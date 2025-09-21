@@ -3,7 +3,6 @@ function updateDateTime() {
   const el = document.getElementById("datetime");
   if (!el) return;
   const now = new Date();
-  // show concise date/time
   el.textContent = now.toLocaleString(undefined, {
     weekday: "short", month: "short", day: "numeric",
     hour: "2-digit", minute: "2-digit"
@@ -13,15 +12,13 @@ setInterval(updateDateTime, 1000);
 updateDateTime();
 
 // -------------------- Roses animation --------------------
-// Put a small rose PNG/SVG in static/img/rose.png for best results.
-// If missing, we use an emoji fallback.
-const ROSE_SRC = "/static/img/rose.png";
+// Use a default rose image or emoji fallback.
+const ROSE_SRC = "/static/img/rose.png"; // Ensure this file exists in static/img/
 function spawnRose() {
   const container = document.querySelector(".animated-roses");
   if (!container) return;
   const r = document.createElement("img");
   r.className = "rose";
-  // fallback to emoji if rose image missing
   r.onerror = function () {
     r.style.width = "28px";
     r.src = "data:image/svg+xml;utf8," + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><text x='0' y='48' font-size='48'>🌹</text></svg>`);
@@ -29,7 +26,7 @@ function spawnRose() {
   r.src = ROSE_SRC;
   r.style.left = Math.random() * 100 + "vw";
   r.style.animationDuration = (6 + Math.random() * 6) + "s";
-  r.style.transform = `scale(${0.6 + Math.random() * 1.0}) rotate(${Math.random()*60-30}deg)`;
+  r.style.transform = `scale(${0.6 + Math.random() * 1.0}) rotate(${Math.random() * 60 - 30}deg)`;
   container.appendChild(r);
   setTimeout(() => { r.remove(); }, 12000);
 }
@@ -39,8 +36,7 @@ setInterval(spawnRose, 1400);
 function previewLocal(input) {
   const file = input.files && input.files[0];
   const preview = document.getElementById("preview");
-  if (!file) return;
-  if (!preview) return;
+  if (!file || !preview) return;
   const url = URL.createObjectURL(file);
   preview.src = url;
   preview.style.display = "block";
@@ -66,3 +62,13 @@ function openImageModal(src) {
   }
   document.getElementById("image-modal-img").src = src;
 }
+
+// -------------------- Deletion Debugging --------------------
+document.addEventListener("submit", (e) => {
+  if (e.target.matches(".delete-form")) {
+    console.log("Delete form submitted for index:", e.target.action.match(/delete_image\/(\d+)/)[1]);
+    e.target.querySelector(".delete-btn").disabled = true;
+    e.target.querySelector(".loading-spinner").style.display = "inline-block";
+    e.target.querySelector(".btn-text").style.display = "none";
+  }
+});

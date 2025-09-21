@@ -9,6 +9,13 @@ from functools import wraps
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
+# Define a custom Jinja2 filter for datetime formatting
+@app.template_filter('datetime')
+def format_datetime(value):
+    if value:
+        return datetime.fromisoformat(value).strftime('%Y-%m-%d %H:%M:%S')
+    return value
+
 # Upload folder setup
 UPLOAD_FOLDER = "static/uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -19,14 +26,34 @@ DB_FILE = "data.json"
 
 # Function to save the database to a JSON file
 def save_db():
-    with open(DB_FILE, "w") as f:
-        json.dump(db, f, indent=4)
+    try:
+        with open(DB_FILE, "w") as f:
+            json.dump(db, f, indent=4)
+        print(f"Database saved to {DB_FILE} at {datetime.now().strftime('%H:%M:%S')}")
+        return True
+    except Exception as e:
+        print(f"Error saving database: {e} at {datetime.now().strftime('%H:%M:%S')}")
+        flash(f"Failed to save database: {e}", "error")
+        return False
 
 # Function to load the database from a JSON file
 def load_db():
     if os.path.exists(DB_FILE):
-        with open(DB_FILE, "r") as f:
-            return json.load(f)
+        try:
+            with open(DB_FILE, "r") as f:
+                return json.load(f)
+        except json.JSONDecodeError as e:
+            print(f"Error decoding {DB_FILE}: {e}. Using default data at {datetime.now().strftime('%H:%M:%S')}")
+            return {
+                "users": [
+                    {"username": "BUNBUN", "password": "BUNBUN", "role": "erl"},
+                    {"username": "BUNNY", "password": "BUNNY", "role": "love"}
+                ],
+                "ideas": ["Go for a picnic", "Watch a movie together"],
+                "memories": ["Our first date", "Trip to the beach"],
+                "notes": ["Don’t forget the anniversary gift!", "Plan next weekend"],
+                "gallery": []
+            }
     return {
         "users": [
             {"username": "BUNBUN", "password": "BUNBUN", "role": "erl"},
@@ -47,7 +74,8 @@ def load_gallery():
         if os.path.isfile(filepath):
             gallery.append({
                 "filename": filename,
-                "uploaded_at": datetime.fromtimestamp(os.path.getmtime(filepath)).isoformat()
+                "uploaded_at": datetime.fromtimestamp(os.path.getmtime(filepath)).isoformat(),
+                "note": ""
             })
     return gallery
 
@@ -62,7 +90,7 @@ def login_required(f):
         if 'username' not in session or not session['username']:
             flash("Please log in to access this page.", "warning")
             return redirect(url_for('login'))
-        print(f"Authenticated user: {session['username']}, Role: {session.get('role')}")  # Debug print
+        print(f"Authenticated user: {session['username']}, Role: {session.get('role')} at {datetime.now().strftime('%H:%M:%S')}")
         return f(*args, **kwargs)
     return decorated_function
 
@@ -78,10 +106,10 @@ def login():
                 session["username"] = u
                 session["role"] = user["role"]
                 flash(f"Signed in as {u} ({user['role']})", "success")
-                print(f"Login success: {u}, Role: {user['role']}")  # Debug print
+                print(f"Login success: {u}, Role: {user['role']} at {datetime.now().strftime('%H:%M:%S')}")
                 return redirect(url_for("dashboard"))
         flash("Invalid credentials. Use BUNBUN/BUNBUN or BUNNY/BUNNY.", "danger")
-        print(f"Login failed for username: {u}")  # Debug print
+        print(f"Login failed for username: {u} at {datetime.now().strftime('%H:%M:%S')}")
     return render_template("login.html")
 
 @app.route("/logout")
@@ -90,10 +118,23 @@ def logout():
     flash("Logged out successfully.", "info")
     return redirect(url_for("login"))
 
-# ---------- Debug Route (remove in production) ----------
+# ---------- Debug and Diagnose Routes (remove in production) ----------
 @app.route("/debug")
 def debug():
-    return f"Session: {dict(session)}<br>DB Users: {db['users']}"
+    return f"Session: {dict(session)}<br>DB Users: {db['users']}<br>Gallery: {db['gallery']}"
+
+@app.route("/diagnose")
+@login_required
+def diagnose():
+    return (
+        f"Time: {datetime.now().strftime('%H:%M:%S')}<br>"
+        f"User: {session.get('username')}<br>"
+        f"Role: {session.get('role')}<br>"
+        f"Gallery Length: {len(db['gallery'])}<br>"
+        f"DB File Exists: {os.path.exists(DB_FILE)}<br>"
+        f"Upload Folder Exists: {os.path.exists(UPLOAD_FOLDER)}<br>"
+        f"DB Write Test: {save_db()}"
+    )
 
 # ---------- Dashboard ----------
 @app.route("/")
@@ -219,14 +260,51 @@ def delete_note(idx):
     role = session.get("role")
     if not role or role != "erl":
         flash("Only users with 'erl' role can delete notes.", "warning")
-        return redirect(url_for("notes"))
-    if 0 <= idx < len(db["notes"]):
-        db["notes"].pop(idx)
-        save_db()
-        flash("Note deleted.", "info")
-    return redirect(url_for("notes"))
+        return redirect(url_for("view_image", idx=idx))
+    if 0 <= idx < len(db["gallery"]):
+        if db["gallery"][idx].get("note"):
+            db["gallery"][idx]["note"] = ""
+            if save_db():
+                flash("Note deleted successfully.", "success")
+                print(f"Note deleted from image {idx} at {datetime.now().strftime('%H:%M:%S')}")
+            else:
+                flash("Failed to delete note (database not saved).", "error")
+        else:
+            flash("No note to delete.", "warning")
+    else:
+        flash("Invalid image index.", "warning")
+    return redirect(url_for("view_image", idx=idx))
 
-# ---------- Gallery ----------
+@app.route("/delete_image/<int:idx>", methods=["POST"])
+@login_required
+def delete_image(idx):
+    role = session.get("role")
+    if not role or role != "erl":
+        flash("Only users with 'erl' role can delete images.", "warning")
+        print(f"Role check failed for {session.get('username')} at {datetime.now().strftime('%H:%M:%S')}")
+        return redirect(url_for("gallery" if request.referrer and "gallery" in request.referrer else "view_image", idx=idx))
+    if not (0 <= idx < len(db["gallery"])):
+        flash("Invalid image index.", "warning")
+        print(f"Invalid index {idx} for gallery length {len(db['gallery'])} at {datetime.now().strftime('%H:%M:%S')}")
+        return redirect(url_for("gallery" if request.referrer and "gallery" in request.referrer else "view_image", idx=idx))
+    try:
+        image_to_delete = db["gallery"][idx]
+        filepath = os.path.join(app.config["UPLOAD_FOLDER"], image_to_delete["filename"])
+        if os.path.exists(filepath):
+            os.remove(filepath)
+            print(f"Deleted file {filepath} at {datetime.now().strftime('%H:%M:%S')}")
+        db["gallery"].pop(idx)
+        if save_db():
+            flash("Image deleted successfully.", "success")
+            print(f"Image deleted at index {idx} at {datetime.now().strftime('%H:%M:%S')}")
+        else:
+            flash("Image deletion failed (database not saved).", "error")
+            print(f"Database save failed at {datetime.now().strftime('%H:%M:%S')}")
+    except Exception as e:
+        flash(f"Failed to delete image: {e}", "error")
+        print(f"Error deleting image: {e} at {datetime.now().strftime('%H:%M:%S')}")
+    return redirect(url_for("gallery" if request.referrer and "gallery" in request.referrer else "view_image", idx=idx))
+
 @app.route("/gallery", methods=["GET", "POST"])
 @login_required
 def gallery():
@@ -241,36 +319,35 @@ def gallery():
             unique_filename = f"{uuid.uuid4().hex}_{filename}"
             filepath = os.path.join(app.config["UPLOAD_FOLDER"], unique_filename)
             file.save(filepath)
-            db["gallery"].insert(0, {"filename": unique_filename, "uploaded_at": datetime.now().isoformat()})
+            db["gallery"].insert(0, {"filename": unique_filename, "uploaded_at": datetime.now().isoformat(), "note": ""})
             save_db()
-            flash("Image uploaded.", "success")
+            flash("Image uploaded successfully.", "success")
     return render_template("gallery.html", gallery=db["gallery"])
 
-@app.route("/delete_image/<int:idx>", methods=["POST"])
-@login_required
-def delete_image(idx):
-    role = session.get("role")
-    if not role or role != "erl":
-        flash("Only users with 'erl' role can delete images.", "warning")
-        return redirect(url_for("gallery"))
-    if 0 <= idx < len(db["gallery"]):
-        filename = db["gallery"][idx]["filename"]
-        filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-        if os.path.exists(filepath):
-            os.remove(filepath)
-        db["gallery"].pop(idx)
-        save_db()
-        flash("Image deleted.", "info")
-    return redirect(url_for("gallery"))
-
-@app.route("/image/<int:idx>")
+@app.route("/image/<int:idx>", methods=["GET", "POST"])
 @login_required
 def view_image(idx):
-    if 0 <= idx < len(db["gallery"]):
-        image = db["gallery"][idx]
-        return render_template("image_view.html", image=image, idx=idx)
-    flash("Image not found.", "warning")
-    return redirect(url_for("gallery"))
+    if not (0 <= idx < len(db["gallery"])):
+        flash("Image not found.", "warning")
+        return redirect(url_for("gallery"))
+    image = db["gallery"][idx]
+    if request.method == "POST":
+        role = session.get("role")
+        if not role or role != "erl":
+            flash("Only users with 'erl' role can add notes.", "warning")
+            return redirect(url_for("view_image", idx=idx))
+        note = request.form.get("note", "").strip()
+        if note:
+            try:
+                image["note"] = note
+                if not save_db():
+                    raise Exception("Database save failed")
+                flash("Note added successfully.", "success")
+                print(f"Note added to image {idx}: {note} at {datetime.now().strftime('%H:%M:%S')}")
+            except Exception as e:
+                flash(f"Failed to add note: {e}", "error")
+                print(f"Error adding note: {e} at {datetime.now().strftime('%H:%M:%S')}")
+    return render_template("image_view.html", image=image, idx=idx)
 
 # ---------- Games ----------
 @app.route("/game")
