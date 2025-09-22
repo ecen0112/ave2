@@ -70,57 +70,73 @@
         <a href="{{ url_for('ideas') }}" class="nav-link" data-section="ideas">Ideas</a>
       </nav>
 
-      <!-- Mobile Menubar -->
-      <div class="mobile-menubar" id="mobileMenubar">
-        <button class="menubar-toggle" id="menubarToggle" aria-label="Toggle menu" aria-expanded="false">
-          <span class="menu-icon">☰</span>
-        </button>
-        <div class="menubar-content" id="menubarContent">
-          <a href="{{ url_for('dashboard') }}" class="menubar-item" data-section="home" aria-current="page">
-            <span class="item-icon">🏠</span> Home
-          </a>
-          <a href="{{ url_for('memories') }}" class="menubar-item" data-section="memories">
-            <span class="item-icon">📸</span> Memories
-          </a>
-          <a href="{{ url_for('gallery') }}" class="menubar-item" data-section="gallery">
-            <span class="item-icon">🖼️</span> Gallery
-          </a>
-          <a href="{{ url_for('notes') }}" class="menubar-item" data-section="notes">
-            <span class="item-icon">📝</span> Notes
-          </a>
-          <a href="{{ url_for('ideas') }}" class="menubar-item" data-section="ideas">
-            <span class="item-icon">💡</span> Ideas
-          </a>
-        </div>
-      </div>
-
-      <!-- Datetime display -->
-      <div class="datetime-container">
-        <span class="datetime" id="datetime">
-          <span class="date-part" id="datePart"></span>
-          <span class="time-part" id="timePart"></span>
-        </span>
-      </div>
-
-      <!-- User section -->
-      <div class="user-section">
-        {% if session.get('username') %}
-          <div class="user-info">
-            <span class="role-badge">
-              <span class="user-icon">{{ '👑' if session.get('username') == 'admin' else '👤' }}</span>
-              <span class="username">{{ session.get('username') }}</span>
-            </span>
-            <a class="logout-btn btn" href="{{ url_for('logout') }}" aria-label="Logout">
-              <span class="btn-icon">🚪</span>
-              <span class="btn-text">Logout</span>
+      <!-- Right-side container -->
+      <div class="right-section">
+        <!-- Mobile Menubar -->
+        <div class="mobile-menubar" id="mobileMenubar">
+          <button class="menubar-toggle" id="menubarToggle" aria-label="Toggle menu" aria-expanded="false">
+            <span class="menu-icon">☰</span>
+          </button>
+          <div class="menubar-content" id="menubarContent">
+            <div class="menubar-datetime" id="menubarDatetime">
+              <span class="date-part" id="menubarDatePart"></span>
+              <span class="time-part" id="menubarTimePart"></span>
+            </div>
+            <a href="{{ url_for('dashboard') }}" class="menubar-item" data-section="home" aria-current="page">
+              <span class="item-icon">🏠</span> Home
             </a>
+            <a href="{{ url_for('memories') }}" class="menubar-item" data-section="memories">
+              <span class="item-icon">📸</span> Memories
+            </a>
+            <a href="{{ url_for('gallery') }}" class="menubar-item" data-section="gallery">
+              <span class="item-icon">🖼️</span> Gallery
+            </a>
+            <a href="{{ url_for('notes') }}" class="menubar-item" data-section="notes">
+              <span class="item-icon">📝</span> Notes
+            </a>
+            <a href="{{ url_for('ideas') }}" class="menubar-item" data-section="ideas">
+              <span class="item-icon">💡</span> Ideas
+            </a>
+            {% if session.get('username') %}
+              <div class="menubar-user">
+                <div class="menubar-role-badge">
+                  <span class="user-icon">{{ '👑' if session.get('username') == 'admin' else '👤' }}</span>
+                  <span class="username">{{ session.get('username') }}</span>
+                </div>
+                <a class="menubar-logout btn" href="{{ url_for('logout') }}" aria-label="Logout">
+                  <span class="btn-icon">🚪</span>
+                  <span class="btn-text">Logout</span>
+                </a>
+              </div>
+            {% else %}
+              <a class="menubar-login btn" href="{{ url_for('login') }}" aria-label="Login">
+                <span class="btn-icon">🔑</span>
+                <span class="btn-text">Login</span>
+              </a>
+            {% endif %}
           </div>
-        {% else %}
-          <a class="login-btn btn" href="{{ url_for('login') }}" aria-label="Login">
-            <span class="btn-icon">🔑</span>
-            <span class="btn-text">Login</span>
-          </a>
-        {% endif %}
+        </div>
+
+        <!-- User section (desktop only) -->
+        <div class="user-section" id="desktopUserSection">
+          {% if session.get('username') %}
+            <div class="user-info">
+              <span class="role-badge">
+                <span class="user-icon">{{ '👑' if session.get('username') == 'admin' else '👤' }}</span>
+                <span class="username">{{ session.get('username') }}</span>
+              </span>
+              <a class="logout-btn btn" href="{{ url_for('logout') }}" aria-label="Logout">
+                <span class="btn-icon">🚪</span>
+                <span class="btn-text">Logout</span>
+              </a>
+            </div>
+          {% else %}
+            <a class="login-btn btn" href="{{ url_for('login') }}" aria-label="Login">
+              <span class="btn-icon">🔑</span>
+              <span class="btn-text">Login</span>
+            </a>
+          {% endif %}
+        </div>
       </div>
     </div>
   </header>
@@ -174,8 +190,6 @@
       </div>
     </div>
   </footer>
-
-
 
   <!-- Notification system -->
   <div class="notification-container" id="notificationContainer" aria-live="polite"></div>
@@ -331,7 +345,7 @@
     .nav-inner {
       display: flex;
       flex-wrap: wrap;
-      align-items: center;
+      align-items: center; /* Ensure vertical centering */
       justify-content: space-between;
       max-width: 1200px;
       margin: 0 auto;
@@ -347,6 +361,7 @@
       padding: 6px 10px;
       border-radius: 8px;
       transition: transform 0.3s ease, background 0.3s ease;
+      line-height: 1; /* Consistent vertical alignment */
     }
 
     .brand:hover {
@@ -407,6 +422,13 @@
       font-weight: 600;
     }
 
+    /* Right section */
+    .right-section {
+      display: flex;
+      align-items: center; /* Ensure vertical centering */
+      gap: 8px;
+    }
+
     /* Mobile Menubar */
     .mobile-menubar {
       display: none;
@@ -421,6 +443,7 @@
       font-size: clamp(16px, 4vw, 18px);
       color: var(--text-light);
       transition: all 0.3s ease;
+      line-height: 1; /* Match brand's vertical alignment */
     }
 
     .menubar-toggle:hover {
@@ -472,34 +495,92 @@
       font-size: clamp(14px, 3vw, 16px);
     }
 
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateY(-8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Datetime */
-    .datetime-container {
-      padding: 4px 8px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-      backdrop-filter: blur(6px);
-    }
-
-    .datetime {
+    .menubar-datetime {
+      padding: 10px 16px;
+      font-size: clamp(10px, 2vw, 11px);
+      font-weight: 500;
+      color: var(--text-light);
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 2px;
-      font-size: clamp(10px, 2vw, 11px);
-      font-weight: 500;
-      color: var(--text-light);
     }
 
     .time-part {
       font-family: 'Courier New', monospace;
     }
 
-    /* User section */
+    .menubar-user {
+      padding: 10px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .menubar-role-badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      border-radius: 12px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      color: var(--text-light);
+      font-weight: 600;
+      font-size: clamp(11px, 2vw, 12px);
+    }
+
+    .menubar-logout.btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: clamp(11px, 2vw, 12px);
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-light);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      text-align: center;
+    }
+
+    .menubar-logout.btn:hover {
+      background: var(--accent);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px var(--shadow);
+    }
+
+    .menubar-login.btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: clamp(11px, 2vw, 12px);
+      transition: all 0.3s ease;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: var(--text-light);
+      text-align: center;
+    }
+
+    .menubar-login.btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px var(--shadow);
+    }
+
+    .user-icon {
+      font-size: clamp(12px, 2.5vw, 13px);
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* User section (desktop only) */
     .user-section {
       display: flex;
       align-items: center;
@@ -522,10 +603,6 @@
       color: var(--text-light);
       font-weight: 600;
       font-size: clamp(11px, 2vw, 12px);
-    }
-
-    .user-icon {
-      font-size: clamp(12px, 2.5vw, 13px);
     }
 
     /* Buttons */
@@ -792,20 +869,29 @@
         display: block;
       }
 
+      .nav-inner {
+        flex-wrap: nowrap; /* Keep items in a single row */
+        padding: 8px 10px; /* Adjusted padding for mobile */
+      }
+
+      .brand {
+        padding: 4px 8px; /* Reduced padding for mobile */
+        font-size: clamp(14px, 6vw, 18px); /* Adjusted size for mobile */
+      }
+
+      .right-section {
+        margin-left: auto; /* Push to the right */
+        padding: 4px 8px; /* Consistent padding */
+      }
+
       .menubar-content {
         right: 8px;
+        width: 200px; /* Fixed width for better mobile display */
+        top: calc(100% + 4px); /* Slight offset from toggle */
       }
 
-      .nav-inner {
-        flex-wrap: wrap;
-        gap: 6px;
-      }
-
-      .datetime-container {
-        order: -1;
-        width: 100%;
-        text-align: center;
-        margin-bottom: 8px;
+      #desktopUserSection {
+        display: none;
       }
     }
 
@@ -835,16 +921,16 @@
         font-size: clamp(12px, 2.5vw, 14px);
       }
 
-      .datetime {
+      .menubar-datetime {
         font-size: clamp(9px, 2vw, 10px);
       }
 
-      .role-badge {
+      .menubar-role-badge {
         font-size: clamp(10px, 2vw, 11px);
         padding: 3px 6px;
       }
 
-      .btn {
+      .menubar-logout.btn, .menubar-login.btn {
         font-size: clamp(10px, 2vw, 11px);
         padding: 5px 8px;
       }
@@ -886,13 +972,13 @@
     // Datetime update
     function updateDateTime() {
       const now = new Date();
-      const datePart = document.getElementById('datePart');
-      const timePart = document.getElementById('timePart');
+      const menubarDatePart = document.getElementById('menubarDatePart');
+      const menubarTimePart = document.getElementById('menubarTimePart');
       
-      if (datePart && timePart) {
+      if (menubarDatePart && menubarTimePart) {
         const options = { weekday: 'short', month: 'short', day: 'numeric' };
-        datePart.textContent = now.toLocaleDateString('en-US', options);
-        timePart.textContent = now.toLocaleTimeString('en-US', { 
+        menubarDatePart.textContent = now.toLocaleDateString('en-US', options);
+        menubarTimePart.textContent = now.toLocaleTimeString('en-US', { 
           hour: '2-digit', 
           minute: '2-digit',
           hour12: true 
@@ -914,7 +1000,7 @@
         document.body.style.overflow = isOpen ? 'hidden' : '';
       });
 
-      menubar.querySelectorAll('.menubar-item').forEach(item => {
+      menubar.querySelectorAll('.menubar-item, .menubar-logout, .menubar-login').forEach(item => {
         item.addEventListener('click', () => {
           menubar.classList.remove('active');
           toggle.setAttribute('aria-expanded', 'false');

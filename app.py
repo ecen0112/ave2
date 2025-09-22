@@ -335,7 +335,21 @@ def delete_note(idx):
         else:
             flash("Failed to delete note. Please try again.", "error")
     return redirect(url_for("notes"))
-
+# New route for deleting an image's note
+@app.route("/delete_image_note/<int:idx>", methods=["POST"])
+@login_required
+def delete_image_note(idx):
+    role = session.get("role")
+    if not role or role != "erl" and role != "love":
+        flash("Only admins can delete image notes.", "warning")
+        return redirect(url_for("view_image", idx=idx))
+    if 0 <= idx < len(db["gallery"]):
+        db["gallery"][idx]["note"] = ""
+        if save_db():
+            flash("Image note deleted successfully.", "info")
+        else:
+            flash("Failed to delete image note. Please try again.", "error")
+    return redirect(url_for("view_image", idx=idx))
 # ---------- Gallery ----------
 @app.route("/gallery", methods=["GET", "POST"])
 @login_required
@@ -356,6 +370,7 @@ def gallery():
             flash("Image uploaded successfully!", "success")
     return render_template("gallery.html", gallery=db["gallery"])
 
+# ---------- Image View ----------
 @app.route("/image/<int:idx>", methods=["GET", "POST"])
 @login_required
 def view_image(idx):
