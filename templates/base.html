@@ -2,19 +2,19 @@
 <html lang="en" class="no-js">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#ff5a7a">
-  <meta name="color-scheme" content="light">
+  <meta name="color-scheme" content="light dark">
   <meta name="description" content="{% block description %}A beautiful journey tracking application for couples{% endblock %}">
   
   <title>{% block title %}Our Journey{% endblock %}</title>
   
   <!-- Preload critical resources -->
   <link rel="preload" href="{{ url_for('static', filename='style.css') }}" as="style">
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" as="style">
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" as="style">
   
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   
   <!-- Favicon -->
@@ -29,73 +29,72 @@
 </head>
 <body class="{% block body_class %}{% endblock %}">
   <!-- Page loading overlay -->
-  <div class="page-loader" id="pageLoader">
+  <div class="page-loader" id="pageLoader" aria-hidden="true">
     <div class="loader-content">
       <div class="loader-heart">
         <span class="heart-beat">💕</span>
       </div>
-      <div class="loader-text">Loading your journey...</div>
+      <div class="loader-text">Loading our journey...</div>
       <div class="loader-progress">
         <div class="progress-bar"></div>
       </div>
     </div>
   </div>
 
-  <!-- Enhanced animated background -->
-  <div class="animated-roses enhanced-bg" aria-hidden="true" id="rosesContainer">
+  <!-- Animated background -->
+  <div class="animated-roses" aria-hidden="true" id="rosesContainer">
     <div class="bg-gradient-overlay"></div>
   </div>
 
   <!-- Skip to main content (accessibility) -->
   <a href="#main-content" class="skip-link">Skip to main content</a>
 
-  <!-- Enhanced header -->
+  <!-- Header -->
   <header class="navbar" role="banner">
     <div class="nav-inner">
-      <!-- Brand with enhanced animation -->
+      <!-- Brand -->
       <a class="brand" href="{{ url_for('dashboard') }}" aria-label="Our Journey - Home">
         <span class="brand-icon">💖</span>
         <span class="brand-text">
           <span class="brand-word">Our</span>
           <span class="brand-word">Journey</span>
         </span>
-        <div class="brand-glow"></div>
       </a>
 
       <!-- Desktop Navigation -->
       <nav class="nav-links" role="navigation">
-        <a href="{{ url_for('dashboard') }}" class="nav-link" data-section="home" title="Home">Home</a>
-        <a href="{{ url_for('memories') }}" class="nav-link" data-section="memories" title="Memories">Memories</a>
-        <a href="{{ url_for('gallery') }}" class="nav-link" data-section="gallery" title="Gallery">Gallery</a>
-        <a href="{{ url_for('notes') }}" class="nav-link" data-section="notes" title="Notes">Notes</a>
-        <a href="{{ url_for('ideas') }}" class="nav-link" data-section="ideas" title="Ideas">Ideas</a>
+        <a href="{{ url_for('dashboard') }}" class="nav-link" data-section="home" aria-current="page">Home</a>
+        <a href="{{ url_for('memories') }}" class="nav-link" data-section="memories">Memories</a>
+        <a href="{{ url_for('gallery') }}" class="nav-link" data-section="gallery">Gallery</a>
+        <a href="{{ url_for('notes') }}" class="nav-link" data-section="notes">Notes</a>
+        <a href="{{ url_for('ideas') }}" class="nav-link" data-section="ideas">Ideas</a>
       </nav>
 
-      <!-- Enhanced Mobile Menubar -->
+      <!-- Mobile Menubar -->
       <div class="mobile-menubar" id="mobileMenubar">
         <button class="menubar-toggle" id="menubarToggle" aria-label="Toggle menu" aria-expanded="false">
           <span class="menu-icon">☰</span>
         </button>
         <div class="menubar-content" id="menubarContent">
-          <a href="{{ url_for('dashboard') }}" class="menubar-item" data-section="home" title="Home">
+          <a href="{{ url_for('dashboard') }}" class="menubar-item" data-section="home" aria-current="page">
             <span class="item-icon">🏠</span> Home
           </a>
-          <a href="{{ url_for('memories') }}" class="menubar-item" data-section="memories" title="Memories">
+          <a href="{{ url_for('memories') }}" class="menubar-item" data-section="memories">
             <span class="item-icon">📸</span> Memories
           </a>
-          <a href="{{ url_for('gallery') }}" class="menubar-item" data-section="gallery" title="Gallery">
+          <a href="{{ url_for('gallery') }}" class="menubar-item" data-section="gallery">
             <span class="item-icon">🖼️</span> Gallery
           </a>
-          <a href="{{ url_for('notes') }}" class="menubar-item" data-section="notes" title="Notes">
+          <a href="{{ url_for('notes') }}" class="menubar-item" data-section="notes">
             <span class="item-icon">📝</span> Notes
           </a>
-          <a href="{{ url_for('ideas') }}" class="menubar-item" data-section="ideas" title="Ideas">
+          <a href="{{ url_for('ideas') }}" class="menubar-item" data-section="ideas">
             <span class="item-icon">💡</span> Ideas
           </a>
         </div>
       </div>
 
-      <!-- Enhanced datetime display -->
+      <!-- Datetime display -->
       <div class="datetime-container">
         <span class="datetime" id="datetime">
           <span class="date-part" id="datePart"></span>
@@ -110,35 +109,34 @@
             <span class="role-badge">
               <span class="user-icon">{{ '👑' if session.get('username') == 'admin' else '👤' }}</span>
               <span class="username">{{ session.get('username') }}</span>
-              <div class="badge-glow"></div>
             </span>
-            <a class="logout-btn btn" href="{{ url_for('logout') }}">
+            <a class="logout-btn btn" href="{{ url_for('logout') }}" aria-label="Logout">
               <span class="btn-icon">🚪</span>
               <span class="btn-text">Logout</span>
-              <div class="btn-ripple"></div>
             </a>
           </div>
-     
+        {% else %}
+          <a class="login-btn btn" href="{{ url_for('login') }}" aria-label="Login">
+            <span class="btn-icon">🔑</span>
+            <span class="btn-text">Login</span>
+          </a>
         {% endif %}
       </div>
     </div>
-    
-    <!-- Navigation background blur -->
-    <div class="nav-blur"></div>
   </header>
 
-  <!-- Main content with enhanced structure -->
+  <!-- Main content -->
   <main class="page" role="main" id="main-content">
     <!-- Page transition overlay -->
     <div class="page-transition" id="pageTransition"></div>
     
     <section class="content">
-      <!-- Enhanced flash messages -->
+      <!-- Flash messages -->
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
           <div class="flash-area" role="alert" aria-live="polite">
             {% for cat, msg in messages %}
-              <div class="flash flash-{{ cat }} flash-enhanced" data-category="{{ cat }}">
+              <div class="flash flash-{{ cat }}" data-category="{{ cat }}">
                 <span class="flash-icon">
                   {% if cat == 'success' %}✅
                   {% elif cat == 'error' %}❌
@@ -149,7 +147,6 @@
                 </span>
                 <span class="flash-message">{{ msg }}</span>
                 <button class="flash-close" onclick="this.parentElement.remove()" aria-label="Close message">×</button>
-                <div class="flash-progress"></div>
               </div>
             {% endfor %}
           </div>
@@ -163,12 +160,11 @@
     </section>
   </main>
 
-  <!-- Enhanced footer -->
+  <!-- Footer -->
   <footer class="page-footer" role="contentinfo">
     <div class="footer-content">
       <div class="footer-heart">
         <span class="footer-emoji">💕</span>
-        <div class="footer-pulse"></div>
       </div>
       <p class="footer-text">Made with love for our beautiful journey together</p>
       <div class="footer-sparkles">
@@ -179,43 +175,40 @@
     </div>
   </footer>
 
+
+
   <!-- Notification system -->
   <div class="notification-container" id="notificationContainer" aria-live="polite"></div>
 
- 
-<!-- In base.html -->
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, message in messages %}
-      <div class="flash {{ category }}">{{ message }}</div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
-
-<style>
-  .flash {
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    text-align: center;
-  }
-  .flash.success { background-color: #d4edda; color: #155724; }
-  .flash.error { background-color: #f8d7da; color: #721c24; }
-  .flash.warning { background-color: #fff3cd; color: #856404; }
-  .flash.info { background-color: #cce5ff; color: #004085; }
-</style>
-  <!-- Enhanced styles for new features -->
+  <!-- Styles -->
   <style>
     :root {
       --accent: #ff5a7a;
       --accent-2: #a6c1ee;
+      --bg-dark: #1a1a2e;
+      --text-light: #f5f5f5;
+      --shadow: rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-light);
+      line-height: 1.5;
+      overflow-x: hidden;
     }
 
     /* Page loader */
     .page-loader {
       position: fixed;
       inset: 0;
-      background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 50%, #ffb6c1 100%);
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
       display: flex;
       align-items: center;
       justify-content: center;
@@ -234,32 +227,32 @@
     }
 
     .loader-heart {
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
     .heart-beat {
-      font-size: 60px;
+      font-size: clamp(40px, 8vw, 50px);
       display: inline-block;
       animation: heartPulse 1.5s ease-in-out infinite;
     }
 
     @keyframes heartPulse {
       0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.2); }
+      50% { transform: scale(1.15); }
     }
 
     .loader-text {
-      color: white;
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 20px;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      color: var(--text-light);
+      font-size: clamp(14px, 3vw, 16px);
+      font-weight: 500;
+      margin-bottom: 16px;
+      text-shadow: 0 1px 8px var(--shadow);
     }
 
     .loader-progress {
-      width: 200px;
-      height: 4px;
-      background: rgba(255,255,255,0.2);
+      width: clamp(150px, 40vw, 180px);
+      height: 3px;
+      background: rgba(255, 255, 255, 0.2);
       border-radius: 2px;
       overflow: hidden;
       margin: 0 auto;
@@ -267,8 +260,7 @@
 
     .progress-bar {
       height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--accent-2));
-      border-radius: 2px;
+      background: var(--text-light);
       animation: progressLoad 2s ease-in-out infinite;
     }
 
@@ -278,154 +270,175 @@
     }
 
     @keyframes loaderFadeIn {
-      from { opacity: 0; transform: translateY(20px); }
+      from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Enhanced navbar */
+    /* Animated background */
+    .animated-roses {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .bg-gradient-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(26, 26, 46, 0.8), rgba(26, 26, 46, 0.95));
+    }
+
+    .rose {
+      position: absolute;
+      animation: floatRose linear forwards;
+      opacity: 0.6;
+    }
+
+    @keyframes floatRose {
+      0% { transform: translateY(100vh) rotate(0deg); opacity: 0.6; }
+      100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+    }
+
+    /* Skip link */
+    .skip-link {
+      position: absolute;
+      top: -50px;
+      left: 8px;
+      background: var(--accent);
+      color: var(--text-light);
+      padding: 8px 12px;
+      border-radius: 6px;
+      z-index: 10000;
+      font-size: clamp(12px, 2.5vw, 14px);
+      transition: top 0.3s ease;
+    }
+
+    .skip-link:focus {
+      top: 8px;
+    }
+
+    /* Navbar */
     .navbar {
       position: sticky;
       top: 0;
-      background: linear-gradient(135deg, rgba(251,194,235,0.95), rgba(166,193,238,0.95));
-      backdrop-filter: blur(15px);
+      background: linear-gradient(135deg, rgba(251, 194, 235, 0.9), rgba(166, 193, 238, 0.9));
+      backdrop-filter: blur(10px);
       z-index: 1000;
-      padding: 12px 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px);
+      box-shadow: 0 2px 8px var(--shadow);
     }
 
     .nav-inner {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      max-width: 1440px;
+      max-width: 1200px;
       margin: 0 auto;
-      gap: 12px;
+      gap: 8px;
     }
 
-    .nav-blur {
-      position: absolute;
-      inset: 0;
-      backdrop-filter: blur(10px);
-      z-index: -1;
-    }
-
-    /* Enhanced brand */
+    /* Brand */
     .brand {
-      position: relative;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       text-decoration: none;
-      padding: 8px 12px;
-      border-radius: 12px;
-      transition: all 0.3s ease;
-      overflow: hidden;
+      padding: 6px 10px;
+      border-radius: 8px;
+      transition: transform 0.3s ease, background 0.3s ease;
     }
 
     .brand:hover {
+      background: rgba(255, 255, 255, 0.1);
       transform: translateY(-2px);
-      background: rgba(255,255,255,0.1);
     }
 
     .brand-icon {
-      font-size: 24px;
+      font-size: clamp(18px, 4vw, 22px);
       animation: brandIconFloat 3s ease-in-out infinite;
     }
 
     @keyframes brandIconFloat {
-      0%, 100% { transform: scale(1) rotate(0deg); }
-      50% { transform: scale(1.1) rotate(-5deg); }
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
     }
 
     .brand-text {
       display: flex;
       flex-direction: column;
-      line-height: 1.2;
+      line-height: 1.1;
     }
 
     .brand-word {
-      font-size: 14px;
-      font-weight: 700;
-      color: white;
-      display: block;
+      font-size: clamp(12px, 3vw, 14px);
+      font-weight: 600;
+      color: var(--text-light);
     }
 
     .brand-word:first-child {
-      font-size: 16px;
-    }
-
-    .brand-glow {
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle, rgba(255,90,122,0.1), transparent 70%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .brand:hover .brand-glow {
-      opacity: 1;
+      font-size: clamp(14px, 3.5vw, 16px);
     }
 
     /* Desktop Navigation */
     .nav-links {
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: clamp(12px, 2vw, 16px);
     }
 
     .nav-link {
       text-decoration: none;
-      color: white;
+      color: var(--text-light);
       font-weight: 500;
-      font-size: 14px;
-      padding: 6px 12px;
-      border-radius: 8px;
+      font-size: clamp(12px, 2.5vw, 13px);
+      padding: 6px 10px;
+      border-radius: 6px;
       transition: all 0.3s ease;
     }
 
     .nav-link:hover {
-      background: rgba(255, 255, 255, 0.1);
-      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-1px);
     }
 
-    .nav-link.active {
+    .nav-link[aria-current="page"] {
       background: rgba(255, 255, 255, 0.2);
       font-weight: 600;
     }
 
-    /* Enhanced Mobile Menubar */
+    /* Mobile Menubar */
     .mobile-menubar {
       display: none;
     }
 
-    .mobile-menubar .menubar-toggle {
-      display: none;
-      background: rgba(255, 255, 255, 0.2);
+    .menubar-toggle {
+      background: rgba(255, 255, 255, 0.15);
       border: none;
       cursor: pointer;
-      padding: 10px 12px;
+      padding: 8px;
       border-radius: 6px;
-      font-size: 20px;
-      color: white;
-      transition: background 0.3s ease, transform 0.3s ease;
+      font-size: clamp(16px, 4vw, 18px);
+      color: var(--text-light);
+      transition: all 0.3s ease;
     }
 
-    .mobile-menubar .menubar-toggle:hover {
-      background: rgba(255, 255, 255, 0.3);
-      transform: scale(1.1);
+    .menubar-toggle:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: scale(1.05);
     }
 
-    .mobile-menubar .menubar-content {
+    .menubar-content {
       display: none;
       flex-direction: column;
       background: linear-gradient(135deg, rgba(251, 194, 235, 0.95), rgba(166, 193, 238, 0.95));
       border-radius: 8px;
-      padding: 10px 0;
+      padding: 8px 0;
       position: absolute;
       top: 100%;
-      right: 16px;
+      right: 12px;
       z-index: 1001;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 4px 12px var(--shadow);
       animation: slideIn 0.3s ease-out;
     }
 
@@ -435,299 +448,193 @@
 
     .menubar-item {
       text-decoration: none;
-      color: white;
+      color: var(--text-light);
       font-weight: 500;
-      font-size: 16px;
-      padding: 12px 20px;
+      font-size: clamp(12px, 2.5vw, 14px);
+      padding: 10px 16px;
       display: flex;
       align-items: center;
-      gap: 8px;
-      transition: background 0.3s ease, color 0.3s ease, transform 0.3s ease;
+      gap: 6px;
+      transition: all 0.3s ease;
     }
 
     .menubar-item:hover {
-      background: rgba(255, 255, 255, 0.15);
-      color: var(--accent);
-      transform: translateX(5px);
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateX(4px);
     }
 
-    .menubar-item .item-icon {
-      font-size: 18px;
+    .menubar-item[aria-current="page"] {
+      background: rgba(255, 255, 255, 0.25);
+      font-weight: 600;
+    }
+
+    .item-icon {
+      font-size: clamp(14px, 3vw, 16px);
     }
 
     @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateY(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    @media (max-width: 991px) {
-      .nav-links {
-        display: none;
-      }
-
-      .mobile-menubar {
-        display: block;
-      }
-
-      .mobile-menubar .menubar-toggle {
-        display: block;
-      }
-
-      .mobile-menubar.active .menubar-toggle {
-        background: rgba(255, 90, 122, 0.8);
-        transform: rotate(90deg);
-      }
-    }
-
-    @media (max-width: 767px) {
-      .menubar-item {
-        font-size: 14px;
-        padding: 10px 16px;
-      }
-
-      .menubar-item .item-icon {
-        font-size: 16px;
-      }
-    }
-
-    @media (max-width: 575px) {
-      .menubar-item {
-        font-size: 13px;
-        padding: 8px 12px;
-      }
-
-      .menubar-item .item-icon {
-        font-size: 14px;
-      }
-
-      .mobile-menubar .menubar-toggle {
-        padding: 8px 10px;
-        font-size: 18px;
-      }
-    }
-
-    /* Enhanced datetime */
+    /* Datetime */
     .datetime-container {
-      margin: 0 12px;
-      padding: 6px 12px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 10px;
-      backdrop-filter: blur(8px);
+      padding: 4px 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      backdrop-filter: blur(6px);
     }
 
     .datetime {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 3px;
-      font-size: 12px;
-      font-weight: 600;
-      color: white;
+      gap: 2px;
+      font-size: clamp(10px, 2vw, 11px);
+      font-weight: 500;
+      color: var(--text-light);
     }
 
     .time-part {
       font-family: 'Courier New', monospace;
-      animation: timeGlow 2s ease-in-out infinite alternate;
     }
 
-    @keyframes timeGlow {
-      0% { text-shadow: 0 0 4px rgba(255,255,255,0.5); }
-      100% { text-shadow: 0 0 8px rgba(255,255,255,0.8); }
-    }
-
-    /* Enhanced user section */
+    /* User section */
     .user-section {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
     }
 
     .user-info {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     .role-badge {
       display: flex;
       align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      border-radius: 16px;
+      gap: 4px;
+      padding: 4px 8px;
+      border-radius: 12px;
       background: linear-gradient(90deg, var(--accent), var(--accent-2));
-      color: white;
-      font-weight: 700;
-      font-size: 12px;
-      position: relative;
-      overflow: hidden;
+      color: var(--text-light);
+      font-weight: 600;
+      font-size: clamp(11px, 2vw, 12px);
     }
 
     .user-icon {
-      font-size: 14px;
+      font-size: clamp(12px, 2.5vw, 13px);
     }
 
-    .badge-glow {
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle, rgba(255,255,255,0.2), transparent 70%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .role-badge:hover .badge-glow {
-      opacity: 1;
-    }
-
-    /* Enhanced buttons */
+    /* Buttons */
     .btn {
       display: flex;
       align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      border-radius: 10px;
+      gap: 4px;
+      padding: 6px 10px;
+      border-radius: 8px;
       text-decoration: none;
-      font-weight: 600;
-      font-size: 13px;
-      position: relative;
-      overflow: hidden;
-      transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+      font-weight: 500;
+      font-size: clamp(11px, 2vw, 12px);
+      transition: all 0.3s ease;
       border: none;
       cursor: pointer;
-      touch-action: manipulation;
     }
 
     .logout-btn {
-      background: rgba(255,255,255,0.1);
-      color: white;
-      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-light);
+      border: 1px solid rgba(255, 255, 255, 0.15);
     }
 
     .logout-btn:hover {
-      background: rgba(255,90,122,0.8);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(255,90,122,0.3);
+      background: var(--accent);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px var(--shadow);
     }
 
     .login-btn {
       background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: white;
+      color: var(--text-light);
     }
 
     .login-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(255,90,122,0.4);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px var(--shadow);
     }
 
-    .btn-ripple {
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle, rgba(255,255,255,0.3), transparent 70%);
-      transform: scale(0);
-      transition: transform 0.3s ease;
+    /* Flash messages */
+    .flash-area {
+      max-width: 1200px;
+      margin: 12px auto;
+      padding: 0 12px;
     }
 
-    .btn:active .btn-ripple {
-      transform: scale(1);
-    }
-
-    /* Enhanced flash messages */
-    .flash-enhanced {
+    .flash {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 14px 18px;
-      border-radius: 10px;
-      position: relative;
-      overflow: hidden;
-      animation: flashSlideIn 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255,255,255,0.2);
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      backdrop-filter: blur(6px);
+      animation: flashSlideIn 0.5s ease-out;
+      border-left: 3px solid transparent;
+      margin-bottom: 8px;
     }
 
-    @keyframes flashSlideIn {
-      from {
-        opacity: 0;
-        transform: translateX(-100%) scale(0.95);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-      }
-    }
+    .flash-success { background: rgba(209, 250, 229, 0.9); color: #065f46; border-left-color: #10b981; }
+    .flash-error { background: rgba(254, 226, 226, 0.9); color: #991b1b; border-left-color: #ef4444; }
+    .flash-warning { background: rgba(254, 243, 199, 0.9); color: #92400e; border-left-color: #f59e0b; }
+    .flash-info { background: rgba(191, 219, 254, 0.9); color: #1e3a8a; border-left-color: #3b82f6; }
 
     .flash-icon {
-      font-size: 16px;
-      flex-shrink: 0;
+      font-size: clamp(12px, 2.5vw, 14px);
     }
 
     .flash-message {
       flex: 1;
+      font-size: clamp(12px, 2.5vw, 13px);
       font-weight: 500;
-      font-size: 14px;
     }
 
     .flash-close {
       background: none;
       border: none;
-      color: inherit;
-      font-size: 18px;
+      font-size: clamp(14px, 3vw, 16px);
       cursor: pointer;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
+      color: inherit;
+      transition: transform 0.3s ease;
     }
 
     .flash-close:hover {
-      background: rgba(255,255,255,0.2);
       transform: scale(1.1);
     }
 
-    .flash-progress {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      height: 2px;
-      background: rgba(255,255,255,0.3);
-      animation: flashProgress 5s linear forwards;
+    @keyframes flashSlideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    @keyframes flashProgress {
-      from { width: 100%; }
-      to { width: 0%; }
-    }
-
-    /* Enhanced footer */
+    /* Footer */
     .page-footer {
-      margin-top: 48px;
-      padding: 32px 16px 16px;
+      margin-top: 32px;
+      padding: clamp(16px, 4vw, 24px) 12px;
       text-align: center;
-      position: relative;
     }
 
     .footer-content {
       max-width: 600px;
       margin: 0 auto;
-      position: relative;
     }
 
     .footer-heart {
       margin-bottom: 12px;
-      position: relative;
-      display: inline-block;
     }
 
     .footer-emoji {
-      font-size: 28px;
+      font-size: clamp(20px, 5vw, 24px);
       animation: footerHeartbeat 2s ease-in-out infinite;
     }
 
@@ -736,66 +643,53 @@
       50% { transform: scale(1.1); }
     }
 
-    .footer-pulse {
-      position: absolute;
-      inset: -8px;
-      border: 2px solid rgba(255,90,122,0.3);
-      border-radius: 50%;
-      animation: footerPulse 2s ease-out infinite;
-    }
-
-    @keyframes footerPulse {
-      0% { transform: scale(0.9); opacity: 1; }
-      100% { transform: scale(1.4); opacity: 0; }
-    }
-
     .footer-text {
-      color: rgba(255,255,255,0.8);
-      font-size: 13px;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: clamp(12px, 2.5vw, 13px);
       font-style: italic;
-      margin: 0 0 12px;
+      margin-bottom: 12px;
     }
 
     .footer-sparkles {
       display: flex;
       justify-content: center;
-      gap: 16px;
+      gap: 12px;
     }
 
-    .footer-sparkles .sparkle {
-      font-size: 14px;
+    .sparkle {
+      font-size: clamp(12px, 2.5vw, 14px);
       animation: sparkleFloat 3s ease-in-out infinite;
     }
 
-    .footer-sparkles .sparkle:nth-child(1) { animation-delay: 0s; }
-    .footer-sparkles .sparkle:nth-child(2) { animation-delay: 0.8s; }
-    .footer-sparkles .sparkle:nth-child(3) { animation-delay: 1.6s; }
+    .sparkle:nth-child(1) { animation-delay: 0s; }
+    .sparkle:nth-child(2) { animation-delay: 0.5s; }
+    .sparkle:nth-child(3) { animation-delay: 1s; }
 
     @keyframes sparkleFloat {
       0%, 100% { transform: translateY(0); opacity: 1; }
-      50% { transform: translateY(-8px); opacity: 0.8; }
+      50% { transform: translateY(-6px); opacity: 0.9; }
     }
 
     /* Back to top button */
     .back-to-top {
       position: fixed;
-      bottom: 24px;
-      right: 24px;
-      width: 48px;
-      height: 48px;
-      border-radius: 24px;
+      bottom: 16px;
+      right: 16px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
       background: linear-gradient(135deg, var(--accent), var(--accent-2));
       border: none;
-      color: white;
+      color: var(--text-light);
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
-      box-shadow: 0 4px 16px rgba(255,90,122,0.3);
-      transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+      font-size: clamp(14px, 3vw, 16px);
+      box-shadow: 0 2px 8px var(--shadow);
+      transition: all 0.3s ease;
       opacity: 0;
-      transform: translateY(16px);
+      transform: translateY(10px);
       z-index: 1000;
     }
 
@@ -805,57 +699,191 @@
     }
 
     .back-to-top:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 6px 24px rgba(255,90,122,0.4);
-    }
-
-    .btn-glow {
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      background: radial-gradient(circle, rgba(255,255,255,0.3), transparent 70%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .back-to-top:hover .btn-glow {
-      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px var(--shadow);
     }
 
     /* Notification system */
     .notification-container {
       position: fixed;
-      top: 16px;
-      right: 16px;
+      top: 12px;
+      right: 12px;
       z-index: 1000;
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
 
-    /* Skip link for accessibility */
-    .skip-link {
-      position: absolute;
-      top: -40px;
-      left: 8px;
-      background: var(--accent);
-      color: white;
+    .notification {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       padding: 8px 12px;
-      text-decoration: none;
+      background: rgba(255, 255, 255, 0.9);
       border-radius: 6px;
-      z-index: 10000;
-      transition: top 0.3s ease;
-      font-size: 13px;
+      box-shadow: 0 2px 8px var(--shadow);
+      animation: notificationSlideIn 0.3s ease;
+      max-width: clamp(250px, 80vw, 300px);
+      border-left: 3px solid var(--accent);
     }
 
-    .skip-link:focus {
-      top: 8px;
+    .notification-success { border-left-color: #10b981; }
+    .notification-error { border-left-color: #ef4444; }
+    .notification-warning { border-left-color: #f59e0b; }
+    .notification-info { border-left-color: #3b82f6; }
+
+    .notification-icon {
+      font-size: clamp(12px, 2.5vw, 14px);
+    }
+
+    .notification-message {
+      flex: 1;
+      font-size: clamp(12px, 2.5vw, 13px);
+      font-weight: 500;
+      color: #1f2937;
+    }
+
+    .notification-close {
+      background: none;
+      border: none;
+      font-size: clamp(14px, 3vw, 16px);
+      cursor: pointer;
+      color: #6b7280;
+      transition: transform 0.3s ease;
+    }
+
+    .notification-close:hover {
+      transform: scale(1.1);
+    }
+
+    @keyframes notificationSlideIn {
+      from { opacity: 0; transform: translateX(100%); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes notificationSlideOut {
+      to { opacity: 0; transform: translateX(100%); }
+    }
+
+    .page-transition {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      z-index: 9999;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      pointer-events: none;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+      }
+
+      .mobile-menubar {
+        display: block;
+      }
+
+      .menubar-toggle {
+        display: block;
+      }
+
+      .menubar-content {
+        right: 8px;
+      }
+
+      .nav-inner {
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .datetime-container {
+        order: -1;
+        width: 100%;
+        text-align: center;
+        margin-bottom: 8px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .navbar {
+        padding: 8px 10px;
+      }
+
+      .brand-icon {
+        font-size: clamp(16px, 4vw, 18px);
+      }
+
+      .brand-word {
+        font-size: clamp(11px, 2.5vw, 12px);
+      }
+
+      .brand-word:first-child {
+        font-size: clamp(12px, 3vw, 13px);
+      }
+
+      .menubar-item {
+        font-size: clamp(11px, 2.5vw, 12px);
+        padding: 8px 12px;
+      }
+
+      .item-icon {
+        font-size: clamp(12px, 2.5vw, 14px);
+      }
+
+      .datetime {
+        font-size: clamp(9px, 2vw, 10px);
+      }
+
+      .role-badge {
+        font-size: clamp(10px, 2vw, 11px);
+        padding: 3px 6px;
+      }
+
+      .btn {
+        font-size: clamp(10px, 2vw, 11px);
+        padding: 5px 8px;
+      }
+
+      .flash {
+        padding: 8px 10px;
+      }
+
+      .flash-message {
+        font-size: clamp(11px, 2.5vw, 12px);
+      }
+
+      .footer-text {
+        font-size: clamp(11px, 2.5vw, 12px);
+      }
+
+      .back-to-top {
+        width: 36px;
+        height: 36px;
+        font-size: clamp(12px, 3vw, 14px);
+      }
+    }
+
+    @media (min-width: 769px) {
+      .nav-inner {
+        flex-wrap: nowrap;
+      }
+
+      .content-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 12px;
+      }
     }
   </style>
 
-  <!-- Enhanced JavaScript -->
+  <!-- JavaScript -->
   <script>
-    // Enhanced datetime update
+    // Datetime update
     function updateDateTime() {
       const now = new Date();
       const datePart = document.getElementById('datePart');
@@ -872,28 +900,20 @@
       }
     }
 
-    // Mobile menubar toggle with enhanced accessibility
+    // Mobile menubar toggle
     function initMobileMenubar() {
       const toggle = document.getElementById('menubarToggle');
       const menubar = document.getElementById('mobileMenubar');
 
-      if (!toggle || !menubar) {
-        console.error('Menubar elements not found');
-        return;
-      }
+      if (!toggle || !menubar) return;
 
       toggle.addEventListener('click', () => {
         const isOpen = !menubar.classList.contains('active');
         menubar.classList.toggle('active');
-        toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-        if (isOpen) {
-          document.body.style.overflow = 'hidden';
-        } else {
-          document.body.style.overflow = '';
-        }
+        toggle.setAttribute('aria-expanded', isOpen);
+        document.body.style.overflow = isOpen ? 'hidden' : '';
       });
 
-      // Close menubar when clicking on items
       menubar.querySelectorAll('.menubar-item').forEach(item => {
         item.addEventListener('click', () => {
           menubar.classList.remove('active');
@@ -902,9 +922,8 @@
         });
       });
 
-      // Close menubar when clicking outside
       document.addEventListener('click', (e) => {
-        if (!menubar.contains(e.target) && menubar.classList.contains('active')) {
+        if (!menubar.contains(e.target) && !toggle.contains(e.target) && menubar.classList.contains('active')) {
           menubar.classList.remove('active');
           toggle.setAttribute('aria-expanded', 'false');
           document.body.style.overflow = '';
@@ -919,7 +938,7 @@
         setTimeout(() => {
           loader.classList.add('hidden');
           setTimeout(() => loader.remove(), 500);
-        }, 1000);
+        }, 800);
       }
     }
 
@@ -928,11 +947,7 @@
       const backToTop = document.getElementById('backToTop');
       if (backToTop) {
         window.addEventListener('scroll', () => {
-          if (window.scrollY > 300) {
-            backToTop.classList.add('visible');
-          } else {
-            backToTop.classList.remove('visible');
-          }
+          backToTop.classList.toggle('visible', window.scrollY > 200);
         });
 
         backToTop.addEventListener('click', () => {
@@ -941,36 +956,35 @@
       }
     }
 
-    // Enhanced rose animation
+    // Rose animation
     function createEnhancedRose() {
       const container = document.getElementById('rosesContainer');
       if (!container) return;
 
-      const roses = ['🌹', '💕', '💖', '💗', '🌺', '✨', '💫', '⭐'];
+      const roses = ['🌹', '💕', '💖', '💗', '🌺'];
       const rose = document.createElement('div');
-      
       rose.className = 'rose';
       rose.textContent = roses[Math.floor(Math.random() * roses.length)];
       rose.style.left = Math.random() * 100 + '%';
-      rose.style.animationDuration = (Math.random() * 4 + 6) + 's';
-      rose.style.animationDelay = Math.random() * 2 + 's';
-      rose.style.fontSize = (Math.random() * 8 + 16) + 'px';
+      rose.style.animationDuration = (Math.random() * 4 + 5) + 's';
+      rose.style.animationDelay = Math.random() * 1.5 + 's';
+      rose.style.fontSize = clamp(12, Math.random() * 8 + 14, 20) + 'px';
       
       container.appendChild(rose);
       
-      setTimeout(() => {
-        if (rose.parentNode) {
-          rose.parentNode.removeChild(rose);
-        }
-      }, 10000);
+      setTimeout(() => rose.remove(), 10000);
     }
 
-    // Auto-dismiss flash messages
+    function clamp(min, val, max) {
+      return Math.min(Math.max(val, min), max);
+    }
+
+    // Flash messages
     function initFlashMessages() {
-      const flashMessages = document.querySelectorAll('.flash-enhanced');
+      const flashMessages = document.querySelectorAll('.flash');
       flashMessages.forEach(flash => {
         setTimeout(() => {
-          flash.style.animation = 'flashSlideOut 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards';
+          flash.style.animation = 'flashSlideOut 0.5s ease forwards';
           setTimeout(() => flash.remove(), 500);
         }, 5000);
       });
@@ -984,19 +998,19 @@
       navLinks.forEach(link => {
         const href = link.getAttribute('href');
         if (href && currentPath.includes(href.split('/').pop())) {
-          link.classList.add('active');
+          link.setAttribute('aria-current', 'page');
         }
       });
     }
 
-    // Page transition effect
+    // Page transitions
     function initPageTransitions() {
       const links = document.querySelectorAll('a[href^="/"], a[href^="' + window.location.origin + '"]');
       
       links.forEach(link => {
+        if (link.target === '_blank') return;
+        
         link.addEventListener('click', (e) => {
-          if (link.target === '_blank') return;
-          
           e.preventDefault();
           const transition = document.getElementById('pageTransition');
           if (transition) {
@@ -1004,66 +1018,28 @@
             setTimeout(() => {
               window.location.href = link.href;
             }, 300);
+          } else {
+            window.location.href = link.href;
           }
         });
       });
     }
 
-    // Notification system
-    function showNotification(message, type = 'info', duration = 3000) {
-      const container = document.getElementById('notificationContainer');
-      if (!container) return;
-
-      const notification = document.createElement('div');
-      notification.className = `notification notification-${type}`;
-      notification.innerHTML = `
-        <span class="notification-icon">${getNotificationIcon(type)}</span>
-        <span class="notification-message">${message}</span>
-        <button class="notification-close" onclick="this.parentElement.remove()">×</button>
-      `;
-
-      container.appendChild(notification);
-
-      setTimeout(() => {
-        if (notification.parentNode) {
-          notification.style.animation = 'notificationSlideOut 0.3s ease forwards';
-          setTimeout(() => notification.remove(), 300);
-        }
-      }, duration);
-    }
-
-    function getNotificationIcon(type) {
-      const icons = {
-        success: '✅',
-        error: '❌',
-        warning: '⚠️',
-        info: 'ℹ️'
-      };
-      return icons[type] || '📢';
-    }
-
     // Keyboard shortcuts
     function initKeyboardShortcuts() {
       document.addEventListener('keydown', (e) => {
-        if (e.altKey && e.key === 'h') {
-          e.preventDefault();
-          window.location.href = "{{ url_for('dashboard') }}";
-        }
-        if (e.altKey && e.key === 'm') {
-          e.preventDefault();
-          window.location.href = "{{ url_for('memories') }}";
-        }
-        if (e.altKey && e.key === 'g') {
-          e.preventDefault();
-          window.location.href = "{{ url_for('gallery') }}";
-        }
-        if (e.altKey && e.key === 'n') {
-          e.preventDefault();
-          window.location.href = "{{ url_for('notes') }}";
-        }
-        if (e.altKey && e.key === 'i') {
-          e.preventDefault();
-          window.location.href = "{{ url_for('ideas') }}";
+        if (e.altKey) {
+          const routes = {
+            'h': "{{ url_for('dashboard') }}",
+            'm': "{{ url_for('memories') }}",
+            'g': "{{ url_for('gallery') }}",
+            'n': "{{ url_for('notes') }}",
+            'i': "{{ url_for('ideas') }}"
+          };
+          if (routes[e.key]) {
+            e.preventDefault();
+            window.location.href = routes[e.key];
+          }
         }
         if (e.key === 'Escape') {
           const toggle = document.getElementById('menubarToggle');
@@ -1077,134 +1053,32 @@
       });
     }
 
-    // Performance monitoring
-    function initPerformanceMonitoring() {
-      if ('performance' in window) {
-        window.addEventListener('load', () => {
-          const navigation = performance.getEntriesByType('navigation')[0];
-          const loadTime = navigation.loadEventEnd - navigation.loadEventStart;
-          
-          if (loadTime > 3000) {
-            console.warn('Slow page load detected:', loadTime + 'ms');
-          }
-        });
-      }
-    }
-
-    // Initialize everything when DOM is loaded
+    // Initialize
     document.addEventListener('DOMContentLoaded', () => {
       updateDateTime();
       setInterval(updateDateTime, 1000);
-      
       initMobileMenubar();
       initBackToTop();
       initFlashMessages();
       highlightActiveNavigation();
       initPageTransitions();
       initKeyboardShortcuts();
-      initPerformanceMonitoring();
-      
-      setInterval(createEnhancedRose, 2000);
-      
+      setInterval(createEnhancedRose, 2500);
       hidePageLoader();
     });
 
-    // Add slide out animation for flash messages
+    // Additional styles
     const style = document.createElement('style');
     style.textContent = `
       @keyframes flashSlideOut {
-        to {
-          opacity: 0;
-          transform: translateX(100%) scale(0.95);
-        }
-      }
-      
-      .notification {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 10px 14px;
-        background: rgba(255,255,255,0.9);
-        backdrop-filter: blur(8px);
-        border-radius: 6px;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-        animation: notificationSlideIn 0.3s ease;
-        max-width: 280px;
-        border-left: 3px solid var(--accent);
-      }
-      
-      .notification-success { border-left-color: #10b981; }
-      .notification-error { border-left-color: #ef4444; }
-      .notification-warning { border-left-color: #f59e0b; }
-      .notification-info { border-left-color: #3b82f6; }
-      
-      .notification-icon {
-        font-size: 14px;
-        flex-shrink: 0;
-      }
-      
-      .notification-message {
-        flex: 1;
-        font-size: 13px;
-        font-weight: 500;
-        color: #374151;
-      }
-      
-      .notification-close {
-        background: none;
-        border: none;
-        color: #6b7280;
-        cursor: pointer;
-        font-size: 16px;
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s ease;
-      }
-      
-      .notification-close:hover {
-        background: rgba(0,0,0,0.1);
-        color: #374151;
-      }
-      
-      @keyframes notificationSlideIn {
-        from {
-          opacity: 0;
-          transform: translateX(100%);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      
-      @keyframes notificationSlideOut {
-        to {
-          opacity: 0;
-          transform: translateX(100%);
-        }
-      }
-      
-      .page-transition {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg, var(--accent), var(--accent-2));
-        z-index: 9999;
-        transform: translateX(-100%);
-        transition: transform 0.3s ease;
-        pointer-events: none;
+        to { opacity: 0; transform: translateY(-10px); }
       }
     `;
     document.head.appendChild(style);
   </script>
 
-  <!-- Load external JavaScript -->
+  <!-- External JavaScript -->
   <script src="{{ url_for('static', filename='script.js') }}"></script>
+  {% block scripts %}{% endblock %}
 </body>
 </html>

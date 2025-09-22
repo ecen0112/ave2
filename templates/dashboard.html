@@ -2,14 +2,14 @@
 {% block title %}Dashboard - Our Journey{% endblock %}
 {% block content %}
 <div class="dashboard-container">
-  <h1 class="page-title">✨ Welcome, <span class="highlight">{{ profile.name }}</span> ✨</h1>
+  <h1 class="page-title" id="dashboard-title">✨ Welcome, <span class="highlight">{{ profile.name }}</span> ✨</h1>
 
   <!-- Main Info Grid -->
   <div class="content-grid">
     <!-- About -->
-    <article class="card-3d highlight-card">
+    <article class="card-3d highlight-card" role="region" aria-labelledby="about-title">
       <div class="card-inner">
-        <h3>💞 About Us</h3>
+        <h3 id="about-title" class="card-title">💞 About Us</h3>
         <p class="bio-text">“{{ profile.bio }}”</p>
         <p class="muted">🌹 Together since <strong>{{ relationship_start }}</strong></p>
         <p class="muted">💖 {{ days_text }}</p>
@@ -28,54 +28,59 @@
 
         <!-- Actions -->
         <div class="card-actions">
-          <a class="btn primary-btn" href="{{ url_for('memories') }}">📖 View Memories</a>
-          <a class="btn secondary-btn" href="{{ url_for('gallery') }}">🖼 Open Gallery</a>
+          <a class="btn primary-btn" href="{{ url_for('memories') }}" aria-label="View your memories">📖 View Memories</a>
+          <a class="btn secondary-btn" href="{{ url_for('gallery') }}" aria-label="Open photo gallery">🖼 Open Gallery</a>
         </div>
       </div>
     </article>
 
     <!-- Next Anniversary -->
-    <div class="card-3d">
+    <div class="card-3d" role="region" aria-labelledby="anniversary-title">
       <div class="card-inner">
-        <h3>🎂 Next Anniversary</h3>
-        <div id="countdown" class="countdown">
-          <span id="days">00</span>d :
-          <span id="hours">00</span>h :
-          <span id="minutes">00</span>m :
-          <span id="seconds">00</span>s
+        <h3 id="anniversary-title" class="card-title">🎂 Next Anniversary</h3>
+        <div id="countdown" class="countdown" aria-live="polite">
+          <span id="days" class="countdown-unit">00</span><span class="countdown-label">d</span>
+          <span id="hours" class="countdown-unit">00</span><span class="countdown-label">h</span>
+          <span id="minutes" class="countdown-unit">00</span><span class="countdown-label">m</span>
+          <span id="seconds" class="countdown-unit">00</span><span class="countdown-label">s</span>
         </div>
-        <p class="muted">Counting down to your special day 💕</p>
+        <p class="muted">Counting down to our special day 💕</p>
         <div class="card-actions">
-          <a class="btn primary-btn" href="{{ url_for('ideas') }}">💡 Date Ideas</a>
+          <a class="btn primary-btn" href="{{ url_for('ideas') }}" aria-label="Explore date ideas">💡 Date Ideas</a>
         </div>
       </div>
     </div>
 
     <!-- Gallery -->
-    <article class="card-3d">
+    <article class="card-3d" role="region" aria-labelledby="gallery-title">
       <div class="card-inner">
-        <h3>📸 Recent Photos</h3>
+        <h3 id="gallery-title" class="card-title">📸 Recent Photos</h3>
         <div class="mini-gallery">
           {% if gallery %}
             {% for img in gallery %}
-              <a href="{{ url_for('view_image', idx=loop.index0) }}">
-                <img src="{{ url_for('static', filename='uploads/' + img.filename) }}" alt="{{ img.filename }}">
+              <a href="{{ url_for('view_image', idx=loop.index0) }}" aria-label="View image {{ img.filename }}">
+                <img 
+                  src="{{ url_for('static', filename='uploads/' + img.filename) }}" 
+                  alt="Photo {{ img.filename }} uploaded on {{ img.uploaded_at|datetime }}"
+                  class="gallery-image"
+                  loading="lazy"
+                >
               </a>
             {% endfor %}
           {% else %}
-            <p class="muted">No photos yet. Upload some in Gallery.</p>
+            <p class="muted">No photos yet. Upload some in the Gallery!</p>
           {% endif %}
         </div>
         <div class="card-actions">
-          <a class="btn primary-btn" href="{{ url_for('gallery') }}">🖼 Open Gallery</a>
+          <a class="btn primary-btn" href="{{ url_for('gallery') }}" aria-label="Open photo gallery">🖼 Open Gallery</a>
         </div>
       </div>
     </article>
   </div>
 
   <!-- Games Section -->
-  <section class="games-section">
-    <h2 class="games-title">🎮 Fun & Games</h2>
+  <section class="games-section" role="region" aria-labelledby="games-title">
+    <h2 id="games-title" class="games-title">🎮 Fun & Games</h2>
     <div class="games-grid">
       {% set games = [
         {"icon": "🎆", "title": "Fireworks", "desc": "Launch colorful fireworks on the screen!", "url": "fireworks"},
@@ -85,12 +90,12 @@
         {"icon": "🐔", "title": "Chicken Game", "desc": "Try to dodge obstacles and score points!", "url": "chicken_game"}
       ] %}
       {% for g in games %}
-      <article class="card-3d">
+      <article class="card-3d game-card" role="region" aria-labelledby="game-title-{{ loop.index0 }}">
         <div class="card-inner">
-          <h3>{{ g.icon }} {{ g.title }}</h3>
+          <h3 id="game-title-{{ loop.index0 }}">{{ g.icon }} {{ g.title }}</h3>
           <p>{{ g.desc }}</p>
           <div class="card-actions">
-            <a class="btn secondary-btn" href="{{ url_for(g.url) }}">Play Now</a>
+            <a class="btn secondary-btn" href="{{ url_for(g.url) }}" aria-label="Play {{ g.title }}">Play Now</a>
           </div>
         </div>
       </article>
@@ -99,6 +104,361 @@
   </section>
 </div>
 
+<style>
+  :root {
+    --accent: #ff4060;
+    --accent-2: #8ba8e0;
+    --bg-dark: #1a1a2e;
+    --text-light: #f5f5f5;
+    --shadow: rgba(0, 0, 0, 0.3);
+    --card-bg: rgba(255, 255, 255, 0.1);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  .dashboard-container {
+    max-width: 100%;
+    width: 100%;
+    margin: 0 auto;
+    padding: 16px;
+  }
+
+  .page-title {
+    font-size: clamp(1.5rem, 5vw, 2rem);
+    font-weight: 700;
+    color: var(--accent);
+    text-align: center;
+    margin-bottom: 24px;
+    animation: fadeIn 0.6s ease-out;
+    line-height: 1.2;
+  }
+
+  .highlight {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: 700;
+  }
+
+  .content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .card-3d {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    box-shadow: 0 4px 16px var(--shadow);
+    padding: 16px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .card-3d:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px var(--shadow);
+  }
+
+  .highlight-card {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .highlight-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  }
+
+  .card-inner {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .card-title {
+    font-size: clamp(1.1rem, 3vw, 1.25rem);
+    color: var(--text-light);
+    margin-bottom: 12px;
+    position: relative;
+  }
+
+  .card-title::after {
+    content: '';
+    width: 50px;
+    height: 2px;
+    background: var(--accent);
+    display: block;
+    margin: 8px auto;
+    border-radius: 1px;
+  }
+
+  .bio-text {
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
+    color: var(--text-light);
+    margin: 12px 0;
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  .muted {
+    color: #cccccc;
+    font-size: clamp(0.85rem, 2vw, 0.95rem);
+    margin: 8px 0;
+    line-height: 1.4;
+  }
+
+  .relationship-stats {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+    margin: 12px 0;
+  }
+
+  .stat-box {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 10px;
+    min-width: 80px;
+    transition: transform 0.3s ease;
+  }
+
+  .stat-box:hover {
+    transform: scale(1.05);
+  }
+
+  .stat-box h4 {
+    font-size: 0.9rem;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  .stat-box p {
+    font-size: 1.1rem;
+    color: var(--text-light);
+    font-weight: 600;
+  }
+
+  .card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .btn {
+    padding: clamp(8px, 2vw, 10px) clamp(16px, 3vw, 20px);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+    font-size: clamp(0.85rem, 2vw, 0.9rem);
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 120px;
+    justify-content: center;
+  }
+
+  .primary-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: var(--text-light);
+  }
+
+  .primary-btn:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, #ff1a40, #6b88c0);
+    box-shadow: 0 4px 12px var(--shadow);
+  }
+
+  .secondary-btn {
+    background: transparent;
+    color: var(--text-light);
+    border: 1px solid var(--accent);
+  }
+
+  .secondary-btn:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 12px var(--shadow);
+  }
+
+  .countdown {
+    font-size: clamp(1.2rem, 3vw, 1.5rem);
+    color: var(--accent);
+    margin: 12px 0;
+    font-weight: 600;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .countdown-unit {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 6px 10px;
+    border-radius: 6px;
+    min-width: 30px;
+    text-align: center;
+    transition: transform 0.3s ease;
+  }
+
+  .countdown-unit:hover {
+    transform: scale(1.05);
+  }
+
+  .countdown-label {
+    font-size: clamp(0.8rem, 2vw, 0.9rem);
+    color: var(--text-light);
+  }
+
+  .mini-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(80px, 100%), 1fr));
+    gap: 10px;
+    margin: 12px 0;
+  }
+
+  .mini-gallery img {
+    width: 100%;
+    height: clamp(60px, 20vw, 80px);
+    object-fit: cover;
+    border-radius: 8px;
+    transition: transform 0.3s ease, filter 0.3s ease;
+  }
+
+  .mini-gallery a:hover img {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+  }
+
+  .games-section {
+    margin-top: 32px;
+  }
+
+  .games-title {
+    font-size: clamp(1.3rem, 3.5vw, 1.5rem);
+    color: var(--accent);
+    text-align: center;
+    margin-bottom: 20px;
+    animation: fadeIn 0.6s ease-out;
+  }
+
+  .games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+    gap: 16px;
+  }
+
+  .game-card {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .game-card:hover .card-inner {
+    transform: translateY(-2px);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Mobile devices (up to 480px) */
+  @media (max-width: 480px) {
+    .dashboard-container {
+      padding: 12px;
+    }
+    .page-title {
+      font-size: clamp(1.2rem, 4vw, 1.4rem);
+    }
+    .card-title {
+      font-size: clamp(1rem, 2.5vw, 1.1rem);
+    }
+    .countdown {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      gap: 4px;
+    }
+    .countdown-unit {
+      padding: 4px 8px;
+      min-width: 25px;
+    }
+    .countdown-label {
+      font-size: clamp(0.7rem, 1.8vw, 0.8rem);
+    }
+    .btn {
+      padding: 6px 12px;
+      min-width: 100px;
+    }
+    .mini-gallery {
+      grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    }
+    .mini-gallery img {
+      height: 60px;
+    }
+    .relationship-stats {
+      gap: 12px;
+    }
+    .stat-box {
+      min-width: 70px;
+    }
+  }
+
+  /* Tablets (481px to 768px) */
+  @media (min-width: 481px) and (max-width: 768px) {
+    .dashboard-container {
+      padding: 16px;
+    }
+    .page-title {
+      font-size: clamp(1.4rem, 4vw, 1.6rem);
+    }
+    .content-grid {
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+    .mini-gallery {
+      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    }
+    .mini-gallery img {
+      height: 90px;
+    }
+    .btn {
+      padding: 8px 16px;
+    }
+  }
+
+  /* Desktops (769px and up) */
+  @media (min-width: 769px) {
+    .dashboard-container {
+      max-width: 1200px;
+      padding: 24px;
+    }
+    .content-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .games-grid {
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+  }
+</style>
+
+{% block scripts %}
 <script>
   function startCountdown() {
     const targetDate = new Date("2025-10-13T00:00:00").getTime();
@@ -108,7 +468,9 @@
       const diff = targetDate - now;
 
       if (diff <= 0) {
-        document.getElementById("countdown").innerHTML = "🎉 It's Anniversary Day! 💖";
+        const countdownElement = document.getElementById("countdown");
+        countdownElement.innerHTML = "🎉 It's Anniversary Day! 💖";
+        countdownElement.setAttribute('aria-label', "Anniversary day has arrived");
         return;
       }
 
@@ -121,6 +483,9 @@
       document.getElementById("hours").textContent = hours.toString().padStart(2, '0');
       document.getElementById("minutes").textContent = minutes.toString().padStart(2, '0');
       document.getElementById("seconds").textContent = seconds.toString().padStart(2, '0');
+
+      document.getElementById("countdown").setAttribute('aria-label', 
+        `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds until your next anniversary`);
     }
 
     updateCountdown();
@@ -128,5 +493,23 @@
   }
 
   startCountdown();
+
+  // Accessibility: Keyboard navigation for buttons
+  document.querySelectorAll('.btn').forEach(button => {
+    button.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        this.click();
+      }
+    });
+  });
+
+  // Ensure cards don't overlap on small screens
+  window.addEventListener('resize', () => {
+    document.querySelectorAll('.card-3d').forEach(card => {
+      card.style.height = 'auto';
+    });
+  });
 </script>
+{% endblock %}
 {% endblock %}
