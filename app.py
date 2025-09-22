@@ -53,8 +53,8 @@ def load_db():
             print(f"Error decoding {DB_FILE}: {e}. Using default data at {datetime.now().strftime('%H:%M:%S')}")
     return {
         "users": [
-            {"username": "BUNBUN", "password": "BUNBUN", "role": "erl"},
-            {"username": "BUNNY", "password": "BUNNY", "role": "love"}
+            {"username": "BUNBUN", "password": "09132025", "role": "erl"},
+            {"username": "BUNNY", "password": "09132025", "role": "love"}
         ],
         "ideas": [{"text": "Go for a picnic", "status": "Planned"}, {"text": "Watch a movie together", "status": "Planned"}],
         "memories": [{"text": "Our first date", "category": "Romantic", "timestamp": "2025-09-13T12:00:00", "photo": ""}],
@@ -175,7 +175,7 @@ def dashboard():
 def ideas():
     if request.method == "POST":
         role = session.get("role")
-        if not role or role != "erl":
+        if not role or role != "erl" and role != "love":
             flash("Only admins can add ideas.", "warning")
             return redirect(url_for("ideas"))
         idea = request.form.get("idea", "").strip()
@@ -190,7 +190,7 @@ def ideas():
 @login_required
 def edit_idea(idx):
     role = session.get("role")
-    if not role or role != "erl":
+    if not role or role != "erl" and role != "love":
         flash("Only admins can edit ideas.", "warning")
         return redirect(url_for("ideas"))
     if 0 <= idx < len(db["ideas"]):
@@ -223,7 +223,7 @@ def delete_idea(idx):
 @login_required
 def toggle_idea_status(idx):
     role = session.get("role")
-    if not role or role != "erl":
+    if not role or role != "erl" and role != "love":
         flash("Only admins can toggle idea status.", "warning")
         return redirect(url_for("ideas"))
     if 0 <= idx < len(db["ideas"]):
@@ -244,7 +244,7 @@ def toggle_idea_status(idx):
 def memories():
     if request.method == "POST":
         role = session.get("role")
-        if not role or role != "erl":
+        if not role or role != "erl" and role != "love":
             flash("Only admins can add memories.", "warning")
             return redirect(url_for("memories"))
         memory_text = request.form.get("memory", "").strip()
@@ -274,7 +274,7 @@ def memories():
 @login_required
 def edit_memory(idx):
     role = session.get("role")
-    if not role or role != "erl":
+    if not role or role != "erl"and role != "love":
         flash("Only admins can edit memories.", "warning")
         return redirect(url_for("memories"))
     if 0 <= idx < len(db["memories"]):
@@ -309,7 +309,7 @@ def delete_memory(idx):
 def notes():
     if request.method == "POST":
         role = session.get("role")
-        if not role or role != "erl":
+        if not role or role != "erl" and role != "love":
             flash("Only admins can add notes.", "warning")
             return redirect(url_for("notes"))
         note = request.form.get("note", "").strip()
@@ -342,7 +342,7 @@ def delete_note(idx):
 def gallery():
     if request.method == "POST":
         role = session.get("role")
-        if not role or role != "erl":
+        if not role or role != "erl" and role != "love":
             flash("Only admins can upload images.", "warning")
             return redirect(url_for("gallery"))
         file = request.files.get("image")
@@ -365,7 +365,7 @@ def view_image(idx):
     image = db["gallery"][idx]
     if request.method == "POST":
         role = session.get("role")
-        if not role or role != "erl":
+        if not role or role != "erl" and role != "love":
             flash("Only admins can add notes.", "warning")
             return redirect(url_for("view_image", idx=idx))
         note = request.form.get("note", "").strip()

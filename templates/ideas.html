@@ -8,7 +8,7 @@
   <article class="card-3d">
     <div class="card-inner">
       <h3>Add New Idea</h3>
-      {% if session.get('role') == 'erl' %}
+      {% if session.get('role') == 'erl' or session.get('role') == 'love' %}
         <form method="post" class="stack add-idea-form" novalidate>
           <input name="idea" type="text" placeholder="A romantic idea..." required>
           <select name="status" class="status-select" required>
@@ -71,14 +71,14 @@
   .content-grid {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 10px;
     display: grid;
     gap: 20px;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px, .5fr));
   }
 
   .page-title {
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 700;
     color: var(--accent);
     margin-bottom: 24px;

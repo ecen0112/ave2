@@ -1,825 +1,1081 @@
-{% extends "base.html" %}
-{% block title %}Login - Our Journey{% endblock %}
-{% block content %}
-<div class="login-container">
-  <!-- Animated background elements -->
-  <div class="bg-magic">
-    <div class="floating-hearts">
-      <div class="heart h1">💕</div>
-      <div class="heart h2">💖</div>
-      <div class="heart h3">💗</div>
-      <div class="heart h4">🌹</div>
-      <div class="heart h5">✨</div>
-    </div>
-    <div class="gradient-orbs">
-      <div class="orb orb-1"></div>
-      <div class="orb orb-2"></div>
-      <div class="orb orb-3"></div>
-    </div>
-  </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Our Journey</title>
+    <style>
+        :root {
+            --accent: #ff6b8a;
+            --accent-2: #4ecdc4;
+            --accent-3: #ffb3c6;
+            --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            --border-radius: 16px;
+        }
 
-  <div class="login-box card-3d">
-    <div class="card-inner">
-      <!-- Enhanced header -->
-      <div class="login-header">
-        <div class="logo-container">
-          <div class="logo-heart">
-            <div class="heart-pulse"></div>
-            <span class="heart-emoji">💕</span>
-            <div class="sparkles">
-              <span class="sparkle s1">✨</span>
-              <span class="sparkle s2">⭐</span>
-              <span class="sparkle s3">💫</span>
-              <span class="sparkle s4">🌟</span>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Enhanced container */
+        .login-container {
+            position: relative;
+            max-width: 480px;
+            width: 100%;
+            margin: 0 auto;
+            animation: containerEntry 1.2s cubic-bezier(0.23, 1, 0.32, 1) both;
+        }
+
+        @keyframes containerEntry {
+            0% {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Magical background */
+        .bg-magic {
+            position: absolute;
+            inset: -80px;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .floating-hearts {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .heart {
+            position: absolute;
+            font-size: 18px;
+            animation: heartFloat 6s ease-in-out infinite;
+            filter: drop-shadow(0 0 8px rgba(255,90,122,0.4));
+        }
+
+        .h1 { left: 10%; top: 20%; animation-delay: 0s; }
+        .h2 { right: 15%; top: 30%; animation-delay: -1s; }
+        .h3 { left: 20%; bottom: 30%; animation-delay: -2s; }
+        .h4 { right: 10%; bottom: 20%; animation-delay: -3s; }
+        .h5 { left: 50%; top: 10%; animation-delay: -4s; }
+
+        @keyframes heartFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.6; }
+            50% { transform: translateY(-15px) rotate(180deg); opacity: 1; }
+        }
+
+        .gradient-orbs {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(1px);
+            animation: orbFloat 8s ease-in-out infinite;
+        }
+
+        .orb-1 {
+            width: 120px; height: 120px;
+            background: radial-gradient(circle, rgba(255,90,122,0.2), transparent 70%);
+            top: -10%; right: -15%;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 80px; height: 80px;
+            background: radial-gradient(circle, rgba(255,157,176,0.25), transparent 70%);
+            bottom: -5%; left: -10%;
+            animation-delay: -3s;
+        }
+
+        .orb-3 {
+            width: 100px; height: 100px;
+            background: radial-gradient(circle, rgba(255,209,224,0.2), transparent 70%);
+            top: 50%; left: -8%;
+            animation-delay: -6s;
+        }
+
+        @keyframes orbFloat {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(10px, -15px); }
+            50% { transform: translate(-5px, 10px); }
+            75% { transform: translate(-10px, -5px); }
+        }
+
+        /* Enhanced login box */
+        .login-box {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px) saturate(150%);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: boxGlow 4s ease-in-out infinite alternate;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .login-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        }
+
+        @keyframes boxGlow {
+            0% { box-shadow: 0 16px 40px rgba(255,90,122,0.18), inset 0 1px 8px rgba(255,255,255,0.05); }
+            100% { box-shadow: 0 20px 50px rgba(255,90,122,0.25), inset 0 1px 12px rgba(255,255,255,0.08); }
+        }
+
+        .card-inner {
+            padding: 40px 32px;
+        }
+
+        /* Enhanced header */
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .logo-container {
+            margin-bottom: 24px;
+            display: inline-block;
+        }
+
+        .logo-heart {
+            width: 85px;
+            height: 85px;
+            background: linear-gradient(145deg, var(--accent), var(--accent-2), var(--accent-3));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            animation: heartbeat 3s ease-in-out infinite;
+            box-shadow: 0 15px 45px rgba(255,90,122,0.4);
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        .heart-pulse {
+            position: absolute;
+            inset: -12px;
+            border: 2px solid rgba(255,90,122,0.3);
+            border-radius: 50%;
+            animation: pulseRing 2s ease-out infinite;
+        }
+
+        @keyframes pulseRing {
+            0% { transform: scale(0.9); opacity: 1; }
+            100% { transform: scale(1.4); opacity: 0; }
+        }
+
+        .heart-emoji {
+            font-size: 38px;
+            z-index: 2;
+            animation: emojiDance 2.5s ease-in-out infinite;
+        }
+
+        @keyframes emojiDance {
+            0%, 100% { transform: rotate(-3deg); }
+            50% { transform: rotate(3deg) scale(1.1); }
+        }
+
+        .sparkles {
+            position: absolute;
+            inset: -15px;
+        }
+
+        .sparkle {
+            position: absolute;
+            font-size: 14px;
+            animation: sparkleFloat 3s ease-in-out infinite;
+        }
+
+        .s1 { top: 5px; left: 50%; animation-delay: 0s; }
+        .s2 { top: 50%; right: 5px; animation-delay: -0.75s; }
+        .s3 { bottom: 5px; left: 50%; animation-delay: -1.5s; }
+        .s4 { top: 50%; left: 5px; animation-delay: -2.25s; }
+
+        @keyframes sparkleFloat {
+            0%, 100% { transform: translate(-50%, -50%) rotate(0deg) scale(0.8); opacity: 0.6; }
+            50% { transform: translate(-50%, -50%) rotate(180deg) scale(1.2); opacity: 1; }
+        }
+
+        /* Enhanced title */
+        .welcome-title {
+            font-size: 2rem;
+            font-weight: 900;
+            margin: 0 0 12px;
+            background: linear-gradient(45deg, var(--accent), var(--accent-2), var(--accent-3));
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 3s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .subtitle-magic {
+            color: rgba(255,255,255,0.9);
+            font-size: 1rem;
+            font-weight: 500;
+            margin: 0;
+            animation: subtitleGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes subtitleGlow {
+            0% { text-shadow: 0 0 8px rgba(255,90,122,0.3); }
+            100% { text-shadow: 0 0 15px rgba(255,90,122,0.5); }
+        }
+
+        /* Form styles */
+        .stack {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .login-form {
+            margin-bottom: 24px;
+        }
+
+        /* Enhanced inputs */
+        .input-container {
+            position: relative;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .magic-input {
+            width: 100%;
+            padding: 18px 24px 18px 55px;
+            border: 2px solid rgba(255,255,255,0.15);
+            border-radius: 16px;
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(12px);
+            color: #333;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .magic-input::placeholder {
+            color: rgba(0,0,0,0.5);
+        }
+
+        .magic-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: rgba(255,255,255,0.18);
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 0 12px 30px rgba(255,90,122,0.2);
+            color: #222;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            z-index: 3;
+            transition: all 0.3s ease;
+            animation: iconFloat 3s ease-in-out infinite;
+            color: rgba(0,0,0,0.6);
+        }
+
+        @keyframes iconFloat {
+            0%, 100% { transform: translateY(-50%); }
+            50% { transform: translateY(-55%); }
+        }
+
+        .magic-input:focus ~ .input-icon {
+            transform: translateY(-50%) scale(1.15);
+            filter: drop-shadow(0 0 8px rgba(255,90,122,0.6));
+            color: var(--accent);
+        }
+
+        .input-glow {
+            position: absolute;
+            inset: -1px;
+            border-radius: 17px;
+            background: linear-gradient(45deg, rgba(255,90,122,0.1), rgba(255,157,176,0.1));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .magic-input:focus ~ .input-glow {
+            opacity: 1;
+            animation: glowPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        /* Enhanced button */
+        .magic-btn {
+            width: 100%;
+            padding: 0;
+            border: none;
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            height: 56px;
+        }
+
+        .btn-bg {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            transition: all 0.3s ease;
+        }
+
+        .magic-btn:hover .btn-bg {
+            background: linear-gradient(135deg, var(--accent-2), var(--accent));
+        }
+
+        .magic-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255,90,122,0.4);
+        }
+
+        .btn-shine {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .magic-btn:hover .btn-shine {
+            left: 100%;
+        }
+
+        .btn-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            height: 100%;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .magic-btn:hover .btn-icon {
+            transform: rotate(180deg) scale(1.2);
+        }
+
+        /* Loading state */
+        .btn-loading {
+            opacity: 0.8;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .btn-loading .btn-content {
+            animation: loading-pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes loading-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Message/Notification styles */
+        .message-container {
+            margin-bottom: 24px;
+            border-radius: 12px;
+            padding: 16px 20px;
+            backdrop-filter: blur(12px);
+            border: 1px solid;
+            position: relative;
+            animation: messageSlideIn 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .message-container.error {
+            background: rgba(244, 67, 54, 0.1);
+            border-color: rgba(244, 67, 54, 0.3);
+            color: #ff6b6b;
+        }
+
+        .message-container.success {
+            background: rgba(76, 175, 80, 0.1);
+            border-color: rgba(76, 175, 80, 0.3);
+            color: #4caf50;
+        }
+
+        .message-container.warning {
+            background: rgba(255, 193, 7, 0.1);
+            border-color: rgba(255, 193, 7, 0.3);
+            color: #ffc107;
+        }
+
+        .message-container.info {
+            background: rgba(33, 150, 243, 0.1);
+            border-color: rgba(33, 150, 243, 0.3);
+            color: #2196f3;
+        }
+
+        .message-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .message-icon {
+            font-size: 20px;
+            animation: iconPulse 2s ease-in-out infinite;
+        }
+
+        .message-text {
+            font-size: 0.95rem;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .message-close {
+            background: none;
+            border: none;
+            color: inherit;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            opacity: 0.7;
+        }
+
+        .message-close:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.1);
+        }
+
+        @keyframes messageSlideIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes iconPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Shake animation for invalid credentials */
+        .shake {
+            animation: shake 0.6s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
+            20%, 40%, 60%, 80% { transform: translateX(8px); }
+        }
+
+        /* Invalid input styling */
+        .magic-input.invalid {
+            border-color: #ff6b6b !important;
+            background: rgba(244, 67, 54, 0.08) !important;
+            animation: inputError 0.3s ease;
+        }
+
+        @keyframes inputError {
+            0% { border-color: rgba(255,255,255,0.15); }
+            50% { border-color: #ff6b6b; }
+            100% { border-color: #ff6b6b; }
+        }
+
+        /* Info section */
+        .login-info {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .info-title {
+            color: var(--accent);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .info-text {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .login-container {
+                max-width: 400px;
+                padding: 0 16px;
+            }
+            
+            .card-inner {
+                padding: 32px 24px;
+            }
+            
+            .logo-heart {
+                width: 75px;
+                height: 75px;
+            }
+            
+            .heart-emoji {
+                font-size: 32px;
+            }
+            
+            .welcome-title {
+                font-size: 1.7rem;
+            }
+            
+            .magic-input {
+                padding: 16px 20px 16px 50px;
+            }
+            
+            .input-icon {
+                left: 18px;
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 16px;
+            }
+            
+            .login-container {
+                max-width: 100%;
+            }
+            
+            .card-inner {
+                padding: 24px 20px;
+            }
+            
+            .login-header {
+                margin-bottom: 32px;
+            }
+            
+            .logo-heart {
+                width: 70px;
+                height: 70px;
+            }
+            
+            .heart-emoji {
+                font-size: 28px;
+            }
+            
+            .welcome-title {
+                font-size: 1.5rem;
+            }
+            
+            .subtitle-magic {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 320px) {
+            .card-inner {
+                padding: 20px 16px;
+            }
+            
+            .magic-input {
+                padding: 14px 18px 14px 45px;
+                font-size: 0.95rem;
+            }
+            
+            .input-icon {
+                left: 16px;
+                font-size: 16px;
+            }
+        }
+
+        /* High contrast support */
+        @media (prefers-contrast: high) {
+            .magic-input {
+                border-width: 3px;
+                background: rgba(255,255,255,0.9);
+                color: #000;
+            }
+            
+            .input-icon {
+                color: #000;
+            }
+        }
+
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <!-- Animated background elements -->
+        <div class="bg-magic">
+            <div class="floating-hearts">
+                <div class="heart h1">💕</div>
+                <div class="heart h2">💖</div>
+                <div class="heart h3">💗</div>
+                <div class="heart h4">🌹</div>
+                <div class="heart h5">✨</div>
             </div>
-          </div>
-        </div>
-        <h2 class="welcome-title">Welcome Back</h2>
-        <p class="subtitle-magic">Continue your beautiful journey together 💝</p>
-      </div>
-
-      <!-- Enhanced form -->
-      <form method="post" class="stack login-form" id="loginForm">
-        <div class="input-container">
-          <div class="input-group">
-            <div class="input-icon">👤</div>
-            <input 
-              name="username" 
-              placeholder="Username (admin or guest)" 
-              required
-              class="magic-input"
-            >
-            <div class="input-glow"></div>
-          </div>
-        </div>
-        
-        <div class="input-container">
-          <div class="input-group">
-            <div class="input-icon">🔒</div>
-            <input 
-              name="password" 
-              type="password" 
-              placeholder="Password" 
-              required
-              class="magic-input"
-            >
-            <div class="input-glow"></div>
-          </div>
-        </div>
-        
-        <button class="btn magic-btn" type="submit" id="loginBtn">
-          <div class="btn-bg"></div>
-          <div class="btn-shine"></div>
-          <span class="btn-content">
-            <span class="btn-text">Sign In</span>
-            <span class="btn-icon">✨</span>
-          </span>
-        </button>
-      </form>
-
-      <!-- Enhanced demo accounts -->
-      <div class="demo-magic">
-        <div class="demo-header">
-          <span class="magic-wand">🪄</span>
-          <h3 class="demo-title">Quick Access</h3>
-          <span class="magic-wand">🪄</span>
-        </div>
-        
-        <div class="demo-accounts">
-          <div class="demo-card admin-card" onclick="fillCredentials('BUNBUN', 'BUNBUN')">
-            <div class="card-content">
-              <div class="account-icon">👑</div>
-              <div class="account-details">
-                <span class="account-title">Administrator</span>
-                <span class="account-subtitle">Full Control</span>
-              </div>
-              <div class="account-badge">admin</div>
+            <div class="gradient-orbs">
+                <div class="orb orb-1"></div>
+                <div class="orb orb-2"></div>
+                <div class="orb orb-3"></div>
             </div>
-            <div class="magic-trail"></div>
-          </div>
+        </div>
 
-          <div class="demo-card guest-card" onclick="fillCredentials('BUNNY', 'BUNNY')">
-            <div class="card-content">
-              <div class="account-icon">👤</div>
-              <div class="account-details">
-                <span class="account-title">Guest User</span>
-                <span class="account-subtitle">Limited Access</span>
-              </div>
-              <div class="account-badge">guest</div>
+        <div class="login-box">
+            <div class="card-inner">
+                <!-- Enhanced header -->
+                <div class="login-header">
+                    <div class="logo-container">
+                        <div class="logo-heart">
+                            <div class="heart-pulse"></div>
+                            <span class="heart-emoji">💕</span>
+                            <div class="sparkles">
+                                <span class="sparkle s1">✨</span>
+                                <span class="sparkle s2">⭐</span>
+                                <span class="sparkle s3">💫</span>
+                                <span class="sparkle s4">🌟</span>
+                            </div>
+                        </div>
+                    </div>
+                    <h2 class="welcome-title">Welcome Back</h2>
+                    <p class="subtitle-magic">Continue your beautiful journey together 💝</p>
+                </div>
+
+                <!-- Enhanced form -->
+                <form method="post" action="{{ url_for('login') }}" class="stack login-form" id="loginForm">
+                    <!-- Flash messages from Flask -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <div class="message-container {{ messages[0][0] }}" style="display: flex;">
+                                <div class="message-content">
+                                    <span class="message-icon">
+                                        {% if messages[0][0] == 'error' %}❌
+                                        {% elif messages[0][0] == 'success' %}🎉
+                                        {% elif messages[0][0] == 'warning' %}⚠️
+                                        {% else %}ℹ️
+                                        {% endif %}
+                                    </span>
+                                    <span class="message-text">{{ messages[0][1] }}</span>
+                                </div>
+                                <button type="button" class="message-close" onclick="hideMessage()">&times;</button>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                    
+                    <div class="input-container">
+                        <div class="input-group">
+                            <input 
+                                name="username" 
+                                placeholder="Enter your username" 
+                                required
+                                class="magic-input"
+                                autocomplete="username"
+                                value="{{ request.form.username if request.form.username else '' }}"
+                            >
+                            <div class="input-icon">👤</div>
+                            <div class="input-glow"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-container">
+                        <div class="input-group">
+                            <input 
+                                name="password" 
+                                type="password" 
+                                placeholder="Enter your password" 
+                                required
+                                class="magic-input"
+                                autocomplete="current-password"
+                            >
+                            <div class="input-icon">🔒</div>
+                            <div class="input-glow"></div>
+                        </div>
+                    </div>
+                    
+                    <button class="magic-btn" type="submit" id="loginBtn">
+                        <div class="btn-bg"></div>
+                        <div class="btn-shine"></div>
+                        <span class="btn-content">
+                            <span class="btn-text">Sign In</span>
+                            <span class="btn-icon">✨</span>
+                        </span>
+                    </button>
+                </form>
+
+                <!-- Error/Success Messages -->
+                <div id="message-container" class="message-container" style="display: none;">
+                    <div class="message-content">
+                        <span class="message-icon"></span>
+                        <span class="message-text"></span>
+                    </div>
+                    <button class="message-close" onclick="hideMessage()">&times;</button>
+                </div>
+
+                <!-- Info section -->
+                <div class="login-info">
+                    <div class="info-title">
+                        <span>🔐</span>
+                        <span>Secure Access</span>
+                    </div>
+                    <p class="info-text">
+                        Please enter your credentials to access your memories and continue your journey together.
+                    </p>
+                </div>
             </div>
-            <div class="magic-trail"></div>
-          </div>
         </div>
-        
-        <div class="demo-hint">
-          <span class="hint-text">✨ Press Alt+1 for Admin or Alt+2 for Guest ✨</span>
-        </div>
-      </div>
     </div>
-  </div>
-</div>
 
-<style>
-/* Enhanced container */
-.login-container {
-  position: relative;
-  max-width: 480px;
-  margin: 0 auto;
-  animation: containerEntry 1.2s cubic-bezier(0.23, 1, 0.32, 1) both;
-}
-
-@keyframes containerEntry {
-  0% {
-    opacity: 0;
-    transform: translateY(40px) scale(0.95);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-/* Magical background */
-.bg-magic {
-  position: absolute;
-  inset: -80px;
-  pointer-events: none;
-  overflow: hidden;
-  z-index: -1;
-}
-
-.floating-hearts {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-}
-
-.heart {
-  position: absolute;
-  font-size: 18px;
-  animation: heartFloat 6s ease-in-out infinite;
-  filter: drop-shadow(0 0 8px rgba(255,90,122,0.4));
-}
-
-.h1 { left: 10%; top: 20%; animation-delay: 0s; }
-.h2 { right: 15%; top: 30%; animation-delay: -1s; }
-.h3 { left: 20%; bottom: 30%; animation-delay: -2s; }
-.h4 { right: 10%; bottom: 20%; animation-delay: -3s; }
-.h5 { left: 50%; top: 10%; animation-delay: -4s; }
-
-@keyframes heartFloat {
-  0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.6; }
-  50% { transform: translateY(-15px) rotate(180deg); opacity: 1; }
-}
-
-.gradient-orbs {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-}
-
-.orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(1px);
-  animation: orbFloat 8s ease-in-out infinite;
-}
-
-.orb-1 {
-  width: 120px; height: 120px;
-  background: radial-gradient(circle, rgba(255,90,122,0.2), transparent 70%);
-  top: -10%; right: -15%;
-  animation-delay: 0s;
-}
-
-.orb-2 {
-  width: 80px; height: 80px;
-  background: radial-gradient(circle, rgba(255,157,176,0.25), transparent 70%);
-  bottom: -5%; left: -10%;
-  animation-delay: -3s;
-}
-
-.orb-3 {
-  width: 100px; height: 100px;
-  background: radial-gradient(circle, rgba(255,209,224,0.2), transparent 70%);
-  top: 50%; left: -8%;
-  animation-delay: -6s;
-}
-
-@keyframes orbFloat {
-  0%, 100% { transform: translate(0, 0); }
-  25% { transform: translate(10px, -15px); }
-  50% { transform: translate(-5px, 10px); }
-  75% { transform: translate(-10px, -5px); }
-}
-
-/* Enhanced login box */
-.login-box {
-  backdrop-filter: blur(20px) saturate(150%);
-  animation: boxGlow 4s ease-in-out infinite alternate;
-}
-
-@keyframes boxGlow {
-  0% { box-shadow: 0 16px 40px rgba(255,90,122,0.18), inset 0 1px 8px rgba(255,255,255,0.05); }
-  100% { box-shadow: 0 20px 50px rgba(255,90,122,0.25), inset 0 1px 12px rgba(255,255,255,0.08); }
-}
-
-/* Enhanced header */
-.login-header {
-  text-align: center;
-  margin-bottom: 32px;
-  position: relative;
-}
-
-.logo-container {
-  margin-bottom: 20px;
-  display: inline-block;
-}
-
-.logo-heart {
-  width: 85px;
-  height: 85px;
-  background: linear-gradient(145deg, var(--accent), var(--accent-2), var(--accent-3));
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  animation: heartbeat 3s ease-in-out infinite;
-  box-shadow: 0 15px 45px rgba(255,90,122,0.4);
-}
-
-@keyframes heartbeat {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.08); }
-}
-
-.heart-pulse {
-  position: absolute;
-  inset: -12px;
-  border: 2px solid rgba(255,90,122,0.3);
-  border-radius: 50%;
-  animation: pulseRing 2s ease-out infinite;
-}
-
-@keyframes pulseRing {
-  0% { transform: scale(0.9); opacity: 1; }
-  100% { transform: scale(1.4); opacity: 0; }
-}
-
-.heart-emoji {
-  font-size: 38px;
-  z-index: 2;
-  animation: emojiDance 2.5s ease-in-out infinite;
-}
-
-@keyframes emojiDance {
-  0%, 100% { transform: rotate(-3deg); }
-  50% { transform: rotate(3deg) scale(1.1); }
-}
-
-.sparkles {
-  position: absolute;
-  inset: -15px;
-}
-
-.sparkle {
-  position: absolute;
-  font-size: 14px;
-  animation: sparkleFloat 3s ease-in-out infinite;
-}
-
-.s1 { top: 5px; left: 50%; animation-delay: 0s; }
-.s2 { top: 50%; right: 5px; animation-delay: -0.75s; }
-.s3 { bottom: 5px; left: 50%; animation-delay: -1.5s; }
-.s4 { top: 50%; left: 5px; animation-delay: -2.25s; }
-
-@keyframes sparkleFloat {
-  0%, 100% { transform: translate(-50%, -50%) rotate(0deg) scale(0.8); opacity: 0.6; }
-  50% { transform: translate(-50%, -50%) rotate(180deg) scale(1.2); opacity: 1; }
-}
-
-/* Enhanced title */
-.welcome-title {
-  font-size: 2rem;
-  font-weight: 900;
-  margin: 0 0 10px;
-  background: linear-gradient(45deg, var(--accent), var(--accent-2), var(--accent-3));
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: gradientShift 3s ease infinite;
-}
-
-@keyframes gradientShift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-
-.subtitle-magic {
-  color: rgba(255,255,255,0.9);
-  font-size: 1rem;
-  font-weight: 500;
-  margin: 0;
-  animation: subtitleGlow 3s ease-in-out infinite alternate;
-}
-
-@keyframes subtitleGlow {
-  0% { text-shadow: 0 0 8px rgba(255,90,122,0.3); }
-  100% { text-shadow: 0 0 15px rgba(255,90,122,0.5); }
-}
-
-/* Enhanced inputs */
-.input-container {
-  margin-bottom: 22px;
-  position: relative;
-}
-
-.input-group {
-  position: relative;
-}
-
-.magic-input {
-  width: 100%;
-  padding: 18px 24px 18px 55px;
-  border: 2px solid rgba(255,255,255,0.15);
-  border-radius: 16px;
-  background: rgba(255,255,255,0.12);
-  backdrop-filter: blur(12px);
-  color: #111;
-  font-size: 1rem;
-  font-weight: 500;
-  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.magic-input:focus {
-  outline: none;
-  border-color: var(--accent);
-  background: rgba(255,255,255,0.18);
-  transform: translateY(-2px) scale(1.01);
-  box-shadow: 0 12px 30px rgba(255,90,122,0.2);
-}
-
-.input-icon {
-  position: absolute;
-  left: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 20px;
-  z-index: 3;
-  transition: all 0.3s ease;
-  animation: iconFloat 3s ease-in-out infinite;
-}
-
-@keyframes iconFloat {
-  0%, 100% { transform: translateY(-50%); }
-  50% { transform: translateY(-55%); }
-}
-
-.magic-input:focus + .input-icon {
-  transform: translateY(-50%) scale(1.15);
-  filter: drop-shadow(0 0 8px rgba(255,90,122,0.6));
-}
-
-.input-glow {
-  position: absolute;
-  inset: -1px;
-  border-radius: 17px;
-  background: linear-gradient(45deg, rgba(255,90,122,0.1), rgba(255,157,176,0.1));
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.magic-input:focus ~ .input-glow {
-  opacity: 1;
-  animation: glowPulse 2s ease-in-out infinite;
-}
-
-@keyframes glowPulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.02); }
-}
-
-/* Enhanced button */
-.magic-btn {
-  width: 100%;
-  padding: 0;
-  border: none;
-  border-radius: 16px;
-  position: relative;
-  overflow: hidden;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-  margin-top: 12px;
-  height: 56px;
-}
-
-.btn-bg {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  transition: all 0.3s ease;
-}
-
-.magic-btn:hover .btn-bg {
-  background: linear-gradient(135deg, var(--accent-2), var(--accent));
-}
-
-.btn-shine {
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-  transition: left 0.6s ease;
-}
-
-.magic-btn:hover .btn-shine {
-  left: 100%;
-}
-
-.btn-content {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  height: 100%;
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: white;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.btn-icon {
-  transition: transform 0.3s ease;
-}
-
-.magic-btn:hover .btn-icon {
-  transform: rotate(180deg) scale(1.2);
-}
-
-/* Enhanced demo section */
-.demo-magic {
-  margin-top: 35px;
-  padding: 25px 22px;
-  border-radius: 18px;
-  background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.1);
-  position: relative;
-  overflow: hidden;
-}
-
-.demo-magic::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 50% 0%, rgba(255,90,122,0.08), transparent 60%);
-  animation: demoGlow 4s ease-in-out infinite alternate;
-}
-
-@keyframes demoGlow {
-  0% { opacity: 0.3; }
-  100% { opacity: 0.6; }
-}
-
-.demo-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 20px;
-  position: relative;
-  z-index: 2;
-}
-
-.magic-wand {
-  font-size: 22px;
-  animation: wandWave 2.5s ease-in-out infinite;
-}
-
-.magic-wand:last-child {
-  animation-delay: 1.25s;
-}
-
-@keyframes wandWave {
-  0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(15deg); }
-}
-
-.demo-title {
-  color: white;
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  text-shadow: 0 0 12px rgba(255,90,122,0.4);
-}
-
-.demo-accounts {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  position: relative;
-  z-index: 2;
-}
-
-.demo-card {
-  position: relative;
-  border-radius: 14px;
-  overflow: hidden;
-  cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.08);
-}
-
-.demo-card:hover {
-  transform: translateX(8px) translateY(-2px);
-  box-shadow: 0 12px 35px rgba(255,90,122,0.25);
-  background: rgba(255,255,255,0.1);
-}
-
-.card-content {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 18px 20px;
-  position: relative;
-  z-index: 2;
-}
-
-.account-icon {
-  width: 45px;
-  height: 45px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  border-radius: 12px;
-  transition: all 0.3s ease;
-}
-
-.admin-card .account-icon {
-  background: linear-gradient(135deg, #ffd700, #ffed4e);
-  box-shadow: 0 6px 20px rgba(255,215,0,0.25);
-}
-
-.guest-card .account-icon {
-  background: linear-gradient(135deg, #64b5f6, #42a5f5);
-  box-shadow: 0 6px 20px rgba(100,181,246,0.25);
-}
-
-.demo-card:hover .account-icon {
-  transform: scale(1.08) rotate(3deg);
-}
-
-.account-details {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.account-title {
-  font-weight: 700;
-  color: white;
-  font-size: 1rem;
-  text-shadow: 0 2px 6px rgba(0,0,0,0.2);
-}
-
-.account-subtitle {
-  font-size: 0.85rem;
-  color: rgba(255,255,255,0.7);
-  font-style: italic;
-}
-
-.account-badge {
-  background: rgba(255,255,255,0.12);
-  color: var(--accent-2);
-  padding: 6px 14px;
-  border-radius: 16px;
-  font-size: 0.85rem;
-  font-weight: 700;
-  font-family: 'Courier New', monospace;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(8px);
-}
-
-.demo-card:hover .account-badge {
-  background: var(--accent);
-  color: white;
-  transform: scale(1.05);
-}
-
-.magic-trail {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(45deg, transparent, rgba(255,255,255,0.08), transparent);
-  transform: translateX(-100%) skewX(-30deg);
-  transition: transform 0.5s ease;
-}
-
-.demo-card:hover .magic-trail {
-  transform: translateX(100%) skewX(-30deg);
-}
-
-.demo-hint {
-  margin-top: 18px;
-  text-align: center;
-  position: relative;
-  z-index: 2;
-}
-
-.hint-text {
-  color: rgba(255,255,255,0.75);
-  font-size: 0.8rem;
-  font-weight: 500;
-  animation: hintGlow 3s ease-in-out infinite alternate;
-}
-
-@keyframes hintGlow {
-  0% { text-shadow: 0 0 4px rgba(255,90,122,0.3); }
-  100% { text-shadow: 0 0 8px rgba(255,90,122,0.5); }
-}
-
-/* Loading state */
-.btn-loading {
-  opacity: 0.8;
-  cursor: not-allowed;
-}
-
-.btn-loading .btn-content {
-  animation: loading-pulse 1.5s ease-in-out infinite;
-}
-
-@keyframes loading-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-
-/* Mobile responsive */
-@media (max-width: 480px) {
-  .login-container {
-    margin: 0 12px;
-  }
-  
-  .card-inner {
-    padding: 20px;
-  }
-  
-  .logo-heart {
-    width: 75px;
-    height: 75px;
-  }
-  
-  .heart-emoji {
-    font-size: 32px;
-  }
-  
-  .welcome-title {
-    font-size: 1.7rem;
-  }
-  
-  .demo-card {
-    flex-direction: column;
-    text-align: center;
-    gap: 10px;
-  }
-  
-  .card-content {
-    flex-direction: column;
-    gap: 12px;
-  }
-}
-</style>
-
-<script>
-// Enhanced credential filling
-function fillCredentials(username, password) {
-  const usernameInput = document.querySelector('input[name="username"]');
-  const passwordInput = document.querySelector('input[name="password"]');
-  
-  // Typewriter effect
-  typewriterEffect(usernameInput, username);
-  setTimeout(() => {
-    typewriterEffect(passwordInput, password);
-  }, username.length * 80 + 200);
-  
-  // Visual feedback
-  const card = event.currentTarget;
-  card.style.transform = 'scale(0.98)';
-  card.style.background = 'rgba(255,90,122,0.15)';
-  
-  setTimeout(() => {
-    card.style.transform = '';
-    card.style.background = '';
-  }, 200);
-  
-  // Success particles
-  createParticles(card);
-}
-
-function typewriterEffect(input, text) {
-  input.value = '';
-  input.focus();
-  
-  let i = 0;
-  const timer = setInterval(() => {
-    input.value += text[i];
-    i++;
-    if (i >= text.length) {
-      clearInterval(timer);
-      input.style.background = 'rgba(255,90,122,0.08)';
-      setTimeout(() => {
-        input.style.background = '';
-      }, 400);
-    }
-  }, 80);
-}
-
-function createParticles(element) {
-  const rect = element.getBoundingClientRect();
-  for (let i = 0; i < 5; i++) {
-    const particle = document.createElement('div');
-    particle.innerHTML = ['✨', '💫', '⭐', '🌟'][Math.floor(Math.random() * 4)];
-    particle.style.position = 'fixed';
-    particle.style.left = rect.left + rect.width / 2 + 'px';
-    particle.style.top = rect.top + rect.height / 2 + 'px';
-    particle.style.fontSize = '14px';
-    particle.style.pointerEvents = 'none';
-    particle.style.zIndex = '1000';
-    
-    document.body.appendChild(particle);
-    
-    const angle = (i * 72) * Math.PI / 180;
-    const distance = 25 + Math.random() * 15;
-    
-    particle.animate([
-      { transform: 'translate(-50%, -50%) scale(0)', opacity: 1 },
-      { transform: `translate(${Math.cos(angle) * distance - 50}%, ${Math.sin(angle) * distance - 50}%) scale(1)`, opacity: 0 }
-    ], {
-      duration: 600,
-      easing: 'cubic-bezier(0.23, 1, 0.32, 1)'
-    }).onfinish = () => {
-      document.body.removeChild(particle);
-    };
-  }
-}
-
-// Form submission
-document.getElementById('loginForm').addEventListener('submit', function(e) {
-  const btn = document.getElementById('loginBtn');
-  const btnText = btn.querySelector('.btn-text');
-  
-  btn.classList.add('btn-loading');
-  btnText.textContent = 'Signing In';
-});
-
-// Keyboard shortcuts
-document.addEventListener('keydown', function(e) {
-  if (e.altKey && e.key === '1') {
-    e.preventDefault();
-    document.querySelector('.admin-card').click();
-    showFeedback('Admin selected! 👑');
-  } else if (e.altKey && e.key === '2') {
-    e.preventDefault();
-    document.querySelector('.guest-card').click();
-    showFeedback('Guest selected! 👤');
-  }
-});
-
-function showFeedback(message) {
-  const feedback = document.createElement('div');
-  feedback.textContent = message;
-  feedback.style.cssText = `
-    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-    background: var(--accent); color: white; padding: 8px 16px;
-    border-radius: 20px; font-size: 14px; font-weight: 600;
-    z-index: 1000; box-shadow: 0 4px 15px rgba(255,90,122,0.3);
-  `;
-  
-  document.body.appendChild(feedback);
-  
-  feedback.animate([
-    { opacity: 0, transform: 'translateX(-50%) translateY(-10px) scale(0.8)' },
-    { opacity: 1, transform: 'translateX(-50%) translateY(0) scale(1)' }
-  ], { duration: 300 }).onfinish = () => {
-    setTimeout(() => {
-      feedback.animate([
-        { opacity: 1, transform: 'translateX(-50%) translateY(0) scale(1)' },
-        { opacity: 0, transform: 'translateX(-50%) translateY(-10px) scale(0.8)' }
-      ], { duration: 300 }).onfinish = () => {
-        document.body.removeChild(feedback);
-      };
-    }, 1500);
-  };
-}
-</script>
-{% endblock %}
+    <script>
+        // Enhanced form handling with error management
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            const btn = document.getElementById('loginBtn');
+            const btnText = btn.querySelector('.btn-text');
+            const btnIcon = btn.querySelector('.btn-icon');
+            
+            // Clear any existing messages and invalid states
+            hideMessage();
+            clearInvalidInputs();
+            
+            // Add loading state
+            btn.classList.add('btn-loading');
+            btnText.textContent = 'Signing In';
+            btnIcon.textContent = '⏳';
+            
+            // Create loading particles
+            createLoadingParticles(btn);
+            
+            // Let the form submit naturally to your Flask backend
+            // The form will be processed by your server
+        });
+
+        // Demo authentication function (replace with your actual authentication)
+        function authenticateUser(username, password) {
+            // Demo credentials - replace with actual authentication
+            const validCredentials = [
+                { username: 'admin', password: 'admin123' },
+                { username: 'BUNBUN', password: 'BUNBUN' },
+                { username: 'guest', password: 'guest123' },
+                { username: 'BUNNY', password: 'BUNNY' }
+            ];
+            
+            return validCredentials.some(cred => 
+                cred.username.toLowerCase() === username.toLowerCase() && 
+                cred.password === password
+            );
+        }
+
+        // Message system functions
+        function showMessage(type, icon, text) {
+            const container = document.getElementById('message-container');
+            const iconElement = container.querySelector('.message-icon');
+            const textElement = container.querySelector('.message-text');
+            
+            // Set message content
+            iconElement.textContent = icon;
+            textElement.textContent = text;
+            
+            // Remove existing type classes
+            container.classList.remove('error', 'success', 'warning', 'info');
+            
+            // Add new type class
+            container.classList.add(type);
+            
+            // Show container
+            container.style.display = 'flex';
+            
+            // Auto-hide after 5 seconds for success messages
+            if (type === 'success') {
+                setTimeout(() => {
+                    hideMessage();
+                }, 5000);
+            }
+            
+            // Create message particles
+            createMessageParticles(container, type);
+        }
+
+        function hideMessage() {
+            const container = document.getElementById('message-container');
+            container.style.display = 'none';
+        }
+
+        function shakeForm() {
+            const form = document.getElementById('loginForm');
+            form.classList.add('shake');
+            
+            setTimeout(() => {
+                form.classList.remove('shake');
+            }, 600);
+        }
+
+        function markInputsAsInvalid() {
+            const inputs = document.querySelectorAll('.magic-input');
+            inputs.forEach(input => {
+                input.classList.add('invalid');
+                
+                // Remove invalid class after animation
+                setTimeout(() => {
+                    input.classList.remove('invalid');
+                }, 2000);
+            });
+        }
+
+        function clearInvalidInputs() {
+            const inputs = document.querySelectorAll('.magic-input');
+            inputs.forEach(input => {
+                input.classList.remove('invalid');
+            });
+        }
+
+        function createMessageParticles(element, type) {
+            const rect = element.getBoundingClientRect();
+            const particles = type === 'success' ? ['🎉', '✨', '🌟', '💫'] : ['💥', '⚠️', '❌'];
+            
+            for (let i = 0; i < 6; i++) {
+                const particle = document.createElement('div');
+                particle.innerHTML = particles[Math.floor(Math.random() * particles.length)];
+                particle.style.position = 'fixed';
+                particle.style.left = rect.left + Math.random() * rect.width + 'px';
+                particle.style.top = rect.top + 'px';
+                particle.style.fontSize = '14px';
+                particle.style.pointerEvents = 'none';
+                particle.style.zIndex = '1000';
+                
+                document.body.appendChild(particle);
+                
+                particle.animate([
+                    { transform: 'translateY(0) scale(0)', opacity: 1 },
+                    { transform: `translateY(-30px) scale(1)`, opacity: 0 }
+                ], {
+                    duration: 800,
+                    easing: 'ease-out'
+                }).onfinish = () => {
+                    if (document.body.contains(particle)) {
+                        document.body.removeChild(particle);
+                    }
+                };
+            }
+        }
+
+        // Enhanced input interactions
+        document.querySelectorAll('.magic-input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('focused');
+                
+                // Create focus particles
+                createFocusParticles(this);
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.classList.remove('focused');
+            });
+            
+            // Real-time validation feedback
+            input.addEventListener('input', function() {
+                if (this.value.length > 0) {
+                    this.style.borderColor = 'var(--accent-2)';
+                    this.style.background = 'rgba(255,255,255,0.15)';
+                } else {
+                    this.style.borderColor = '';
+                    this.style.background = '';
+                }
+            });
+        });
+
+        function createLoadingParticles(element) {
+            const rect = element.getBoundingClientRect();
+            for (let i = 0; i < 8; i++) {
+                const particle = document.createElement('div');
+                particle.innerHTML = ['✨', '💫', '⭐', '🌟', '💖'][Math.floor(Math.random() * 5)];
+                particle.style.position = 'fixed';
+                particle.style.left = rect.left + rect.width / 2 + 'px';
+                particle.style.top = rect.top + rect.height / 2 + 'px';
+                particle.style.fontSize = '12px';
+                particle.style.pointerEvents = 'none';
+                particle.style.zIndex = '1000';
+                particle.style.color = '#fff';
+                
+                document.body.appendChild(particle);
+                
+                const angle = (i * 45) * Math.PI / 180;
+                const distance = 40 + Math.random() * 20;
+                
+                particle.animate([
+                    { transform: 'translate(-50%, -50%) scale(0)', opacity: 1 },
+                    { transform: `translate(${Math.cos(angle) * distance - 50}%, ${Math.sin(angle) * distance - 50}%) scale(1)`, opacity: 0 }
+                ], {
+                    duration: 1000,
+                    easing: 'cubic-bezier(0.23, 1, 0.32, 1)'
+                }).onfinish = () => {
+                    if (document.body.contains(particle)) {
+                        document.body.removeChild(particle);
+                    }
+                };
+            }
+        }
+
+        function createFocusParticles(element) {
+            const rect = element.getBoundingClientRect();
+            const particle = document.createElement('div');
+            particle.innerHTML = '✨';
+            particle.style.position = 'fixed';
+            particle.style.left = rect.right - 20 + 'px';
+            particle.style.top = rect.top + rect.height / 2 + 'px';
+            particle.style.fontSize = '14px';
+            particle.style.pointerEvents = 'none';
+            particle.style.zIndex = '1000';
+            particle.style.color = 'var(--accent)';
+            
+            document.body.appendChild(particle);
+            
+            particle.animate([
+                { transform: 'translateY(-50%) scale(0) rotate(0deg)', opacity: 1 },
+                { transform: 'translateY(-70%) scale(1) rotate(360deg)', opacity: 0 }
+            ], {
+                duration: 600,
+                easing: 'ease-out'
+            }).onfinish = () => {
+                if (document.body.contains(particle)) {
+                    document.body.removeChild(particle);
+                }
+            };
+        }
+
+        // Enhanced keyboard interactions
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                const form = document.getElementById('loginForm');
+                const activeElement = document.activeElement;
+                
+                if (activeElement && activeElement.closest('.login-form')) {
+                    if (activeElement.name === 'username') {
+                        const passwordInput = form.querySelector('input[name="password"]');
+                        if (passwordInput) {
+                            e.preventDefault();
+                            passwordInput.focus();
+                        }
+                    }
+                }
+            }
+        });
+
+        // Add subtle hover effects to inputs
+        document.querySelectorAll('.input-group').forEach(group => {
+            group.addEventListener('mouseenter', function() {
+                if (!this.classList.contains('focused')) {
+                    this.style.transform = 'translateY(-1px)';
+                    this.style.boxShadow = '0 4px 12px rgba(255,90,122,0.1)';
+                }
+            });
+            
+            group.addEventListener('mouseleave', function() {
+                if (!this.classList.contains('focused')) {
+                    this.style.transform = '';
+                    this.style.boxShadow = '';
+                }
+            });
+        });
+
+        // Auto-focus first input on page load
+        window.addEventListener('load', function() {
+            const firstInput = document.querySelector('input[name="username"]');
+            if (firstInput) {
+                setTimeout(() => {
+                    firstInput.focus();
+                }, 500);
+            }
+        });
+    </script>
+</body>
+</html>

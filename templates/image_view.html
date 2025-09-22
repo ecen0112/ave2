@@ -21,7 +21,7 @@
     {% if image.note %}
       <div class="note-display">
         <p class="note-text">Note: {{ image.note }}</p>
-        {% if session.get('role') == 'erl' %}
+      {% if session.get('role') == 'erl' or session.get('role') == 'love' %}
           <form 
             method="post" 
             action="{{ url_for('delete_note', idx=idx) }}" 
@@ -41,7 +41,7 @@
         {% endif %}
       </div>
     {% endif %}
-    {% if session.get('role') == 'erl' %}
+   {% if session.get('role') == 'erl' or session.get('role') == 'love' %}
       <div class="note-section">
         <button type="button" class="btn toggle-note-btn" onclick="toggleNoteForm()">
           <span class="btn-text">{% if image.note %}Edit Note{% else %}Add Note{% endif %}</span>
@@ -126,7 +126,7 @@
   }
 
   .page-title {
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 700;
     color: var(--accent);
     margin-bottom: 24px;

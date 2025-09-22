@@ -7,10 +7,10 @@
   <div class="upload-card card-3d">
     <div class="card-inner">
       <h3>Upload Photo</h3>
-      {% if session.get('role') == 'erl' %}
+ {% if session.get('role') == 'erl' or session.get('role') == 'love' %}
         <form method="post" enctype="multipart/form-data" class="upload-form" id="uploadForm">
           <input 
-            id="fileInput" 
+            class="file-input-label" 
             type="file" 
             name="image" 
             accept="image/*" 
@@ -96,6 +96,41 @@
 </div>
 
 <style>
+  .file-input-wrapper {
+  position: relative;
+}
+
+.file-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.file-input-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: clamp(12px, 3vw, 16px);
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  border-radius: clamp(10px, 2vw, 14px);
+  background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: clamp(0.9rem, 2vw, 1rem);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.file-input-label:hover {
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.file-icon {
+  font-size: clamp(1.2rem, 3vw, 1.5rem);
+}
   .gallery-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -103,7 +138,7 @@
   }
 
   .page-title {
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 700;
     color: var(--accent);
     margin-bottom: 24px;

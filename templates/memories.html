@@ -18,8 +18,8 @@
             Add New Memory
           </h3>
         </div>
-        
-        {% if session.get('role') == 'erl' %}
+
+        {% if session.get('role') == 'erl' or session.get('role') == 'love' %}
           <form method="post" enctype="multipart/form-data" class="stack add-memory-form" novalidate>
             <div class="form-group">
               <label for="category" class="form-label">Category</label>

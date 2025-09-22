@@ -8,7 +8,7 @@
   <article class="card-3d">
     <div class="card-inner">
       <h3>Add New Note</h3>
-      {% if session.get('role') == 'erl' %}
+      {% if session.get('role') == 'erl' or session.get('role') == 'love' %}
         <form method="post" class="stack add-note-form" novalidate>
           <textarea name="note" rows="3" maxlength="500" placeholder="Write something... (max 500 characters)" required></textarea>
           <div class="char-counter">Characters: <span id="char-count">0</span>/500</div>
