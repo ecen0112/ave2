@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Heart animation For You</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #000;
+    }
+
+    #container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #canvas-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    canvas {
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    svg {
+      position: absolute;
+      display: none;
+      width: 100%;
+      height: 100%;
+    }
+
+    .loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #ff7098;
+      font-family: Arial, sans-serif;
+      font-size: 1.5rem;
+      display: none;
+    }
+
+    @media screen and (max-width: 768px) {
+      body {
+        background: #000;
+      }
+      .loading {
+        font-size: 1.2rem;
+      }
+    }
+
+    @media screen and (max-width: 480px) {
+      body {
+        background: #000;
+      }
+      .loading {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <svg viewBox="0 0 600 552" preserveAspectRatio="xMidYMid meet">
+      <path d="M300,107.77C284.68,55.67,239.76,0,162.31,0,64.83,0,0,82.08,0,171.71c0,.48,0,.95,0,1.43-.52,19.5,0,217.94,299.87,379.69v0l0,0,.05,0,0,0,0,0v0C600,391.08,600.48,192.64,600,173.14c0-.48,0-.95,0-1.43C600,82.08,535.17,0,437.69,0,360.24,0,315.32,55.67,300,107.77" fill="#ff7098"/>
+    </svg>
+    <div class="loading">Loading...</div>
+    <div id="canvas-container"></div>
+  </div>
+
+  <script src='https://cdn.jsdelivr.net/npm/three@0.136.0/build/three.min.js'></script>
+  <script src='https://cdn.jsdelivr.net/npm/three@0.136.0/examples/js/controls/OrbitControls.js'></script>
+  <script src='https://unpkg.co/gsap@3/dist/gsap.min.js'></script>
+  <script>
+    console.clear();
+
+    /* SETUP */
+    let scene, camera, renderer, particles, geometry, material, controlsWebGL, tl, vertices;
+
+    function init() {
+      const loading = document.querySelector('.loading');
+      loading.style.display = 'block';
+
+      // Scene setup
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x000000);
+
+      // Responsive camera setup
+      const aspect = window.innerWidth / window.innerHeight;
+      camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 5000);
+      const minDim = Math.min(window.innerWidth, window.innerHeight);
+      camera.position.z = minDim * 0.7;
+
+      // Renderer setup
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setSize(window.innerWidth, window.innerHeight);
+
+      // Append to container
+      const container = document.getElementById('canvas-container');
+      container.appendChild(renderer.domElement);
+
+      // Controls with touch optimization
+      controlsWebGL = new THREE.OrbitControls(camera, renderer.domElement);
+      controlsWebGL.enableZoom = true;
+      controlsWebGL.enablePan = false;
+      controlsWebGL.maxDistance = minDim * 1.5;
+      controlsWebGL.minDistance = minDim * 0.3;
+      controlsWebGL.enableDamping = true;
+      controlsWebGL.dampingFactor = 0.1;
+      controlsWebGL.rotateSpeed = 0.5;
+      controlsWebGL.zoomSpeed = 0.5;
+
+      // Add point light for subtle glow
+      const pointLight = new THREE.PointLight(0xff7098, 0.5, 1000);
+      pointLight.position.set(0, 0, minDim * 0.5);
+      scene.add(pointLight);
+
+      // Particles setup
+      createParticles();
+
+      // Scene rotation animation
+      gsap.fromTo(scene.rotation, {
+        y: -0.15
+      }, {
+        y: 0.15,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut',
+        duration: 2.5
+      });
+
+      // Fade out loading
+      gsap.to(loading, {
+        opacity: 0,
+        duration: 0.5,
+        onComplete: () => loading.style.display = 'none'
+      });
+
+      // Start rendering
+      render();
+    }
+
+    function createParticles() {
+      // Clear existing
+      if (tl) tl.kill();
+      if (particles) scene.remove(particles);
+      if (geometry) geometry.dispose();
+      if (material) material.dispose();
+
+      // GSAP timeline
+      tl = gsap.timeline({
+        repeat: -1,
+        yoyo: true
+      });
+
+      const path = document.querySelector("path");
+      const length = path.getTotalLength();
+
+      // Responsive scaling
+      const viewBoxWidth = 600;
+      const viewBoxHeight = 552;
+      const scaleFactor = Math.min(
+        window.innerWidth / viewBoxWidth,
+        window.innerHeight / viewBoxHeight
+      ) * 0.75;
+
+      vertices = [];
+
+      // Denser particles for bolder look
+      const isMobile = window.innerWidth < 768;
+      const step = isMobile ? 0.4 : 0.1; // Reduced step for more particles
+      const maxParticles = isMobile ? 1500 : 4000; // Increased max particles
+      const particleStep = Math.max(step, length / maxParticles);
+
+      for (let i = 0; i < length; i += particleStep) {
+        const point = path.getPointAtLength(i);
+        const vector = new THREE.Vector3(
+          (point.x - viewBoxWidth / 2) * scaleFactor,
+          -(point.y - viewBoxHeight / 2) * scaleFactor,
+          0
+        );
+
+        // Tighter random offset for bolder shape
+        const offsetScale = Math.min(window.innerWidth, window.innerHeight) / 1200;
+        vector.x += (Math.random() - 0.5) * 10 * offsetScale; // Reduced offset
+        vector.y += (Math.random() - 0.5) * 10 * offsetScale;
+        vector.z += (Math.random() - 0.5) * 30 * offsetScale;
+
+        vertices.push(vector);
+
+        // Tween with slight color variation
+        const hueShift = Math.random() * 0.05 - 0.025;
+        tl.from(vector, {
+          x: 0,
+          y: 0,
+          z: 0,
+          ease: "power2.inOut",
+          duration: gsap.utils.random(1.5, 3.5),
+          onUpdate: () => {
+            if (material) {
+              material.color.setHSL(0.95 + hueShift, 0.85, 0.55);
+            }
+          }
+        }, i * 0.0003); // Faster stagger for denser particles
+      }
+
+      // Geometry and material
+      geometry = new THREE.BufferGeometry().setFromPoints(vertices);
+
+      // Larger particles for bolder look
+      const baseSize = Math.max(2, Math.min(window.innerWidth, window.innerHeight) / 300);
+      material = new THREE.PointsMaterial({
+        color: 0xff7098, // Brighter pink
+        blending: THREE.AdditiveBlending,
+        size: baseSize * 1.5, // Increased size
+        transparent: true,
+        opacity: 0.9,
+        sizeAttenuation: true
+      });
+
+      particles = new THREE.Points(geometry, material);
+      scene.add(particles);
+    }
+
+    /* RENDERING */
+    function render() {
+      try {
+        requestAnimationFrame(render);
+        if (geometry && vertices) {
+          geometry.setFromPoints(vertices);
+        }
+        if (controlsWebGL) controlsWebGL.update();
+        renderer.render(scene, camera);
+      } catch (e) {
+        console.error('Rendering error:', e);
+      }
+    }
+
+    /* EVENTS */
+    function onWindowResize() {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+
+      const minDim = Math.min(width, height);
+      camera.position.z = minDim * 0.7;
+
+      renderer.setSize(width, height);
+
+      // Recreate particles
+      createParticles();
+
+      // Update controls
+      if (controlsWebGL) {
+        controlsWebGL.minDistance = minDim * 0.3;
+        controlsWebGL.maxDistance = minDim * 1.5;
+      }
+    }
+
+    // Initialize
+    window.addEventListener('load', init);
+    window.addEventListener('resize', onWindowResize, false);
+    window.addEventListener('orientationchange', () => {
+      setTimeout(onWindowResize, 200);
+    });
+  </script>
+</body>
+</html>

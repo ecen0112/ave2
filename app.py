@@ -448,6 +448,16 @@ def snake_game():
 @login_required
 def arrow_game():
     return render_template("arrow-game.html")
+@app.route("/flower")
+@login_required
+def flower():
+    return render_template("flower.html")
+@app.route("/heart")
+@login_required
+def heart():
+    return render_template("heart.html")
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
