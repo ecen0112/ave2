@@ -36,21 +36,6 @@
             "uploaded_at": "2025-09-21T21:15:59.861790",
             "note": ""
         }
-    ],
-    "music": [
-        {
-            "song": "Die With A Smile",
-            "artist": "Lady Gaga, Bruno Mars",
-            "url": "https://www.youtube.com/embed/zgaCZOQCpp8",
-            "thumbnail": "https://img.youtube.com/vi/zgaCZOQCpp8/hqdefault.jpg",
-            "placement": "Romantic"
-        },
-        {
-            "song": "Die With A Smile",
-            "artist": "Lady Gaga, Bruno Mars",
-            "url": "https://www.youtube.com/embed/zgaCZOQCpp8",
-            "thumbnail": "https://img.youtube.com/vi/zgaCZOQCpp8/hqdefault.jpg",
-            "placement": "Romantic"
-        }
     ]
+   
 }
