@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=5.0">
+    <meta name="theme-color" content="#ff6b8a">
+    <meta name="color-scheme" content="light dark">
     <title>Login - Our Journey</title>
     <style>
         :root {
@@ -14,7 +16,7 @@
             --text-secondary: #cccccc;
             --card-bg: rgba(255, 255, 255, 0.1);
             --shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            --border-radius: 16px;
+            --border-radius: clamp(12px, 3vw, 16px);
         }
 
         * {
@@ -23,23 +25,28 @@
             box-sizing: border-box;
         }
 
+        /* Base mobile-first styles */
         body {
             background: var(--background);
+            background-attachment: fixed;
             color: var(--text-primary);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             line-height: 1.6;
             min-height: 100vh;
+            min-height: 100dvh; /* Modern dynamic viewport height */
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: clamp(8px, 2vw, 20px);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Enhanced container */
+        /* Enhanced container with fluid sizing */
         .login-container {
             position: relative;
-            max-width: 480px;
             width: 100%;
+            max-width: clamp(300px, 90vw, 480px);
             margin: 0 auto;
             animation: containerEntry 1.2s cubic-bezier(0.23, 1, 0.32, 1) both;
         }
@@ -47,18 +54,20 @@
         @keyframes containerEntry {
             0% {
                 opacity: 0;
-                transform: translateY(40px) scale(0.95);
+                transform: translateY(clamp(20px, 5vw, 40px)) scale(0.95);
+                filter: blur(4px);
             }
             100% {
                 opacity: 1;
                 transform: translateY(0) scale(1);
+                filter: blur(0);
             }
         }
 
-        /* Magical background */
+        /* Responsive magical background */
         .bg-magic {
             position: absolute;
-            inset: -80px;
+            inset: clamp(-40px, -10vw, -80px);
             pointer-events: none;
             overflow: hidden;
             z-index: -1;
@@ -72,9 +81,10 @@
 
         .heart {
             position: absolute;
-            font-size: 18px;
+            font-size: clamp(14px, 3vw, 18px);
             animation: heartFloat 6s ease-in-out infinite;
             filter: drop-shadow(0 0 8px rgba(255,90,122,0.4));
+            will-change: transform;
         }
 
         .h1 { left: 10%; top: 20%; animation-delay: 0s; }
@@ -85,7 +95,7 @@
 
         @keyframes heartFloat {
             0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.6; }
-            50% { transform: translateY(-15px) rotate(180deg); opacity: 1; }
+            50% { transform: translateY(clamp(-8px, -2vw, -15px)) rotate(180deg); opacity: 1; }
         }
 
         .gradient-orbs {
@@ -97,26 +107,30 @@
         .orb {
             position: absolute;
             border-radius: 50%;
-            filter: blur(1px);
+            filter: blur(clamp(0.5px, 0.2vw, 1px));
             animation: orbFloat 8s ease-in-out infinite;
+            will-change: transform;
         }
 
         .orb-1 {
-            width: 120px; height: 120px;
+            width: clamp(60px, 15vw, 120px);
+            height: clamp(60px, 15vw, 120px);
             background: radial-gradient(circle, rgba(255,90,122,0.2), transparent 70%);
             top: -10%; right: -15%;
             animation-delay: 0s;
         }
 
         .orb-2 {
-            width: 80px; height: 80px;
+            width: clamp(40px, 10vw, 80px);
+            height: clamp(40px, 10vw, 80px);
             background: radial-gradient(circle, rgba(255,157,176,0.25), transparent 70%);
             bottom: -5%; left: -10%;
             animation-delay: -3s;
         }
 
         .orb-3 {
-            width: 100px; height: 100px;
+            width: clamp(50px, 12vw, 100px);
+            height: clamp(50px, 12vw, 100px);
             background: radial-gradient(circle, rgba(255,209,224,0.2), transparent 70%);
             top: 50%; left: -8%;
             animation-delay: -6s;
@@ -124,12 +138,12 @@
 
         @keyframes orbFloat {
             0%, 100% { transform: translate(0, 0); }
-            25% { transform: translate(10px, -15px); }
-            50% { transform: translate(-5px, 10px); }
-            75% { transform: translate(-10px, -5px); }
+            25% { transform: translate(clamp(5px, 2vw, 10px), clamp(-8px, -3vw, -15px)); }
+            50% { transform: translate(clamp(-3px, -1vw, -5px), clamp(5px, 2vw, 10px)); }
+            75% { transform: translate(clamp(-5px, -2vw, -10px), clamp(-3px, -1vw, -5px)); }
         }
 
-        /* Enhanced login box */
+        /* Enhanced responsive login box */
         .login-box {
             background: var(--card-bg);
             backdrop-filter: blur(20px) saturate(150%);
@@ -139,6 +153,7 @@
             animation: boxGlow 4s ease-in-out infinite alternate;
             overflow: hidden;
             position: relative;
+            width: 100%;
         }
 
         .login-box::before {
@@ -152,29 +167,28 @@
         }
 
         @keyframes boxGlow {
-            0% { box-shadow: 0 16px 40px rgba(255,90,122,0.18), inset 0 1px 8px rgba(255,255,255,0.05); }
-            100% { box-shadow: 0 20px 50px rgba(255,90,122,0.25), inset 0 1px 12px rgba(255,255,255,0.08); }
+            0% { box-shadow: 0 clamp(8px, 3vw, 16px) clamp(20px, 6vw, 40px) rgba(255,90,122,0.18), inset 0 1px clamp(4px, 1vw, 8px) rgba(255,255,255,0.05); }
+            100% { box-shadow: 0 clamp(10px, 4vw, 20px) clamp(25px, 8vw, 50px) rgba(255,90,122,0.25), inset 0 1px clamp(6px, 2vw, 12px) rgba(255,255,255,0.08); }
         }
 
         .card-inner {
-            padding: 40px 32px;
+            padding: clamp(20px, 6vw, 40px) clamp(16px, 5vw, 32px);
         }
 
-        /* Enhanced header */
         .login-header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: clamp(24px, 8vw, 40px);
             position: relative;
         }
 
         .logo-container {
-            margin-bottom: 24px;
+            margin-bottom: clamp(16px, 5vw, 24px);
             display: inline-block;
         }
 
         .logo-heart {
-            width: 85px;
-            height: 85px;
+            width: clamp(60px, 15vw, 85px);
+            height: clamp(60px, 15vw, 85px);
             background: linear-gradient(145deg, var(--accent), var(--accent-2), var(--accent-3));
             border-radius: 50%;
             display: flex;
@@ -182,17 +196,18 @@
             justify-content: center;
             position: relative;
             animation: heartbeat 3s ease-in-out infinite;
-            box-shadow: 0 15px 45px rgba(255,90,122,0.4);
+            box-shadow: 0 clamp(8px, 3vw, 15px) clamp(20px, 8vw, 45px) rgba(255,90,122,0.4);
+            margin: 0 auto;
         }
 
         @keyframes heartbeat {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.08); }
+            50% { transform: scale(clamp(1.05, 1.02, 1.08)); }
         }
 
         .heart-pulse {
             position: absolute;
-            inset: -12px;
+            inset: clamp(-8px, -3vw, -12px);
             border: 2px solid rgba(255,90,122,0.3);
             border-radius: 50%;
             animation: pulseRing 2s ease-out infinite;
@@ -204,7 +219,7 @@
         }
 
         .heart-emoji {
-            font-size: 38px;
+            font-size: clamp(24px, 7vw, 38px);
             z-index: 2;
             animation: emojiDance 2.5s ease-in-out infinite;
         }
@@ -216,12 +231,12 @@
 
         .sparkles {
             position: absolute;
-            inset: -15px;
+            inset: clamp(-10px, -3vw, -15px);
         }
 
         .sparkle {
             position: absolute;
-            font-size: 14px;
+            font-size: clamp(10px, 3vw, 14px);
             animation: sparkleFloat 3s ease-in-out infinite;
         }
 
@@ -235,17 +250,17 @@
             50% { transform: translate(-50%, -50%) rotate(180deg) scale(1.2); opacity: 1; }
         }
 
-        /* Enhanced title */
         .welcome-title {
-            font-size: 2rem;
+            font-size: clamp(1.5rem, 6vw, 2rem);
             font-weight: 900;
-            margin: 0 0 12px;
+            margin: 0 0 clamp(8px, 2vw, 12px);
             background: linear-gradient(45deg, var(--accent), var(--accent-2), var(--accent-3));
             background-size: 200% 200%;
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
             animation: gradientShift 3s ease infinite;
+            line-height: 1.2;
         }
 
         @keyframes gradientShift {
@@ -255,10 +270,11 @@
 
         .subtitle-magic {
             color: rgba(255,255,255,0.9);
-            font-size: 1rem;
+            font-size: clamp(0.9rem, 3vw, 1rem);
             font-weight: 500;
             margin: 0;
             animation: subtitleGlow 3s ease-in-out infinite alternate;
+            line-height: 1.4;
         }
 
         @keyframes subtitleGlow {
@@ -266,18 +282,18 @@
             100% { text-shadow: 0 0 15px rgba(255,90,122,0.5); }
         }
 
-        /* Form styles */
+        /* Enhanced responsive form */
         .stack {
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: clamp(16px, 4vw, 24px);
         }
 
         .login-form {
-            margin-bottom: 24px;
+            margin-bottom: clamp(16px, 4vw, 24px);
         }
 
-        /* Enhanced inputs */
+        /* Ultra-responsive inputs */
         .input-container {
             position: relative;
         }
@@ -288,45 +304,49 @@
 
         .magic-input {
             width: 100%;
-            padding: 18px 24px 18px 55px;
+            padding: clamp(14px, 4vw, 18px) clamp(20px, 5vw, 24px) clamp(14px, 4vw, 18px) clamp(45px, 12vw, 55px);
             border: 2px solid rgba(255,255,255,0.15);
-            border-radius: 16px;
+            border-radius: clamp(12px, 3vw, 16px);
             background: rgba(255,255,255,0.12);
             backdrop-filter: blur(12px);
             color: #333;
-            font-size: 1rem;
+            font-size: clamp(0.9rem, 3vw, 1rem);
             font-weight: 500;
             transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            -webkit-appearance: none;
+            appearance: none;
         }
 
         .magic-input::placeholder {
             color: rgba(0,0,0,0.5);
+            font-size: clamp(0.85rem, 3vw, 0.95rem);
         }
 
         .magic-input:focus {
             outline: none;
             border-color: var(--accent);
             background: rgba(255,255,255,0.18);
-            transform: translateY(-2px) scale(1.01);
-            box-shadow: 0 12px 30px rgba(255,90,122,0.2);
+            transform: translateY(clamp(-1px, -0.5vw, -2px)) scale(1.01);
+            box-shadow: 0 clamp(6px, 3vw, 12px) clamp(15px, 6vw, 30px) rgba(255,90,122,0.2);
             color: #222;
         }
 
         .input-icon {
             position: absolute;
-            left: 20px;
+            left: clamp(16px, 4vw, 20px);
             top: 50%;
             transform: translateY(-50%);
-            font-size: 20px;
+            font-size: clamp(16px, 4vw, 20px);
             z-index: 3;
             transition: all 0.3s ease;
             animation: iconFloat 3s ease-in-out infinite;
             color: rgba(0,0,0,0.6);
+            pointer-events: none;
         }
 
         @keyframes iconFloat {
             0%, 100% { transform: translateY(-50%); }
-            50% { transform: translateY(-55%); }
+            50% { transform: translateY(clamp(-52%, -51%, -55%)); }
         }
 
         .magic-input:focus ~ .input-icon {
@@ -338,7 +358,7 @@
         .input-glow {
             position: absolute;
             inset: -1px;
-            border-radius: 17px;
+            border-radius: clamp(13px, 3vw, 17px);
             background: linear-gradient(45deg, rgba(255,90,122,0.1), rgba(255,157,176,0.1));
             opacity: 0;
             transition: opacity 0.3s ease;
@@ -355,17 +375,19 @@
             50% { transform: scale(1.02); }
         }
 
-        /* Enhanced button */
+        /* Enhanced responsive button */
         .magic-btn {
             width: 100%;
             padding: 0;
             border: none;
-            border-radius: 16px;
+            border-radius: clamp(12px, 3vw, 16px);
             position: relative;
             overflow: hidden;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-            height: 56px;
+            height: clamp(48px, 12vw, 56px);
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .btn-bg {
@@ -375,13 +397,20 @@
             transition: all 0.3s ease;
         }
 
-        .magic-btn:hover .btn-bg {
+        .magic-btn:hover .btn-bg,
+        .magic-btn:focus .btn-bg {
             background: linear-gradient(135deg, var(--accent-2), var(--accent));
         }
 
-        .magic-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255,90,122,0.4);
+        .magic-btn:hover,
+        .magic-btn:focus {
+            transform: translateY(clamp(-1px, -0.5vw, -2px));
+            box-shadow: 0 clamp(4px, 2vw, 8px) clamp(12px, 6vw, 25px) rgba(255,90,122,0.4);
+        }
+
+        .magic-btn:active {
+            transform: translateY(0);
+            transition: transform 0.1s;
         }
 
         .btn-shine {
@@ -394,7 +423,8 @@
             transition: left 0.6s ease;
         }
 
-        .magic-btn:hover .btn-shine {
+        .magic-btn:hover .btn-shine,
+        .magic-btn:focus .btn-shine {
             left: 100%;
         }
 
@@ -404,9 +434,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: clamp(6px, 2vw, 10px);
             height: 100%;
-            font-size: 1.05rem;
+            font-size: clamp(0.95rem, 3vw, 1.05rem);
             font-weight: 700;
             color: white;
             text-transform: uppercase;
@@ -417,11 +447,11 @@
             transition: transform 0.3s ease;
         }
 
-        .magic-btn:hover .btn-icon {
+        .magic-btn:hover .btn-icon,
+        .magic-btn:focus .btn-icon {
             transform: rotate(180deg) scale(1.2);
         }
 
-        /* Loading state */
         .btn-loading {
             opacity: 0.8;
             cursor: not-allowed;
@@ -437,11 +467,11 @@
             50% { opacity: 0.7; }
         }
 
-        /* Message/Notification styles */
+        /* Enhanced message system */
         .message-container {
-            margin-bottom: 24px;
-            border-radius: 12px;
-            padding: 16px 20px;
+            margin-bottom: clamp(16px, 4vw, 24px);
+            border-radius: clamp(8px, 2vw, 12px);
+            padding: clamp(12px, 3vw, 16px) clamp(16px, 4vw, 20px);
             backdrop-filter: blur(12px);
             border: 1px solid;
             position: relative;
@@ -449,7 +479,8 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 12px;
+            gap: clamp(8px, 2vw, 12px);
+            font-size: clamp(0.9rem, 3vw, 0.95rem);
         }
 
         .message-container.error {
@@ -479,39 +510,44 @@
         .message-content {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: clamp(8px, 2vw, 12px);
             flex: 1;
+            min-width: 0;
         }
 
         .message-icon {
-            font-size: 20px;
+            font-size: clamp(16px, 4vw, 20px);
             animation: iconPulse 2s ease-in-out infinite;
+            flex-shrink: 0;
         }
 
         .message-text {
-            font-size: 0.95rem;
             font-weight: 500;
             line-height: 1.4;
+            word-wrap: break-word;
         }
 
         .message-close {
             background: none;
             border: none;
             color: inherit;
-            font-size: 20px;
+            font-size: clamp(18px, 4vw, 20px);
             cursor: pointer;
-            padding: 4px;
+            padding: clamp(2px, 1vw, 4px);
             border-radius: 50%;
-            width: 28px;
-            height: 28px;
+            width: clamp(24px, 6vw, 28px);
+            height: clamp(24px, 6vw, 28px);
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s ease;
             opacity: 0.7;
+            flex-shrink: 0;
+            touch-action: manipulation;
         }
 
-        .message-close:hover {
+        .message-close:hover,
+        .message-close:focus {
             opacity: 1;
             background: rgba(255, 255, 255, 0.1);
             transform: scale(1.1);
@@ -520,7 +556,7 @@
         @keyframes messageSlideIn {
             0% {
                 opacity: 0;
-                transform: translateY(-20px) scale(0.95);
+                transform: translateY(clamp(-10px, -3vw, -20px)) scale(0.95);
             }
             100% {
                 opacity: 1;
@@ -533,18 +569,17 @@
             50% { transform: scale(1.1); }
         }
 
-        /* Shake animation for invalid credentials */
+        /* Enhanced animations */
         .shake {
             animation: shake 0.6s ease-in-out;
         }
 
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
-            20%, 40%, 60%, 80% { transform: translateX(8px); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(clamp(-4px, -2vw, -8px)); }
+            20%, 40%, 60%, 80% { transform: translateX(clamp(4px, 2vw, 8px)); }
         }
 
-        /* Invalid input styling */
         .magic-input.invalid {
             border-color: #ff6b6b !important;
             background: rgba(244, 67, 54, 0.08) !important;
@@ -552,92 +587,118 @@
         }
 
         @keyframes inputError {
-            0% { border-color: rgba(255,255,255,0.15); }
+            0%, 100% { border-color: rgba(255, 255, 255, 0.15); }
             50% { border-color: #ff6b6b; }
             100% { border-color: #ff6b6b; }
         }
 
-        /* Info section */
+        /* Enhanced info section */
         .login-info {
             text-align: center;
-            padding: 20px;
+            padding: clamp(16px, 4vw, 20px);
             background: rgba(255,255,255,0.05);
-            border-radius: 12px;
+            border-radius: clamp(8px, 2vw, 12px);
             border: 1px solid rgba(255,255,255,0.1);
             backdrop-filter: blur(10px);
         }
 
         .info-title {
             color: var(--accent);
-            font-size: 1.1rem;
+            font-size: clamp(1rem, 3vw, 1.1rem);
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: clamp(6px, 2vw, 8px);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: clamp(6px, 2vw, 8px);
+            flex-wrap: wrap;
         }
 
         .info-text {
             color: rgba(255,255,255,0.8);
-            font-size: 0.9rem;
+            font-size: clamp(0.85rem, 3vw, 0.9rem);
             line-height: 1.5;
         }
 
-        /* Responsive design */
-        @media (max-width: 768px) {
+        /* Tablet styles (601px - 1024px) */
+        @media (min-width: 601px) and (max-width: 1024px) {
             .login-container {
-                max-width: 400px;
-                padding: 0 16px;
+                max-width: 500px;
             }
             
             .card-inner {
-                padding: 32px 24px;
-            }
-            
-            .logo-heart {
-                width: 75px;
-                height: 75px;
-            }
-            
-            .heart-emoji {
-                font-size: 32px;
-            }
-            
-            .welcome-title {
-                font-size: 1.7rem;
+                padding: 36px 32px;
             }
             
             .magic-input {
-                padding: 16px 20px 16px 50px;
+                font-size: 1rem;
+                padding: 16px 22px 16px 52px;
             }
             
             .input-icon {
-                left: 18px;
                 font-size: 18px;
+                left: 18px;
             }
         }
 
-        @media (max-width: 480px) {
-            body {
-                padding: 16px;
-            }
-            
+        /* Desktop styles (1025px+) */
+        @media (min-width: 1025px) {
             .login-container {
-                max-width: 100%;
+                max-width: 480px;
             }
             
             .card-inner {
-                padding: 24px 20px;
+                padding: 40px 32px;
+            }
+            
+            .magic-input {
+                padding: 18px 24px 18px 55px;
+                font-size: 1rem;
+            }
+            
+            .input-icon {
+                font-size: 20px;
+                left: 20px;
+            }
+            
+            .magic-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(255,90,122,0.4);
+            }
+        }
+
+        /* Large desktop styles (1400px+) */
+        @media (min-width: 1400px) {
+            .login-container {
+                max-width: 520px;
+            }
+            
+            .welcome-title {
+                font-size: 2.2rem;
+            }
+            
+            .subtitle-magic {
+                font-size: 1.1rem;
+            }
+        }
+
+        /* Landscape phone optimization */
+        @media (max-height: 600px) and (orientation: landscape) {
+            body {
+                padding: 8px;
+            }
+            
+            .card-inner {
+                padding: 16px 24px;
             }
             
             .login-header {
-                margin-bottom: 32px;
+                margin-bottom: 20px;
             }
             
             .logo-heart {
-                width: 70px;
-                height: 70px;
+                width: 60px;
+                height: 60px;
             }
             
             .heart-emoji {
@@ -645,31 +706,42 @@
             }
             
             .welcome-title {
-                font-size: 1.5rem;
+                font-size: 1.4rem;
+                margin-bottom: 6px;
             }
             
-            .subtitle-magic {
-                font-size: 0.9rem;
+            .stack {
+                gap: 16px;
             }
         }
 
+        /* Very small screens optimization */
         @media (max-width: 320px) {
+            .login-container {
+                max-width: 100%;
+                margin: 0 4px;
+            }
+            
             .card-inner {
-                padding: 20px 16px;
+                padding: 16px 16px;
             }
             
             .magic-input {
-                padding: 14px 18px 14px 45px;
-                font-size: 0.95rem;
+                padding: 12px 16px 12px 40px;
+                font-size: 0.9rem;
             }
             
             .input-icon {
-                left: 16px;
+                left: 14px;
                 font-size: 16px;
+            }
+            
+            .magic-btn {
+                height: 44px;
             }
         }
 
-        /* High contrast support */
+        /* High contrast mode support */
         @media (prefers-contrast: high) {
             .magic-input {
                 border-width: 3px;
@@ -680,16 +752,102 @@
             .input-icon {
                 color: #000;
             }
+            
+            .login-box {
+                border-width: 2px;
+                border-color: rgba(255, 255, 255, 0.8);
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            .magic-input::placeholder {
+                color: rgba(0,0,0,0.7);
+            }
         }
 
         /* Reduced motion support */
         @media (prefers-reduced-motion: reduce) {
-            *,
-            *::before,
-            *::after {
+            *, *::before, *::after {
                 animation-duration: 0.01ms !important;
                 animation-iteration-count: 1 !important;
                 transition-duration: 0.01ms !important;
+            }
+            
+            .login-container {
+                animation: none;
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        /* Touch device optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            .magic-btn {
+                min-height: 48px;
+            }
+            
+            .message-close {
+                min-width: 32px;
+                min-height: 32px;
+            }
+            
+            .magic-input:focus {
+                transform: none;
+            }
+            
+            .input-group:hover {
+                transform: none !important;
+            }
+        }
+
+        /* Focus styles for keyboard navigation */
+        .magic-input:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .magic-btn:focus-visible {
+            outline: 2px solid #fff;
+            outline-offset: 2px;
+        }
+
+        .message-close:focus-visible {
+            outline: 1px solid currentColor;
+            outline-offset: 1px;
+        }
+
+        /* Print styles */
+        @media print {
+            .bg-magic,
+            .sparkles,
+            .heart-pulse {
+                display: none !important;
+            }
+            
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            
+            .login-box {
+                box-shadow: none !important;
+                border: 2px solid #000 !important;
+                background: white !important;
+            }
+            
+            .welcome-title {
+                color: black !important;
+            }
+        }
+
+        /* Safe area for devices with notches */
+        @supports (padding: max(0px)) {
+            .login-container {
+                padding-left: max(clamp(8px, 2vw, 20px), env(safe-area-inset-left));
+                padding-right: max(clamp(8px, 2vw, 20px), env(safe-area-inset-right));
+                padding-top: max(clamp(8px, 2vw, 20px), env(safe-area-inset-top));
+                padding-bottom: max(clamp(8px, 2vw, 20px), env(safe-area-inset-bottom));
             }
         }
     </style>
@@ -729,11 +887,11 @@
                         </div>
                     </div>
                     <h2 class="welcome-title">Welcome Back</h2>
-                    <p class="subtitle-magic">Continue your beautiful journey together 💝</p>
+                    <p class="subtitle-magic">Continue our beautiful journey together 💝</p>
                 </div>
 
                 <!-- Enhanced form -->
-                <form method="post" action="{{ url_for('login') }}" class="stack login-form" id="loginForm">
+                <form method="post" action="{{ url_for('login') }}" class="stack login-form" id="loginForm" novalidate>
                     <!-- Flash messages from Flask -->
                     {% with messages = get_flashed_messages(with_categories=true) %}
                         {% if messages %}
@@ -748,7 +906,7 @@
                                     </span>
                                     <span class="message-text">{{ messages[0][1] }}</span>
                                 </div>
-                                <button type="button" class="message-close" onclick="hideMessage()">&times;</button>
+                                <button type="button" class="message-close" onclick="hideMessage()" aria-label="Close message">&times;</button>
                             </div>
                         {% endif %}
                     {% endwith %}
@@ -762,8 +920,11 @@
                                 class="magic-input"
                                 autocomplete="username"
                                 value="{{ request.form.username if request.form.username else '' }}"
+                                aria-label="Username"
+                                inputmode="text"
+                                spellcheck="false"
                             >
-                            <div class="input-icon">👤</div>
+                            <div class="input-icon" aria-hidden="true">👤</div>
                             <div class="input-glow"></div>
                         </div>
                     </div>
@@ -777,39 +938,40 @@
                                 required
                                 class="magic-input"
                                 autocomplete="current-password"
+                                aria-label="Password"
                             >
-                            <div class="input-icon">🔒</div>
+                            <div class="input-icon" aria-hidden="true">🔒</div>
                             <div class="input-glow"></div>
                         </div>
                     </div>
                     
-                    <button class="magic-btn" type="submit" id="loginBtn">
+                    <button class="magic-btn" type="submit" id="loginBtn" aria-describedby="login-help">
                         <div class="btn-bg"></div>
                         <div class="btn-shine"></div>
                         <span class="btn-content">
                             <span class="btn-text">Sign In</span>
-                            <span class="btn-icon">✨</span>
+                            <span class="btn-icon" aria-hidden="true">✨</span>
                         </span>
                     </button>
                 </form>
 
                 <!-- Error/Success Messages -->
-                <div id="message-container" class="message-container" style="display: none;">
+                <div id="message-container" class="message-container" style="display: none;" role="alert" aria-live="polite">
                     <div class="message-content">
-                        <span class="message-icon"></span>
+                        <span class="message-icon" aria-hidden="true"></span>
                         <span class="message-text"></span>
                     </div>
-                    <button class="message-close" onclick="hideMessage()">&times;</button>
+                    <button class="message-close" onclick="hideMessage()" aria-label="Close message">&times;</button>
                 </div>
 
                 <!-- Info section -->
                 <div class="login-info">
                     <div class="info-title">
-                        <span>🔐</span>
+                        <span aria-hidden="true">🔐</span>
                         <span>Secure Access</span>
                     </div>
-                    <p class="info-text">
-                        Please enter your credentials to access your memories and continue your journey together.
+                    <p class="info-text" id="login-help">
+                        Please enter your credentials to access our memories and continue your journey together.
                     </p>
                 </div>
             </div>
@@ -817,11 +979,24 @@
     </div>
 
     <script>
-        // Enhanced form handling with error management
+        // Enhanced form handling with comprehensive error management
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             const btn = document.getElementById('loginBtn');
             const btnText = btn.querySelector('.btn-text');
             const btnIcon = btn.querySelector('.btn-icon');
+            const form = this;
+            
+            // Validate inputs before submission
+            const username = form.querySelector('input[name="username"]').value.trim();
+            const password = form.querySelector('input[name="password"]').value;
+            
+            if (!username || !password) {
+                e.preventDefault();
+                showMessage('error', '❌', 'Please fill in all fields');
+                markInputsAsInvalid();
+                shakeForm();
+                return false;
+            }
             
             // Clear any existing messages and invalid states
             hideMessage();
@@ -829,33 +1004,17 @@
             
             // Add loading state
             btn.classList.add('btn-loading');
+            btn.disabled = true;
             btnText.textContent = 'Signing In';
             btnIcon.textContent = '⏳';
             
             // Create loading particles
             createLoadingParticles(btn);
             
-            // Let the form submit naturally to your Flask backend
-            // The form will be processed by your server
+            // Let the form submit naturally to Flask backend
         });
 
-        // Demo authentication function (replace with your actual authentication)
-        function authenticateUser(username, password) {
-            // Demo credentials - replace with actual authentication
-            const validCredentials = [
-                { username: 'admin', password: 'admin123' },
-                { username: 'BUNBUN', password: 'BUNBUN' },
-                { username: 'guest', password: 'guest123' },
-                { username: 'BUNNY', password: 'BUNNY' }
-            ];
-            
-            return validCredentials.some(cred => 
-                cred.username.toLowerCase() === username.toLowerCase() && 
-                cred.password === password
-            );
-        }
-
-        // Message system functions
+        // Enhanced message system
         function showMessage(type, icon, text) {
             const container = document.getElementById('message-container');
             const iconElement = container.querySelector('.message-icon');
@@ -883,6 +1042,12 @@
             
             // Create message particles
             createMessageParticles(container, type);
+            
+            // Announce to screen readers
+            container.setAttribute('aria-live', 'assertive');
+            setTimeout(() => {
+                container.setAttribute('aria-live', 'polite');
+            }, 1000);
         }
 
         function hideMessage() {
@@ -893,7 +1058,6 @@
         function shakeForm() {
             const form = document.getElementById('loginForm');
             form.classList.add('shake');
-            
             setTimeout(() => {
                 form.classList.remove('shake');
             }, 600);
@@ -902,22 +1066,21 @@
         function markInputsAsInvalid() {
             const inputs = document.querySelectorAll('.magic-input');
             inputs.forEach(input => {
-                input.classList.add('invalid');
-                
-                // Remove invalid class after animation
-                setTimeout(() => {
-                    input.classList.remove('invalid');
-                }, 2000);
+                if (!input.value.trim()) {
+                    input.classList.add('invalid');
+                    setTimeout(() => {
+                        input.classList.remove('invalid');
+                    }, 2000);
+                }
             });
         }
 
         function clearInvalidInputs() {
             const inputs = document.querySelectorAll('.magic-input');
-            inputs.forEach(input => {
-                input.classList.remove('invalid');
-            });
+            inputs.forEach(input => input.classList.remove('invalid'));
         }
 
+        // Enhanced particle effects
         function createMessageParticles(element, type) {
             const rect = element.getBoundingClientRect();
             const particles = type === 'success' ? ['🎉', '✨', '🌟', '💫'] : ['💥', '⚠️', '❌'];
@@ -925,80 +1088,64 @@
             for (let i = 0; i < 6; i++) {
                 const particle = document.createElement('div');
                 particle.innerHTML = particles[Math.floor(Math.random() * particles.length)];
-                particle.style.position = 'fixed';
-                particle.style.left = rect.left + Math.random() * rect.width + 'px';
-                particle.style.top = rect.top + 'px';
-                particle.style.fontSize = '14px';
-                particle.style.pointerEvents = 'none';
-                particle.style.zIndex = '1000';
+                particle.style.cssText = `
+                    position: fixed;
+                    left: ${rect.left + Math.random() * rect.width}px;
+                    top: ${rect.top}px;
+                    font-size: clamp(12px, 3vw, 14px);
+                    pointer-events: none;
+                    z-index: 10000;
+                `;
                 
                 document.body.appendChild(particle);
                 
                 particle.animate([
                     { transform: 'translateY(0) scale(0)', opacity: 1 },
-                    { transform: `translateY(-30px) scale(1)`, opacity: 0 }
-                ], {
-                    duration: 800,
-                    easing: 'ease-out'
+                    { transform: `translateY(${-20 - Math.random() * 20}px) scale(1)`, opacity: 0 }
+                ], { 
+                    duration: 800, 
+                    easing: 'ease-out' 
                 }).onfinish = () => {
-                    if (document.body.contains(particle)) {
+                    if (particle.parentNode) {
                         document.body.removeChild(particle);
                     }
                 };
             }
         }
 
-        // Enhanced input interactions
-        document.querySelectorAll('.magic-input').forEach(input => {
-            input.addEventListener('focus', function() {
-                this.parentElement.classList.add('focused');
-                
-                // Create focus particles
-                createFocusParticles(this);
-            });
-            
-            input.addEventListener('blur', function() {
-                this.parentElement.classList.remove('focused');
-            });
-            
-            // Real-time validation feedback
-            input.addEventListener('input', function() {
-                if (this.value.length > 0) {
-                    this.style.borderColor = 'var(--accent-2)';
-                    this.style.background = 'rgba(255,255,255,0.15)';
-                } else {
-                    this.style.borderColor = '';
-                    this.style.background = '';
-                }
-            });
-        });
-
         function createLoadingParticles(element) {
             const rect = element.getBoundingClientRect();
+            const particles = ['✨', '💫', '⭐', '🌟', '💖'];
+            
             for (let i = 0; i < 8; i++) {
                 const particle = document.createElement('div');
-                particle.innerHTML = ['✨', '💫', '⭐', '🌟', '💖'][Math.floor(Math.random() * 5)];
-                particle.style.position = 'fixed';
-                particle.style.left = rect.left + rect.width / 2 + 'px';
-                particle.style.top = rect.top + rect.height / 2 + 'px';
-                particle.style.fontSize = '12px';
-                particle.style.pointerEvents = 'none';
-                particle.style.zIndex = '1000';
-                particle.style.color = '#fff';
+                particle.innerHTML = particles[Math.floor(Math.random() * particles.length)];
+                particle.style.cssText = `
+                    position: fixed;
+                    left: ${rect.left + rect.width / 2}px;
+                    top: ${rect.top + rect.height / 2}px;
+                    font-size: clamp(10px, 2vw, 12px);
+                    pointer-events: none;
+                    z-index: 10000;
+                    color: #fff;
+                `;
                 
                 document.body.appendChild(particle);
                 
                 const angle = (i * 45) * Math.PI / 180;
-                const distance = 40 + Math.random() * 20;
+                const distance = 30 + Math.random() * 20;
                 
                 particle.animate([
                     { transform: 'translate(-50%, -50%) scale(0)', opacity: 1 },
-                    { transform: `translate(${Math.cos(angle) * distance - 50}%, ${Math.sin(angle) * distance - 50}%) scale(1)`, opacity: 0 }
-                ], {
-                    duration: 1000,
-                    easing: 'cubic-bezier(0.23, 1, 0.32, 1)'
+                    { 
+                        transform: `translate(${Math.cos(angle) * distance - 50}%, ${Math.sin(angle) * distance - 50}%) scale(1)`, 
+                        opacity: 0 
+                    }
+                ], { 
+                    duration: 1000, 
+                    easing: 'cubic-bezier(0.23, 1, 0.32, 1)' 
                 }).onfinish = () => {
-                    if (document.body.contains(particle)) {
+                    if (particle.parentNode) {
                         document.body.removeChild(particle);
                     }
                 };
@@ -1009,30 +1156,56 @@
             const rect = element.getBoundingClientRect();
             const particle = document.createElement('div');
             particle.innerHTML = '✨';
-            particle.style.position = 'fixed';
-            particle.style.left = rect.right - 20 + 'px';
-            particle.style.top = rect.top + rect.height / 2 + 'px';
-            particle.style.fontSize = '14px';
-            particle.style.pointerEvents = 'none';
-            particle.style.zIndex = '1000';
-            particle.style.color = 'var(--accent)';
+            particle.style.cssText = `
+                position: fixed;
+                left: ${rect.right - 15}px;
+                top: ${rect.top + rect.height / 2}px;
+                font-size: clamp(12px, 3vw, 14px);
+                pointer-events: none;
+                z-index: 1000;
+                color: var(--accent);
+            `;
             
             document.body.appendChild(particle);
             
             particle.animate([
                 { transform: 'translateY(-50%) scale(0) rotate(0deg)', opacity: 1 },
                 { transform: 'translateY(-70%) scale(1) rotate(360deg)', opacity: 0 }
-            ], {
-                duration: 600,
-                easing: 'ease-out'
+            ], { 
+                duration: 600, 
+                easing: 'ease-out' 
             }).onfinish = () => {
-                if (document.body.contains(particle)) {
+                if (particle.parentNode) {
                     document.body.removeChild(particle);
                 }
             };
         }
 
-        // Enhanced keyboard interactions
+        // Enhanced input interactions
+        document.querySelectorAll('.magic-input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('focused');
+                createFocusParticles(this);
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.classList.remove('focused');
+            });
+            
+            input.addEventListener('input', function() {
+                if (this.value.length > 0) {
+                    this.style.borderColor = 'var(--accent-2)';
+                    this.style.background = 'rgba(255,255,255,0.15)';
+                } else {
+                    this.style.borderColor = '';
+                    this.style.background = '';
+                }
+                // Clear invalid state on input
+                this.classList.remove('invalid');
+            });
+        });
+
+        // Enhanced keyboard navigation
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 const form = document.getElementById('loginForm');
@@ -1048,34 +1221,89 @@
                     }
                 }
             }
-        });
-
-        // Add subtle hover effects to inputs
-        document.querySelectorAll('.input-group').forEach(group => {
-            group.addEventListener('mouseenter', function() {
-                if (!this.classList.contains('focused')) {
-                    this.style.transform = 'translateY(-1px)';
-                    this.style.boxShadow = '0 4px 12px rgba(255,90,122,0.1)';
-                }
-            });
             
-            group.addEventListener('mouseleave', function() {
-                if (!this.classList.contains('focused')) {
-                    this.style.transform = '';
-                    this.style.boxShadow = '';
-                }
-            });
-        });
-
-        // Auto-focus first input on page load
-        window.addEventListener('load', function() {
-            const firstInput = document.querySelector('input[name="username"]');
-            if (firstInput) {
-                setTimeout(() => {
-                    firstInput.focus();
-                }, 500);
+            // Escape key to clear messages
+            if (e.key === 'Escape') {
+                hideMessage();
             }
         });
+
+        // Enhanced hover effects for desktop
+        if (window.matchMedia('(hover: hover)').matches) {
+            document.querySelectorAll('.input-group').forEach(group => {
+                group.addEventListener('mouseenter', function() {
+                    if (!this.classList.contains('focused')) {
+                        this.style.transform = 'translateY(-1px)';
+                        this.style.boxShadow = '0 4px 12px rgba(255,90,122,0.1)';
+                    }
+                });
+                
+                group.addEventListener('mouseleave', function() {
+                    if (!this.classList.contains('focused')) {
+                        this.style.transform = '';
+                        this.style.boxShadow = '';
+                    }
+                });
+            });
+        }
+
+        // Auto-focus first input on load (desktop only)
+        window.addEventListener('load', function() {
+            if (window.matchMedia('(min-width: 768px)').matches) {
+                const firstInput = document.querySelector('input[name="username"]');
+                if (firstInput) {
+                    setTimeout(() => {
+                        firstInput.focus();
+                    }, 500);
+                }
+            }
+        });
+
+        // Performance optimizations
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(function() {
+                // Recalculate any necessary measurements
+                document.body.style.height = window.innerHeight + 'px';
+            }, 150);
+        });
+
+        // Touch device optimizations
+        if ('ontouchstart' in window) {
+            document.documentElement.classList.add('touch-device');
+            
+            // Prevent zoom on input focus for iOS
+            document.querySelectorAll('input').forEach(input => {
+                input.addEventListener('focus', function() {
+                    if (this.style.fontSize !== '16px') {
+                        this.style.fontSize = '16px';
+                    }
+                });
+            });
+        }
+
+        // Handle form reset on page visibility change (prevents stuck loading states)
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                const btn = document.getElementById('loginBtn');
+                if (btn.classList.contains('btn-loading')) {
+                    btn.classList.remove('btn-loading');
+                    btn.disabled = false;
+                    btn.querySelector('.btn-text').textContent = 'Sign In';
+                    btn.querySelector('.btn-icon').textContent = '✨';
+                }
+            }
+        });
+
+        // Service Worker registration for enhanced offline experience (optional)
+        if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js').catch(function(err) {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
     </script>
 </body>
 </html>

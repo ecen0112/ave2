@@ -68,6 +68,7 @@
         <a href="{{ url_for('gallery') }}" class="nav-link" data-section="gallery">Gallery</a>
         <a href="{{ url_for('notes') }}" class="nav-link" data-section="notes">Notes</a>
         <a href="{{ url_for('ideas') }}" class="nav-link" data-section="ideas">Ideas</a>
+        <a href="{{ url_for('music') }}" class="nav-link" data-section="music">Music</a>
       </nav>
 
       <!-- Right-side container -->
@@ -96,6 +97,9 @@
             </a>
             <a href="{{ url_for('ideas') }}" class="menubar-item" data-section="ideas">
               <span class="item-icon">💡</span> Ideas
+            </a>
+            <a href="{{ url_for('music') }}" class="menubar-item" data-section="music">
+              <span class="item-icon">🎵</span> Music
             </a>
             {% if session.get('username') %}
               <div class="menubar-user">
@@ -148,26 +152,26 @@
     
     <section class="content">
       <!-- Flash messages -->
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-          <div class="flash-area" role="alert" aria-live="polite">
-            {% for cat, msg in messages %}
-              <div class="flash flash-{{ cat }}" data-category="{{ cat }}">
-                <span class="flash-icon">
-                  {% if cat == 'success' %}✅
-                  {% elif cat == 'error' %}❌
-                  {% elif cat == 'warning' %}⚠️
-                  {% elif cat == 'info' %}ℹ️
-                  {% else %}📢
-                  {% endif %}
-                </span>
-                <span class="flash-message">{{ msg }}</span>
-                <button class="flash-close" onclick="this.parentElement.remove()" aria-label="Close message">×</button>
-              </div>
-            {% endfor %}
-          </div>
-        {% endif %}
-      {% endwith %}
+     {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-area" role="alert" aria-live="polite">
+      {% for cat, msg in messages %}
+        <div class="flash flash-{{ cat }}" data-category="{{ cat }}">
+          <span class="flash-icon">
+            {% if cat == 'success' %}✅
+            {% elif cat == 'error' %}❌
+            {% elif cat == 'warning' %}⚠️
+            {% elif cat == 'info' %}ℹ️
+            {% else %}📢
+            {% endif %}
+          </span>
+          <span class="flash-message">{{ msg }}</span>
+          <button class="flash-close" onclick="this.parentElement.remove()" aria-label="Close message">×</button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
 
       <!-- Page content -->
       <div class="content-wrapper">

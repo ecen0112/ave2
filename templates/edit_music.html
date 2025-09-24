@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Music{% endblock %}
+{% block body_class %}edit-music-page{% endblock %}
+
+{% block content %}
+<div class="edit-container">
+  <h1 class="edit-header">Edit Music</h1>
+
+ <!-- Thumbnail preview -->
+{% if item.thumbnail %}
+  <div class="thumbnail-preview">
+    <img src="{{ item.thumbnail }}" alt="Current Thumbnail" loading="lazy" onerror="this.style.display='none';">
+  </div>
+{% else %}
+  <div class="thumbnail-preview no-thumbnail">No Thumbnail Available</div>
+{% endif %}
+
+  <!-- Edit music form -->
+  {% set placement = item.placement | default('General') %}
+  {% set is_custom = placement not in ['Romantic', 'Chill', 'Workout'] %}
+  <form method="post" action="{{ url_for('edit_music', index=index) }}" class="edit-form" onsubmit="return confirm('Save changes to this song?');">
+    <input type="text" name="song" class="edit-input" placeholder="Song Title" value="{{ item.song | default('') }}" required aria-label="Song Title">
+    <input type="text" name="artist" class="edit-input" placeholder="Artist" value="{{ item.artist | default('') }}" required aria-label="Artist">
+    <input type="url" name="url" class="edit-input" placeholder="YouTube URL" value="{{ item.url | default('') }}" required aria-label="YouTube URL">
+    <select name="placement" class="edit-input" id="placementSelect" aria-label="Placement Category">
+      <option value="Romantic" {% if placement == 'Romantic' %}selected{% endif %}>Romantic</option>
+      <option value="Chill" {% if placement == 'Chill' %}selected{% endif %}>Chill</option>
+      <option value="Workout" {% if placement == 'Workout' %}selected{% endif %}>Workout</option>
+      <option value="Custom" {% if is_custom %}selected{% endif %}>Custom</option>
+    </select>
+       <input type="text" name="custom_placement" class="edit-input" placeholder="Custom category" 
+           value="{% if is_custom %}{{ placement }}{% endif %}"
+           {% if is_custom %}style="display: block;"{% else %}style="display: none;"{% endif %}
+           aria-label="Custom Category">
+
+    <div class="actions">
+      <button type="submit" class="btn edit-btn">Save Changes</button>
+      <a href="{{ url_for('music') }}" class="btn cancel-btn">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const placementSelect = document.querySelector('#placementSelect');
+    const customInput = document.querySelector('input[name="custom_placement"]');
+    if (placementSelect && customInput) {
+      placementSelect.addEventListener('change', e => {
+        customInput.style.display = e.target.value === 'Custom' ? 'block' : 'none';
+      });
+    } else {
+      console.error('placementSelect or customInput not found');
+    }
+  });
+</script>
+{% endblock %}
+
+{% block head %}
+<style>
+  .edit-container {
+    max-width: 600px;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 20px;
+    border-radius: var(--border-radius, 8px);
+    box-shadow: var(--shadow, 0 8px 24px rgba(0, 0, 0, 0.3));
+    backdrop-filter: blur(12px);
+    margin: 0 auto;
+  }
+
+  .edit-header {
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--accent, #ff5a7a);
+  }
+
+  .edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .edit-input, select {
+    padding: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--border-radius, 8px);
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-light, #f5f5f5);
+    font-size: clamp(12px, 2.5vw, 14px);
+  }
+
+  .edit-btn {
+    background: linear-gradient(135deg, var(--accent, #ff5a7a), var(--accent-2, #a6c1ee));
+    color: var(--text-light, #f5f5f5);
+  }
+
+  .cancel-btn {
+    background: var(--accent, #ff5a7a);
+    color: var(--text-light, #f5f5f5);
+  }
+
+  .edit-btn:hover, .cancel-btn:hover {
+    transform: scale(1.05);
+  }
+
+  .thumbnail-preview img {
+    width: 100%;
+    max-width: 200px;
+    border-radius: 12px;
+    margin: 0 auto 12px;
+    display: block;
+  }
+
+  .thumbnail-preview.no-thumbnail {
+    text-align: center;
+    color: var(--text-light, #f5f5f5);
+    font-style: italic;
+    margin-bottom: 12px;
+  }
+
+  .actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 10px;
+  }
+</style>
+{% endblock %}

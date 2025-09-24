@@ -1,0 +1,23 @@
+[
+    {
+        "song": "back to friendsS",
+        "artist": "sombr",
+        "url": "https://www.youtube.com/embed/flXK3Z1QiU8&list=RDflXK3Z1QiU8&start_radio=1",
+        "thumbnail": "https://img.youtube.com/vi/flXK3Z1QiU8/hqdefault.jpg",
+        "placement": "Chill"
+    },
+    {
+        "song": "Die With A Smile",
+        "artist": "Lady Gaga, Bruno Mars",
+        "url": "https://www.youtube.com/embed/zgaCZOQCpp8&list=RDzgaCZOQCpp8&start_radio=1",
+        "thumbnail": "https://img.youtube.com/vi/zgaCZOQCpp8/hqdefault.jpg",
+        "placement": "Romantic"
+    },
+    {
+        "song": "SARANGOLA",
+        "artist": "BEN&BEN",
+        "url": "https://www.youtube.com/embed/gEIpajaddVU&list=RDgEIpajaddVU&start_radio=1",
+        "thumbnail": "https://img.youtube.com/vi/gEIpajaddVU/hqdefault.jpg",
+        "placement": "Romantic"
+    }
+]
