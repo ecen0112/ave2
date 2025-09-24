@@ -17,10 +17,6 @@
             "status": "Planned"
         },
         {
-            "text": "Go for a picnic",
-            "status": "Completed"
-        },
-        {
             "text": "Watch a movie together",
             "status": "Planned"
         }
@@ -33,34 +29,28 @@
             "photo": "cf17b62e58ac4a4b8eaaa9ed791dceae_547283380_694025507058378_1555488525928090813_n.jpg"
         }
     ],
-    "notes": [
-        {
-            "text": "sdsdsd",
-            "timestamp": "2025-09-24T18:22:49.577153"
-        }
-    ],
+    "notes": [],
     "gallery": [
         {
             "filename": "85705a0bed5e451abc68516bdf6e85bf_547283380_694025507058378_1555488525928090813_n.jpg",
             "uploaded_at": "2025-09-21T21:15:59.861790",
             "note": ""
-        },
-        {
-            "filename": "108a1d3947b14c6bb51714e7ebef208a_547283380_694025507058378_1555488525928090813_n.jpg",
-            "uploaded_at": "2025-09-22T19:40:36.343534",
-            "note": ""
         }
     ],
     "music": [
         {
-            "title": "SARANGOLA",
-            "artist": "BEN&BEN",
-            "url": "https://youtu.be/gEIpajaddVU?si=q6BgPPYlfOUCswaB",
-            "embed_src": "https://www.youtube.com/embed/gEIpajaddVU",
-            "platform": "youtube",
-            "thumbnail": "https://img.youtube.com/vi/gEIpajaddVU/hqdefault.jpg",
-            "placement": "Romantic",
-            "added_at": "2025-09-24T17:32:38.548984"
+            "song": "Die With A Smile",
+            "artist": "Lady Gaga, Bruno Mars",
+            "url": "https://www.youtube.com/embed/zgaCZOQCpp8",
+            "thumbnail": "https://img.youtube.com/vi/zgaCZOQCpp8/hqdefault.jpg",
+            "placement": "Romantic"
+        },
+        {
+            "song": "Die With A Smile",
+            "artist": "Lady Gaga, Bruno Mars",
+            "url": "https://www.youtube.com/embed/zgaCZOQCpp8",
+            "thumbnail": "https://img.youtube.com/vi/zgaCZOQCpp8/hqdefault.jpg",
+            "placement": "Romantic"
         }
     ]
 }

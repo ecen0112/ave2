@@ -8,19 +8,19 @@
   <h1 class="music-header">Favorite Music</h1>
 
   <!-- Add music form -->
-  <form method="post" action="{{ url_for('music') }}" class="add-form" onsubmit="return confirm('Add this song?');">
-    <input type="text" name="song" class="add-input" placeholder="Song Title" required>
-    <input type="text" name="artist" class="add-input" placeholder="Artist" required>
-    <input type="url" name="url" class="add-input" placeholder="YouTube URL" required>
-    <select name="placement" class="add-input" id="placementSelect">
-      <option value="Romantic">💕 Romantic</option>
-      <option value="Chill">🌙 Chill</option>
-      <option value="Workout">💪 Workout</option>
-      <option value="Custom">✨ Custom</option>
-    </select>
-    <input type="text" name="custom_placement" class="add-input" id="customPlacementInput" placeholder="Custom category" style="display:none;" required>
-    <button type="submit" class="add-btn">Add Music ✨</button>
-  </form>
+  <form method="post" action="{{ url_for('music') }}" class="add-form" onsubmit="return validateForm()">
+  <input type="text" name="song" class="add-input" placeholder="Song Title" required>
+  <input type="text" name="artist" class="add-input" placeholder="Artist" required>
+  <input type="url" name="url" class="add-input" placeholder="YouTube URL" required>
+  <select name="placement" class="add-input" id="placementSelect">
+    <option value="Romantic">💕 Romantic</option>
+    <option value="Chill">🌙 Chill</option>
+    <option value="Workout">💪 Workout</option>
+    <option value="Custom">✨ Custom</option>
+  </select>
+  <input type="text" name="custom_placement" class="add-input" id="customPlacementInput" placeholder="Custom category" style="display:none;">
+  <button type="submit" class="add-btn">Add Music ✨</button>
+</form>
 
   <!-- Music items grouped by placement -->
   {% for placement, items in grouped_items.items() %}
@@ -51,9 +51,12 @@
           <div class="actions">
             <a href="{{ url_for('edit_music', index=item.global_index) }}" class="btn btn-edit" 
                onclick="return confirm('Edit this song?')">Edit</a>
-            <form method="post" action="{{ url_for('remove_music', index=item.global_index) }}" style="display: inline;">
-              <button type="submit" class="btn btn-remove" onclick="return confirm('Remove this song?')">Remove</button>
-            </form>
+       <form method="post" action="{{ url_for('remove_music', index=item.global_index) }}" style="display:inline;">
+  <button type="submit" class="btn btn-remove" onclick="return confirm('Remove this song?')">Remove</button>
+</form>
+
+
+
           </div>
         </div>
       {% endfor %}
