@@ -1,495 +1,626 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Animated flower</title>
-    <link rel="stylesheet" href="styles.css" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+    box-sizing: border-box;
+}
 
-    <link
-      href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap"
-      rel="stylesheet" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700&display=swap"
-      rel="stylesheet" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap"
-      rel="stylesheet" />
-      <style>*,
-*::after,
-*::before {
-  padding: 0;
-  margin: 0;
-  box-sizing: border-box;
-}
-:root {
-  --color-bg: linear-gradient(to top, #2c0e22, #000005);
-  --color-glass: linear-gradient(to left, #142544, #1a9092);
-  --color-water: linear-gradient(to left, #142544, #1b6d6e);
-}
 body {
-  background-image: var(--color-bg);
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  overflow: hidden;
-  text-align: center;
-}
-h1 {
-  font-size: 3rem;
-  color: white;
-  position: absolute;
-  top: 45%;
-  font-family: "Playfair Display", serif;
-  opacity: 1;
-  animation: word-animation 2s ease-in-out forwards;
-}
-.my-name {
-  position: absolute;
-  color: rgba(255, 255, 255, 0.318);
-  top: 60%;
-  animation: word-animation 2s ease-in-out forwards;
-}
-.rain {
-  height: 0.5rem;
-  width: 0.15rem;
-  background-color: rgba(255, 255, 255, 0.432);
-  position: absolute;
-  top: -10px;
-  border-radius: 45%;
-  z-index: 2;
-  animation: rain-drop 1s linear forwards;
+    background-image: linear-gradient(to bottom, #060825 0%, #000 50%);
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    align-content: center;
+    justify-items: center;
+    overflow: hidden;
 }
 
-@keyframes rain-drop {
-  from {
-    transform: translateY(-100%);
-  }
-  to {
-    transform: translateY(110vh);
-  }
+.ground {
+    width: 100vmin;
+    aspect-ratio: 1.5;
+    overflow: visible;
+    position: relative;
+    transform-origin: center center;
+    transform: scale(2);
+    animation: shrink 1.5s ease-in forwards 4s;
 }
-@keyframes word-animation {
-  to {
+
+.flower-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    &:first-child {
+        top: 50%;
+        left: 50%;
+    }
+
+    &:nth-child(2) {
+        top: 45%;
+        left: 30%;
+        width: 8%;
+    }
+    &:nth-child(3) {
+        top: 45%;
+        left: 70%;
+        width: 8%;
+    }
+    &:nth-child(4) {
+        top: 85%;
+        left: 95%;
+        width: 20%;
+    }
+    &:nth-child(5) {
+        top: 130%;
+        left: 30%;
+        width: 30%;
+    }
+    &:nth-child(6) {
+        top: 60%;
+        left: 10%;
+        width: 12%;
+    }
+    &:nth-child(7) {
+        top: 20%;
+        left: 15%;
+        width: 6%;
+    }
+
+    &:nth-child(8) {
+        top: 15%;
+        left: 35%;
+        width: 5%;
+    }
+
+    &:nth-child(9) {
+        top: 26%;
+        left: 85%;
+        width: 7%;
+    }
+
+    &:nth-child(10) {
+        top: 22%;
+        left: 60%;
+        width: 6.5%;
+    }
+}
+
+.flower-container {
+    width: 10%;
+    aspect-ratio: 16;
+    container-type: inline-size;
+    filter: drop-shadow(0 0 25cqi #ffd85faa);
+    justify-items: center;
+    align-content: center;
+    transform-origin: bottom center;
+}
+
+.flower-top {
+    width: 50cqi;
+    aspect-ratio: 1.5;
+    position: relative;
+    z-index: 1;
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translate(-50%, 50%);
+}
+
+.flower-circle {
+    width: 30cqi;
+    aspect-ratio: 1.5;
+    border-radius: 50%;
+    background-color: #ffe4a0;
+    box-shadow: inset 0px -3cqi 3cqi #aa7a0266;
+    position: absolute;
+    scale: 0;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 100% 100% 100% 100%/90% 90% 90% 90%;
+    filter: drop-shadow(0 0 15cqi #ffd85f);
+    transform-origin: top left;
+}
+
+.flower-petal {
+    width: 80%;
+    aspect-ratio: 1;
+    background-color: #ffe4a0;
+    background-image: linear-gradient(135deg, #ff6236 20%, #ffd85f 80%);
+    position: absolute;
     opacity: 0;
-  }
 }
 
-.flower {
-  position: relative;
-  display: none;
+.flower-petal__1 {
+    bottom: 42%;
+    right: 65%;
+    border-radius: 0px 100% 5% 100%/0px 100% 5% 100%;
+    transform: rotate(-10deg) scale(0.82);
 }
 
-.flower__glass {
-  width: 20vmin;
-  height: 30vmin;
-  background-image: var(--color-glass);
-  clip-path: polygon(0 0, 100% 0, 85% 100%, 15% 100%);
-  opacity: 0.8;
-  position: relative;
+.flower-petal__2 {
+    bottom: 42%;
+    left: 65%;
+    border-radius: 0px 100% 5% 100%/0px 100% 5% 100%;
+    transform: rotate(100deg) scale(0.82);
 }
 
-.flower__glass::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  background-color: #182843;
-  width: 100%;
-  height: 2vmin;
+.flower-petal__3 {
+    bottom: 40%;
+    left: 10%;
+    border-radius: 0px 100% 50% 100%/0px 100% 50% 100%;
+    transform: rotate(45deg) scale(0.8);
 }
 
-.flower__glass::before {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  background-image: var(--color-water);
-  width: 100%;
-  height: 15vmin;
+.flower-petal__4 {
+    top: -10%;
+    left: 80%;
+    border-radius: 0px 100% 0% 100%/0px 100% 0% 100%;
+    transform: rotate(135deg) scale(0.9);
 }
 
-.f-wrapper {
-  position: absolute;
-  left: 45%;
-  bottom: 2vmin;
+.flower-petal__5 {
+    top: -10%;
+    right: 70%;
+    border-radius: 0px 100% 0% 100%/0px 100% 0% 100%;
+    transform: rotate(315deg) scale(0.9);
 }
 
-.f-wrapper--2 {
-  left: 50%;
-  bottom: 5%;
-  transform-origin: 10% left;
-  transform: rotate(20deg);
+.flower-petal__6 {
+    top: 50%;
+    right: 65%;
+    border-radius: 0px 100% 10% 100%/0px 100% 5% 100%;
+    transform: rotate(270deg) scale(1.1);
 }
 
-.f-wrapper--3 {
-  left: 30%;
-  bottom: 5%;
-  transform-origin: 10% left;
-  transform: rotate(-10deg);
+.flower-petal__7 {
+    top: 50%;
+    left: 65%;
+    border-radius: 0px 100% 10% 100%/0px 100% 5% 100%;
+    transform: rotate(180deg) scale(1.1);
 }
 
-.f-wrapper--3 .flower__line {
-  height: 45vmin;
-  position: relative;
+.flower-petal__8 {
+    top: 50%;
+    left: 10%;
+    border-radius: 0px 100% 50% 100%/0px 100% 30% 100%;
+    transform: rotate(225deg) scale(1);
 }
 
-.f-wrapper--3 .flower__line::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 6vmin;
-  height: 6vmin;
-  transform: translate(-69%, -30%) rotate(-5deg);
-  border-radius: 10vmin 10vmin 0 0;
-  border: 2vmin solid #104d4e;
-  border-bottom: transparent;
-  border-left: transparent;
-}
-
-.f-wrapper--3 .flower__line::before {
-  content: "";
-  position: absolute;
-  left: -40%;
-  top: -1%;
-  width: 6vmin;
-  height: 2vmin;
-  transform-origin: right;
-  transform: translate(-100%, -80%) rotate(-20deg);
-  background-color: #104d4e;
-  border-radius: 2vmin;
-}
-
-.f-wrapper--3 .flower__line {
-  background-image: linear-gradient(to top, #142544, #104d4e);
-}
-
-.f-wrapper--2 .flower__line {
-  height: 45vmin;
-}
-
-.f-wrapper--2 .f {
-  transform: translateX(-50%) rotate(20deg);
-}
-
-.f-wrapper--3 .f {
-  transform: translate(-350%, -50%) rotate(-120deg);
-}
-
-.f-wrapper--2 .flower__leaf:not(:first-child) {
-  width: 3.8vmin;
-  height: 10vmin;
-  background-image: linear-gradient(to bottom, #e0ff43, #c22887, #1a233a 99%);
-}
-
-.f-wrapper--3 .flower__leaf:not(:first-child) {
-  width: 3.8vmin;
-  height: 10vmin;
-  background-image: linear-gradient(to bottom, #bfe02b, #712291, #1a233a 99%);
-}
-
-.f-wrapper--3 .flower__leaf--1 {
-  width: 8vmin;
-  height: 10vmin;
-  bottom: 2vmin;
-  background-color: #ad2be0;
-}
-
-.f-wrapper--2 .flower__leaf--1 {
-  width: 8vmin;
-  height: 10vmin;
-  bottom: 2vmin;
-  background-color: #de118b;
-}
-
-.f-wrapper--2 .f .flower__leaf--8 {
-  width: 10vmin;
-  height: 9vmin;
-  bottom: 3vmin;
-  left: -30%;
-  transform: rotate(-50deg);
-  background-image: linear-gradient(to left bottom, #ff43b6, #4d1337);
-}
-
-.f-wrapper--3 .f .flower__leaf--8 {
-  width: 10vmin;
-  height: 9vmin;
-  left: -10% !important;
-  background-image: linear-gradient(to left bottom, #ad2be0, #712291);
-}
-
-.flower__line {
-  width: 2vmin;
-  height: 56vmin;
-  background-image: linear-gradient(to left top, #82fdff 20%, #142544, #104d4e);
-  border-radius: 4vmin;
-}
-
-.f {
-  position: absolute;
-  top: 1vmin;
-  left: 50%;
-  transform: translateX(-50%) rotate(-10deg);
-  width: 2vmin;
-  height: 2vmin;
-}
-
-.flower__leaf {
-  position: absolute;
-  left: 50%;
-  bottom: 2vmin;
-  transform: translateX(-50%);
-  width: 5vmin;
-  height: 14vmin;
-  background-image: linear-gradient(to bottom, #ffa085, #fa7373, #1a233a 99%);
-
-  clip-path: ellipse(50% 50% at 50% 50%);
-  transform-origin: center bottom;
-  animation: open-flower 2s 1s backwards;
-}
-
-.flower__leaf--1 {
-  width: 10vmin;
-  height: 12vmin;
-  bottom: 3vmin;
-  border-radius: 50% 50% 50% 50% / 80% 80% 20% 20%;
-  background-color: #e24f5f;
-  background-image: none;
-  animation: open-flowe--middle 1.4s 1s backwards;
-}
-
-.flower__leaf--2 {
-  transform: translateX(-50%) rotate(-30deg);
-}
-.flower__leaf--3 {
-  transform: translateX(-50%) rotate(-50deg);
-}
-.flower__leaf--4 {
-  transform: translateX(-50%) rotate(-70deg);
-}
-
-.flower__leaf--5 {
-  transform: translateX(-50%) rotate(30deg);
-}
-
-.flower__leaf--6 {
-  transform: translateX(-50%) rotate(50deg);
-}
-
-.flower__leaf--7 {
-  transform: translateX(-50%) rotate(70deg);
-}
-
-.flower__leaf--8 {
-  width: 13vmin;
-  height: 11vmin;
-  bottom: 6vmin;
-  left: -30%;
-  border-radius: none;
-  clip-path: none;
-  border-radius: 10vmin 2vmin 10vmin 2vmin;
-  transform: rotate(-55deg);
-  background-image: linear-gradient(
-    to left bottom,
-    #ffa085,
-    #eb8b8b,
-    #492f2f 98%
-  );
-}
-
-.flower__fall-down--yellow {
-  animation: flower-fall-down-yellow 8s 1.2s linear forwards;
-}
-
-.flower__fall-down--pink {
-  animation: flower-fall-down-pink 5s 1.2s linear forwards;
-}
-
-.flower__fall-down--purple {
-  bottom: 4vmin;
-  animation: flower-fall-down-purple 6s 1.2s linear forwards,
-    flower-falling 6s 7.2s linear infinite;
-}
-
-@keyframes open-flower {
-  0% {
-    transform: translateX(-50%) rotate(0);
-  }
-}
-
-@keyframes open-flowe--middle {
-  0% {
+.flower-light {
+    width: 3cqi;
+    aspect-ratio: 1;
+    position: absolute;
+    border-radius: 50%;
     opacity: 0;
-    transform: translateX(-50%) scale(0);
-  }
+
+    &:nth-child(odd) {
+        background-color: #ffe4a0;
+        filter: blur(2cqi) drop-shadow(0 0 5cqi #ffd85f);
+    }
+
+    &:nth-child(even) {
+        background-color: #ff6236;
+        filter: blur(2cqi) drop-shadow(0 0 5cqi #ff6236);
+    }
 }
 
-@keyframes flower-fall-down-pink {
-  0% {
-    transform: rotate(-55deg);
-  }
-
-  50% {
-    transform: rotateX(-100deg);
-  }
-
-  100% {
-    transform: translate(2vmin, 28vmin);
-  }
+.flower-light__1 {
+    top: 10%;
+    left: 20%;
+    scale: 0.8;
+}
+.flower-light__2 {
+    top: 20%;
+    left: 80%;
+    scale: 1.2;
+}
+.flower-light__3 {
+    top: 30%;
+    left: 50%;
+    scale: 1.5;
+}
+.flower-light__4 {
+    top: 40%;
+    left: 10%;
+}
+.flower-light__5 {
+    top: 50%;
+    left: 90%;
+    scale: 2;
+}
+.flower-light__6 {
+    top: 60%;
+    left: 30%;
+}
+.flower-light__7 {
+    top: 70%;
+    left: 40%;
+    scale: 0.5;
+}
+.flower-light__8 {
+    top: 60%;
+    left: 60%;
 }
 
-@keyframes flower-fall-down-yellow {
-  0% {
-    transform: rotate(-55deg);
-  }
-
-  50% {
-    bottom: 3vmin;
-    transform: rotateX(-100deg);
-  }
-
-  100% {
-    transform: translate(2vmin, 70vmin) rotate(150deg);
-  }
+.flower-bottom {
+    width: 6%;
+    aspect-ratio: 0.02;
+    left: 47%;
+    top: 50%;
 }
 
-@keyframes flower-fall-down-purple {
-  0% {
-    transform: rotate(-50deg);
-  }
-
-  25% {
-    bottom: 1vmin;
-    transform: rotateX(-100deg);
-    perspective: 0px;
-  }
-
-  50% {
-    perspective: 0px;
-    transform: translate(-30vmin, 2vmin) rotate(90deg);
-  }
-
-  75% {
-    perspective: 0px;
-    transform: translate(-34vmin, -2vmin);
-  }
-
-  100% {
-    transform-origin: center;
-    transform: translate(-34vmin, -2vmin) rotateY(-80deg) rotateX(35deg);
-  }
+.flower-stem {
+    width: 100%;
+    height: 100%;
+    transform: scaleY(0);
+    background-image: linear-gradient(to left, rgba(0, 0, 0, 0.2), transparent, rgba(87, 42, 25, 0.2)),
+                         linear-gradient(to top, transparent 10%, #da580099, #da580099);
+    border-radius: 50px 50px 0 0;
+    transform-origin: bottom center;
 }
 
-@keyframes flower-falling {
-  0%,
-  100% {
-    transform-origin: center;
-    transform: translate(-34vmin, -2vmin) rotateY(-80deg) rotateX(35deg);
-  }
+.flower-leaf {
+    width: 40%;
+    aspect-ratio: 2.5;
+    position: absolute;
+    scale: 0;
+    opacity: 0;
 
-  25% {
-    transform-origin: center;
-    transform: translate(-34.4vmin, -2vmin) rotateY(-84deg) rotateX(35deg);
-  }
+    &:nth-child(even) {
+        right: 55%;
+        background-image: linear-gradient(120deg, #d86100aa 0%, #da580000 90%);
+        border-radius: 0% 100% 0% 100%/0% 100% 0% 100%;
+        transform-origin: bottom right;
+    }
 
-  50% {
-    transform-origin: center;
-    transform: translate(-32vmin, -4.2vmin) rotateY(-80deg) rotateX(35deg);
-  }
-
-  75% {
-    transform-origin: center;
-    transform: translate(-36vmin, 1.1vmin) rotateY(-80deg) rotateX(35deg);
-  }
+    &:nth-child(odd) {
+        left: 55%;
+        background-image: linear-gradient(300deg, #d86100aa 0%, #da580000 90%);
+        border-radius: 100% 0% 100% 0%/100% 0% 100% 0%;
+        transform-origin: bottom left;
+    }
 }
-</style>
-  </head>
 
-  <body class="not-loaded">
-    <h1>Flowers for you!</h1>
-    <p class="my-name">Code by bunbun</p>
-    <div class="rain"></div>
-    <div class="flower" id="animation-flower">
-      <div class="f-wrapper">
-        <div class="flower__line"></div>
-        <div class="f">
-          <div class="flower__leaf flower__leaf--1"></div>
-          <div class="flower__leaf flower__leaf--2"></div>
-          <div class="flower__leaf flower__leaf--3"></div>
-          <div class="flower__leaf flower__leaf--4"></div>
-          <div class="flower__leaf flower__leaf--5"></div>
-          <div class="flower__leaf flower__leaf--6"></div>
-          <div class="flower__leaf flower__leaf--7"></div>
-          <div
-            class="flower__leaf flower__leaf--8 flower__fall-down--yellow"></div>
-        </div>
-      </div>
+.flower-leaf__2 {
+    top: 25%;
+    transform: rotate(-15deg) scale(1);
+}
 
-      <div class="f-wrapper f-wrapper--2">
-        <div class="flower__line"></div>
-        <div class="f">
-          <div class="flower__leaf flower__leaf--1"></div>
-          <div class="flower__leaf flower__leaf--2"></div>
-          <div class="flower__leaf flower__leaf--3"></div>
-          <div class="flower__leaf flower__leaf--4"></div>
-          <div class="flower__leaf flower__leaf--5"></div>
-          <div class="flower__leaf flower__leaf--6"></div>
-          <div class="flower__leaf flower__leaf--7"></div>
-          <div
-            class="flower__leaf flower__leaf--8 flower__fall-down--pink"></div>
-        </div>
-      </div>
+.flower-leaf__1 {
+    top: 31%;
+    transform: rotate(15deg) scale(1);
+}
 
-      <div class="f-wrapper f-wrapper--3">
-        <div class="flower__line"></div>
-        <div class="f">
-          <div class="flower__leaf flower__leaf--1"></div>
-          <div class="flower__leaf flower__leaf--2"></div>
-          <div class="flower__leaf flower__leaf--3"></div>
-          <div class="flower__leaf flower__leaf--4"></div>
-          <div class="flower__leaf flower__leaf--5"></div>
-          <div class="flower__leaf flower__leaf--6"></div>
-          <div class="flower__leaf flower__leaf--7"></div>
-          <div
-            class="flower__leaf flower__leaf--8 flower__fall-down--purple"></div>
-        </div>
-      </div>
-      <div class="flower__glass"></div>
+.flower-leaf__4 {
+    top: 37%;
+    transform: rotate(-15deg) scale(1.2);
+}
+
+.flower-leaf__3 {
+    top: 43%;
+    transform: rotate(15deg) scale(1.2);
+}
+
+.flower-leaf__6 {
+    top: 50%;
+    transform: rotate(-15deg) scale(1.5);
+}
+
+.flower-leaf__5 {
+    top: 56%;
+    transform: rotate(15deg) scale(1.5);
+}
+
+
+.flower-grass {
+    position: absolute;
+    bottom: -20cqi;
+    width: 80cqi;
+    height: 120cqi;
+    opacity: 0;
+    scale: 0;
+    mask-image: linear-gradient(to top, transparent 15%, #fff 50%);
+
+    &:nth-child(odd) {
+        right: 55%;
+        border-top-right-radius: 100%;
+        border-right: 5cqi solid #d86100aa;
+        transform-origin: bottom right;
+    }
+
+    &:nth-child(even) {
+        left: 55%;
+        border-top-left-radius: 100%;
+        border-left: 5cqi solid #d86100aa;
+        transform-origin: bottom left;
+    }
+}
+
+.flower-grass__3 {
+    left: 70% !important;
+    width: 75cqi;
+    height: 100cqi;;
+}
+
+.flower-grass__4 {
+    right: 70% !important;
+    width: 75cqi;
+    height: 90cqi;
+}
+
+
+.animate {
+    &.flower-container {
+        animation: flower-rotate 12s linear infinite;
+    }
+
+    .flower-circle {
+        animation: grass-grow 0.25s ease-in forwards 3s;
+    }
+
+     .flower-petal {
+        animation: petal-grow 0.5s ease-in forwards,
+                    flower-rotate 3s linear infinite;
+    }
+
+   .flower-petal__3 {
+        animation-delay: 3.2s;
+    }
+    .flower-petal__2 {
+        animation-delay: 3.3s;
+    }
+    .flower-petal__4 {
+        animation-delay: 3.4s;
+    }
+    .flower-petal__7 {
+        animation-delay: 3.5s;
+    }
+    .flower-petal__8 {
+        animation-delay: 3.6s;
+    }
+    .flower-petal__6 {
+        animation-delay: 3.7s;
+    }
+    .flower-petal__5 {
+        animation-delay: 3.8s;
+    }
+    .flower-petal__1 {
+        animation-delay: 3.9s;
+    }
+
+    .flower-stem {
+        animation: stem-grow 3s ease-in forwards;
+    }
+    
+    .flower-grass {
+        animation:  grass-grow 1s ease-in forwards 1.5s,
+        flower-rotate 6s linear infinite;
+    }
+    
+    .flower-leaf {
+        animation: grass-grow 0.75s ease-in forwards, 
+                    flower-rotate 6s linear infinite;
+    }
+    
+    .flower-leaf__2 {
+        animation-delay: 2s;
+    }
+    
+    .flower-leaf__1 {
+        animation-delay: 1.9s;
+    }
+    
+    .flower-leaf__4 {
+        animation-delay: 1.8s;
+    }
+    
+    .flower-leaf__3 {
+        animation-delay: 1.65s;
+    }
+    
+    .flower-leaf__6 {
+        animation-delay: 1.5s;
+    }
+    
+    .flower-leaf__5 {
+        animation-delay: 1.25s;
+    }
+
+    .flower-light {
+        animation: light-float 5s ease-in-out infinite;
+    }
+
+    .flower-light__1 {
+        animation-delay: 4.7s;
+    }
+    .flower-light__2 {
+        animation-delay: 5.2s;
+    }
+    .flower-light__3 {
+        animation-delay: 5.7s;
+    }
+    .flower-light__4 {
+        animation-delay: 6.2s;
+    }
+    .flower-light__5 {
+        animation-delay: 6.7s;
+    }
+    .flower-light__6 {
+        animation-delay: 7.2s;
+    }
+    .flower-light__7 {
+        animation-delay: 7.7s;
+    }
+    .flower-light__8 {
+        animation-delay: 8.2s;
+    }
+}
+
+@keyframes petal-grow {
+    0% {
+        scale: 0;
+        opacity: 0.8;
+    }
+    50% {
+        scale: 1;
+        opacity: 0.8;
+    }
+    75% {
+        scale: 1.1;
+        opacity: 0.8;
+    }
+    90% {
+        scale: 0.9;
+        opacity: 0.8;
+    }
+    100% {
+        scale: 1;
+        opacity: 0.8;
+    }
+}
+
+
+@keyframes grass-grow {
+    100% {
+        opacity: 1;
+        scale: 1;
+    }
+}
+
+
+@keyframes stem-grow {
+    0% {
+        border-radius: 10%;
+    }
+
+    100% {
+        transform: scaleY(1);
+    }
+}
+
+@keyframes flower-rotate {
+    0%,100% {
+        rotate: 0deg;
+    }
+    25% {
+        rotate: 5deg;
+    }
+    75% {
+        rotate: -5deg;
+    }
+}
+
+@keyframes shrink {
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes light-float {
+    0% {
+        opacity: 0;
+        transform: translate(0, 0);
+    }
+    25% {
+        opacity: 1;
+        transform: translate(20cqi, -25cqi);
+    }
+    50% {
+        opacity: 1;
+        transform: translate(0, -50cqi);
+    }
+    75% {
+        opacity: 1;
+        transform: translate(-20cqi, -75cqi);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(0, -100cqi);
+    }
+}
+    </style>
+</head>
+<body>
+        <div class="ground">
+        <div class="flower-container"></div>
+        <div class="flower-container"></div>
+        <div class="flower-container"></div>
+        <div class="flower-container"></div>
+        <div class="flower-container"></div>
+        <div class="flower-container"></div>
+        <div class="flower-container"></div>
+        <div class="flower-container"></div>
+        <div class="flower-container"></div>
+        <div class="flower-container"></div>
     </div>
+    <script>
+        
 
-    <script >document.addEventListener("DOMContentLoaded", () => {
-  const flower = document.querySelector("#animation-flower");
-  const word = document.querySelector("h1");
-  const rainDrop = document.querySelector(".rain-drop");
+document.querySelectorAll('.flower-container').forEach(el => {
+  el.innerHTML = `<div class="flower-top">
+                  <div class="flower-petal flower-petal__1"></div>
+                  <div class="flower-petal flower-petal__2"></div>
+                  <div class="flower-petal flower-petal__3"></div>
+                  <div class="flower-petal flower-petal__4"></div>
+                  <div class="flower-petal flower-petal__5"></div>
+                  <div class="flower-petal flower-petal__6"></div>
+                  <div class="flower-petal flower-petal__7"></div>
+                  <div class="flower-petal flower-petal__8"></div>
+                  <div class="flower-circle"></div>
+                  <div class="flower-light flower-light__1"></div>
+                  <div class="flower-light flower-light__2"></div>
+                  <div class="flower-light flower-light__3"></div>
+                  <div class="flower-light flower-light__4"></div>
+                  <div class="flower-light flower-light__5"></div>
+                  <div class="flower-light flower-light__6"></div>
+                  <div class="flower-light flower-light__7"></div>
+                  <div class="flower-light flower-light__8"></div>
+                  </div>
 
-  setTimeout(() => {
-    flower.style.display = "inherit";
-    word.style.display = "none";
-  }, 2000);
-});
+                  <div class="flower-bottom">
+                  <div class="flower-stem"></div>
+                  <div class="flower-leaf flower-leaf__1"></div>
+                  <div class="flower-leaf flower-leaf__2"></div>
+                  <div class="flower-leaf flower-leaf__3"></div>
+                  <div class="flower-leaf flower-leaf__4"></div>
+                  <div class="flower-leaf flower-leaf__5"></div>
+                  <div class="flower-leaf flower-leaf__6"></div>
 
-function createRaindrop() {
-  const body = document.querySelector("body");
-  const xPosition = Math.random() * window.innerWidth;
-  const delay = Math.random() * 5;
-  const duration = Math.random() * 2 + 2;
+                  <div class="flower-grass flower-grass__1"></div>
+                  <div class="flower-grass flower-grass__2"></div>
+                  <div class="flower-grass flower-grass__3"></div>
+                  <div class="flower-grass flower-grass__4"></div>
+                  </div>`;
+    });
 
-  const rainDrop = document.createElement("div");
-  rainDrop.className = "rain";
-  rainDrop.style.left = `${xPosition}px`;
-  rainDrop.style.animationDelay = `${delay}s`;
-  rainDrop.style.animationDuration = `${duration}s`;
-  rainDrop.style.display = "none";
-  body.appendChild(rainDrop);
-
-  setTimeout(() => {
-    rainDrop.style.display = "inherit";
-  }, 800);
-}
-
-setInterval(createRaindrop, 100);
-</script>
-  </body>
+    const flowers = Array.from(document.querySelectorAll('.flower-container'));
+    const animatedClass = 'animate';
+    
+    flowers[0].classList.add(animatedClass);
+    
+    setTimeout(() => {
+      for (let i = 1; i <= 2 && i < flowers.length; i++) {
+        flowers[i].classList.add(animatedClass);
+      }
+    
+      let remaining = flowers.slice(3); 
+      const interval = setInterval(() => {
+        if (remaining.length === 0) {
+          clearInterval(interval);
+          return;
+        }
+    
+        const randomIndex = Math.floor(Math.random() * remaining.length);
+        const el = remaining.splice(randomIndex, 1)[0]; 
+        el.classList.add(animatedClass);
+      }, 500);
+    
+    }, 3000);
+    </script>
+</body>
 </html>
