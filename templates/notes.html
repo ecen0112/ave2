@@ -1,249 +1,1676 @@
 {% extends "base.html" %}
 {% block title %}Notes - Our Journey{% endblock %}
 {% block content %}
-<h1 class="page-title">Notes</h1>
+<div class="notes-container">
+  <header class="page-header">
+    <h1 class="page-title">📝 Love Notes</h1>
+    <p class="page-subtitle">Capture your beautiful moments and thoughts together</p>
+  </header>
 
-<div class="content-grid">
-  <!-- Add Note Card -->
-  <article class="card-3d">
-    <div class="card-inner">
-      <h3>Add New Note</h3>
-      {% if session.get('role') == 'erl' or session.get('role') == 'love' %}
-        <form method="post" class="stack add-note-form" novalidate>
-          <textarea name="note" rows="3" maxlength="500" placeholder="Write something... (max 500 characters)" required></textarea>
-          <div class="char-counter">Characters: <span id="char-count">0</span>/500</div>
-          <button class="btn add-btn" type="submit">Add Note</button>
-        </form>
-      {% else %}
-        <p class="muted">Only admins can add notes. Sign in as BUNBUN to add.</p>
-      {% endif %}
-    </div>
-  </article>
-
-  <!-- All Notes Card -->
-  <article class="card-3d" style="grid-column: 1 / -1;">
-    <div class="card-inner">
-      <h3>All Notes</h3>
-      {% if notes %}
-        <div class="stack note-list">
-          {% for note in notes %}
-            <div class="note-card" data-timestamp="{{ note.timestamp }}">
-              <div class="note-header">
-                <h3>Note {{ loop.revindex }}</h3>
-                <span class="note-timestamp">{{ note.timestamp|datetime }}</span>
-              </div>
-              <p class="note-content">{{ note.text }}</p>
-              {% if session.get('role') == 'erl' %}
-                <form method="post" action="{{ url_for('delete_note', idx=loop.index0) }}" class="delete-form" onsubmit="return confirm('Are you sure you want to delete this note?')">
-                  <button class="btn delete-btn" type="submit">Delete</button>
-                </form>
-              {% endif %}
-            </div>
-          {% endfor %}
+  <div class="content-grid">
+    <!-- Enhanced Add Note Card -->
+    <article class="card-3d add-note-card" role="region" aria-labelledby="add-note-title">
+      <div class="card-inner">
+        <div class="card-header">
+          <h3 id="add-note-title" class="card-title">
+            <span class="card-icon">✍️</span>
+            Add New Note
+          </h3>
         </div>
-      {% else %}
-        <p class="muted">No notes yet.</p>
-      {% endif %}
+        {% if session.get('role') == 'erl' or session.get('role') == 'love' %}
+          <form method="post" class="add-note-form" novalidate>
+            <div class="form-group">
+              <label for="note-input" class="form-label">Your thoughts...</label>
+              <div class="textarea-container">
+                <textarea 
+                  id="note-input"
+                  name="note" 
+                  rows="4" 
+                  maxlength="500" 
+                  placeholder="Write something beautiful... Share your feelings, memories, or thoughts 💭" 
+                  required
+                  class="note-textarea"
+                ></textarea>
+                <div class="textarea-overlay"></div>
+              </div>
+              <div class="form-footer">
+                <div class="char-counter">
+                  <span id="char-count">0</span><span class="char-limit">/500</span>
+                  <div class="char-progress">
+                    <div class="char-progress-bar" id="char-progress-bar"></div>
+                  </div>
+                </div>
+                <div class="form-actions">
+                  <button class="btn btn-primary add-btn" type="submit" id="submit-btn">
+                    <span class="btn-icon">💖</span>
+                    <span class="btn-text">Add Note</span>
+                  </button>
+                  <button class="btn btn-secondary clear-btn" type="button" id="clear-btn">
+                    <span class="btn-icon">🗑️</span>
+                    <span class="btn-text">Clear</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        {% else %}
+          <div class="access-restricted">
+            <div class="restricted-icon">🔒</div>
+            <p class="restricted-text">Only admins can add notes</p>
+            <p class="restricted-subtext">Sign in as BUNBUN to add beautiful notes</p>
+            <a href="{{ url_for('login') }}" class="btn btn-outline">
+              <span class="btn-icon">🔑</span>
+              <span class="btn-text">Sign In</span>
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </article>
+
+    <!-- Enhanced Notes Display -->
+    <article class="card-3d notes-display-card" role="region" aria-labelledby="notes-title" style="grid-column: 1 / -1;">
+      <div class="card-inner">
+        <div class="card-header">
+          <h3 id="notes-title" class="card-title">
+            <span class="card-icon">📚</span>
+            All Notes
+            {% if notes %}
+              <span class="notes-count">({{ notes|length }})</span>
+            {% endif %}
+          </h3>
+          {% if notes %}
+            <div class="notes-controls">
+              <button class="btn btn-small btn-outline" id="search-toggle">
+                <span class="btn-icon">🔍</span>
+                <span class="btn-text">Search</span>
+              </button>
+             
+            </div>
+          {% endif %}
+        </div>
+        
+        {% if notes %}
+          <!-- Search Bar -->
+          <div class="search-container" id="search-container" style="display: none;">
+            <div class="search-input-container">
+              <input type="text" id="search-input" placeholder="Search notes..." class="search-input">
+              <span class="search-icon">🔍</span>
+            </div>
+          </div>
+
+          <!-- Sort Options -->
+          <div class="sort-container" id="sort-container" style="display: none;">
+            <div class="sort-options">
+              <button class="sort-btn active" data-sort="newest">📅 Newest First</button>
+              <button class="sort-btn" data-sort="oldest">🕐 Oldest First</button>
+              <button class="sort-btn" data-sort="longest">📏 Longest</button>
+              <button class="sort-btn" data-sort="shortest">📐 Shortest</button>
+            </div>
+          </div>
+
+          <div class="notes-list" id="notes-list">
+            {% for note in notes %}
+              <div class="note-card" data-timestamp="{{ note.timestamp }}" data-length="{{ note.text|length }}">
+                <div class="note-card-inner">
+                  <div class="note-header">
+                    <div class="note-info">
+                      <h4 class="note-title">
+                        <span class="note-number">#{{ loop.revindex }}</span>
+                        <span class="note-label">Love Note</span>
+                      </h4>
+                      <div class="note-meta">
+                        <span class="note-timestamp">
+                          <span class="timestamp-icon">🕐</span>
+                          {{ note.timestamp|datetime }}
+                        </span>
+                        <span class="note-length">
+                          <span class="length-icon">📝</span>
+                          {{ note.text|length }} chars
+                        </span>
+                      </div>
+                    </div>
+                    {% if session.get('role') == 'erl' %}
+                      <div class="note-actions">
+                        <button class="btn btn-small btn-danger delete-btn" 
+                                data-note-id="{{ loop.index0 }}" 
+                                data-note-preview="{{ note.text[:30] }}...">
+                          <span class="btn-icon">🗑️</span>
+                        </button>
+                      </div>
+                    {% endif %}
+                  </div>
+                  <div class="note-content">
+                    <p class="note-text">{{ note.text }}</p>
+                  </div>
+                  <div class="note-footer">
+                    <div class="note-tags">
+                      {% if note.text|length > 200 %}
+                        <span class="note-tag">📖 Long Read</span>
+                      {% elif note.text|length < 50 %}
+                        <span class="note-tag">⚡ Quick Note</span>
+                      {% endif %}
+                      
+                      {% if "love" in note.text.lower() or "❤" in note.text %}
+                        <span class="note-tag love-tag">💕 Love</span>
+                      {% endif %}
+                      
+                      {% if "memory" in note.text.lower() or "remember" in note.text.lower() %}
+                        <span class="note-tag memory-tag">🧠 Memory</span>
+                      {% endif %}
+                      
+                      {% if "happy" in note.text.lower() or "joy" in note.text.lower() or "smile" in note.text.lower() %}
+                        <span class="note-tag happy-tag">😊 Happy</span>
+                      {% endif %}
+                    </div>
+                    <div class="note-stats">
+                      <span class="word-count">{{ note.text.split()|length }} words</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+
+          <!-- Notes Statistics -->
+          <div class="notes-stats">
+            <div class="stat-item">
+              <span class="stat-icon">📊</span>
+              <span class="stat-label">Total Notes:</span>
+              <span class="stat-value">{{ notes|length }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-icon">📝</span>
+              <span class="stat-label">Total Chars:</span>
+              <span class="stat-value">
+                {% set total_chars = 0 %}
+                {% for note in notes %}
+                  {% set total_chars = total_chars + note.text|length %}
+                {% endfor %}
+                {{ total_chars }}
+              </span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-icon">💭</span>
+              <span class="stat-label">Avg Length:</span>
+              <span class="stat-value">
+                {% if notes|length > 0 %}
+                  {% set total_chars = 0 %}
+                  {% for note in notes %}
+                    {% set total_chars = total_chars + note.text|length %}
+                  {% endfor %}
+                  {{ (total_chars / notes|length)|round|int }} chars
+                {% else %}
+                  0 chars
+                {% endif %}
+              </span>
+            </div>
+          </div>
+
+        {% else %}
+          <div class="empty-state">
+            <div class="empty-icon">📝</div>
+            <h4 class="empty-title">No notes yet</h4>
+            <p class="empty-description">Start writing your first love note to capture beautiful memories!</p>
+            {% if session.get('role') == 'erl' or session.get('role') == 'love' %}
+              <button class="btn btn-primary" onclick="document.getElementById('note-input').focus()">
+                <span class="btn-icon">✍️</span>
+                <span class="btn-text">Write First Note</span>
+              </button>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+    </article>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal" id="delete-modal" style="display: none;">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">🗑️ Delete Note</h3>
+      <button class="modal-close" id="modal-close">&times;</button>
     </div>
-  </article>
+    <div class="modal-body">
+      <p>Are you sure you want to delete this note?</p>
+      <div class="note-preview" id="note-preview"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="cancel-delete">
+        <span class="btn-text">Cancel</span>
+      </button>
+      <form method="post" id="delete-form" style="display: inline;">
+        <button class="btn btn-danger" type="submit">
+          <span class="btn-icon">🗑️</span>
+          <span class="btn-text">Delete</span>
+        </button>
+      </form>
+    </div>
+  </div>
 </div>
 
 <style>
-  .content-grid {
-    max-width: 1200px;
+  :root {
+    --accent: #ff4060;
+    --accent-2: #8ba8e0;
+    --accent-3: #6c5ce7;
+    --success: #00b894;
+    --warning: #fdcb6e;
+    --danger: #e17055;
+    --bg-dark: #1a1a2e;
+    --bg-darker: #16213e;
+    --text-light: #f5f5f5;
+    --text-muted: #b8c5d1;
+    --shadow: rgba(0, 0, 0, 0.3);
+    --shadow-light: rgba(255, 255, 255, 0.1);
+    --card-bg: rgba(255, 255, 255, 0.08);
+    --card-bg-hover: rgba(255, 255, 255, 0.12);
+    --border-radius: 16px;
+    --border-radius-sm: 8px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-darker) 100%);
+    min-height: 100vh;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  .notes-container {
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 20px;
-    display: grid;
-    gap: 20px;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    padding: 24px;
+    animation: fadeInUp 0.8s ease-out;
+  }
+
+  .page-header {
+    text-align: center;
+    margin-bottom: 32px;
   }
 
   .page-title {
-    font-size: 2.5rem;
-    font-weight: 700;
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 800;
     color: var(--accent);
-    margin-bottom: 24px;
-    text-align: center;
-    animation: fadeIn 0.5s ease-out;
+    margin-bottom: 8px;
+    text-shadow: 0 2px 10px rgba(255, 64, 96, 0.3);
+    animation: fadeIn 0.6s ease-out;
+  }
+
+  .page-subtitle {
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
+    color: var(--text-muted);
+    font-weight: 400;
+    animation: fadeIn 0.8s ease-out;
+  }
+
+  .content-grid {
+    display: grid;
+    gap: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(min(400px, 100%), 1fr));
   }
 
   .card-3d {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(8px);
-    border-radius: 18px;
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
-    padding: 20px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius);
+    box-shadow: 
+      0 8px 32px var(--shadow),
+      inset 0 1px 0 var(--shadow-light);
+    padding: 24px;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-3d::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    opacity: 0;
+    transition: var(--transition);
+    pointer-events: none;
   }
 
   .card-3d:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25);
+    transform: translateY(-4px);
+    box-shadow: 
+      0 16px 40px var(--shadow),
+      inset 0 1px 0 var(--shadow-light);
+    background: var(--card-bg-hover);
+  }
+
+  .card-3d:hover::before {
+    opacity: 1;
+  }
+
+  .add-note-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+  }
+
+  .notes-display-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(135deg, var(--accent-3), var(--accent));
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
   }
 
   .card-inner {
-    text-align: center;
+    position: relative;
+    z-index: 1;
   }
 
-  .stack {
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .card-title {
+    font-size: clamp(1.3rem, 3vw, 1.6rem);
+    color: var(--text-light);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .card-icon {
+    font-size: 1.2em;
+  }
+
+  .notes-count {
+    font-size: 0.8em;
+    color: var(--accent);
+    background: rgba(255, 64, 96, 0.2);
+    padding: 4px 8px;
+    border-radius: 12px;
+    margin-left: 8px;
+  }
+
+  .notes-controls {
+    display: flex;
+    gap: 8px;
+  }
+
+  .form-group {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
   }
 
-  .add-note-form textarea {
+  .form-label {
+    font-size: 1.1rem;
+    color: var(--text-light);
+    font-weight: 600;
+    text-align: left;
+  }
+
+  .textarea-container {
+    position: relative;
+  }
+
+  .note-textarea {
     width: 100%;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid var(--accent);
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
+    padding: 16px;
+    border-radius: var(--border-radius-sm);
+    border: 2px solid transparent;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-light);
+    font-size: 1rem;
+    line-height: 1.6;
     resize: vertical;
-    min-height: 80px;
+    min-height: 120px;
+    transition: var(--transition);
+    font-family: inherit;
+  }
+
+  .note-textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 0 0 3px rgba(255, 64, 96, 0.2);
+  }
+
+  .note-textarea::placeholder {
+    color: var(--text-muted);
+  }
+
+  .textarea-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: var(--border-radius-sm);
+    background: linear-gradient(135deg, rgba(255, 64, 96, 0.1), rgba(139, 168, 224, 0.1));
+    opacity: 0;
+    transition: var(--transition);
+    pointer-events: none;
+  }
+
+  .note-textarea:focus + .textarea-overlay {
+    opacity: 1;
+  }
+
+  .form-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 16px;
   }
 
   .char-counter {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
     font-size: 0.9rem;
-    color: #cccccc;
-    text-align: right;
+    color: var(--text-muted);
+  }
+
+  .char-limit {
+    opacity: 0.7;
+  }
+
+  .char-progress {
+    width: 120px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .char-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--success), var(--warning), var(--danger));
+    width: 0%;
+    transition: var(--transition);
+    border-radius: 2px;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 12px;
   }
 
   .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    min-width: fit-content;
+  }
+
+  .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: var(--transition);
+  }
+
+  .btn:hover::before {
+    left: 100%;
+  }
+
+  .btn-primary {
     background: linear-gradient(135deg, var(--accent), var(--accent-2));
     color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: transform 0.3s ease, background 0.3s ease;
-    width: 100%;
-    max-width: 200px;
-    margin: 0 auto;
+    box-shadow: 0 4px 15px rgba(255, 64, 96, 0.3);
   }
 
-  .btn:hover {
+  .btn-primary:hover {
     transform: translateY(-2px);
-    background: linear-gradient(135deg, #ff4060, #8ba8e0);
+    box-shadow: 0 8px 25px rgba(255, 64, 96, 0.4);
   }
 
-  .add-btn {
-    background: linear-gradient(135deg, #4CAF50, #8BC34A);
+  .btn-secondary {
+    background: transparent;
+    color: var(--text-light);
+    border: 2px solid var(--text-muted);
   }
 
-  .add-btn:hover {
-    background: linear-gradient(135deg, #388E3C, #689F38);
+  .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--accent);
+    transform: translateY(-2px);
   }
 
-  .delete-btn {
-    background: linear-gradient(135deg, #ff4060, #8ba8e0);
-    padding: 8px 15px;
-    max-width: 100px;
+  .btn-outline {
+    background: transparent;
+    color: var(--text-light);
+    border: 1px solid rgba(255, 255, 255, 0.3);
   }
 
-  .delete-btn:hover {
-    background: linear-gradient(135deg, #ff1a40, #6b88c0);
+  .btn-outline:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--accent);
   }
 
-  .muted {
-    color: #cccccc;
-    font-style: italic;
+  .btn-danger {
+    background: linear-gradient(135deg, var(--danger), #d63031);
+    color: white;
+    box-shadow: 0 4px 15px rgba(225, 112, 85, 0.3);
   }
 
-  .note-list {
-    gap: 15px;
+  .btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(225, 112, 85, 0.4);
+  }
+
+  .btn-small {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+  }
+
+  .btn-icon {
+    font-size: 1.1em;
+  }
+
+  .access-restricted {
+    text-align: center;
+    padding: 32px 16px;
+  }
+
+  .restricted-icon {
+    font-size: 4rem;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+
+  .restricted-text {
+    color: var(--text-light);
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+  }
+
+  .restricted-subtext {
+    color: var(--text-muted);
+    margin-bottom: 24px;
+  }
+
+  .search-container {
+    margin-bottom: 20px;
+    animation: slideDown 0.3s ease-out;
+  }
+
+  .search-input-container {
+    position: relative;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 12px 16px 12px 48px;
+    border: 2px solid transparent;
+    border-radius: var(--border-radius-sm);
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-light);
+    font-size: 1rem;
+    transition: var(--transition);
+  }
+
+  .search-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.1rem;
+    color: var(--text-muted);
+  }
+
+  .sort-container {
+    margin-bottom: 20px;
+    animation: slideDown 0.3s ease-out;
+  }
+
+  .sort-options {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .sort-btn {
+    padding: 8px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.85rem;
+  }
+
+  .sort-btn:hover,
+  .sort-btn.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+
+  .notes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
   }
 
   .note-card {
-    background: rgba(0, 0, 0, 0.2);
-    padding: 15px;
-    border-radius: 10px;
-    border-left: 4px solid var(--accent);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-sm);
+    transition: var(--transition);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .note-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
   }
 
   .note-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 25px var(--shadow);
+  }
+
+  .note-card-inner {
+    padding: 20px;
   }
 
   .note-header {
     display: flex;
     justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    gap: 16px;
+  }
+
+  .note-info {
+    flex: 1;
+  }
+
+  .note-title {
+    display: flex;
     align-items: center;
-    margin-bottom: 10px;
+    gap: 12px;
+    margin-bottom: 8px;
   }
 
-  .note-header h3 {
+  .note-number {
     font-size: 1.2rem;
+    font-weight: 700;
     color: var(--accent);
-    margin: 0;
   }
 
-  .note-timestamp {
-    font-size: 0.8rem;
-    color: #cccccc;
-    font-style: italic;
+  .note-label {
+    font-size: 1rem;
+    color: var(--text-light);
+    font-weight: 600;
+  }
+
+  .note-meta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .note-timestamp,
+  .note-length {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .timestamp-icon,
+  .length-icon {
+    font-size: 1rem;
+  }
+
+  .note-actions {
+    display: flex;
+    gap: 8px;
   }
 
   .note-content {
+    margin-bottom: 16px;
+  }
+
+  .note-text {
+    color: var(--text-light);
+    line-height: 1.6;
     font-size: 1rem;
-    color: #ffffff;
-    margin: 0 0 10px 0;
     word-wrap: break-word;
   }
 
-  .delete-form {
-    margin-top: 10px;
-    text-align: right;
+  .note-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
   }
 
+  .note-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .note-tag {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-light);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .love-tag {
+    background: rgba(255, 64, 96, 0.2);
+    border-color: var(--accent);
+    color: #ffb3c1;
+  }
+
+  .memory-tag {
+    background: rgba(108, 92, 231, 0.2);
+    border-color: var(--accent-3);
+    color: #c4b9f3;
+  }
+
+  .happy-tag {
+    background: rgba(0, 184, 148, 0.2);
+    border-color: var(--success);
+    color: #81ecec;
+  }
+
+  .note-stats {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .word-count {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .notes-stats {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--border-radius-sm);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+  }
+
+  .stat-icon {
+    font-size: 1.1em;
+  }
+
+  .stat-label {
+    color: var(--text-muted);
+  }
+
+  .stat-value {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 64px 24px;
+  }
+
+  .empty-icon {
+    font-size: 5rem;
+    margin-bottom: 24px;
+    opacity: 0.3;
+  }
+
+  .empty-title {
+    font-size: 1.5rem;
+    color: var(--text-light);
+    margin-bottom: 12px;
+  }
+
+  .empty-description {
+    color: var(--text-muted);
+    margin-bottom: 32px;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Modal Styles */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+  }
+
+  .modal-content {
+    position: relative;
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius);
+    box-shadow: 0 16px 40px var(--shadow);
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow: auto;
+    animation: scaleIn 0.3s ease-out;
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 24px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .modal-title {
+    font-size: 1.3rem;
+    color: var(--text-light);
+    font-weight: 700;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: var(--transition);
+  }
+
+  .modal-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-light);
+  }
+
+  .modal-body {
+    padding: 24px;
+  }
+
+  .modal-body p {
+    color: var(--text-light);
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+
+  .note-preview {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-sm);
+    padding: 16px;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-bottom: 16px;
+  }
+
+  .modal-footer {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    padding: 16px 24px 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Animations */
   @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(40px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Hidden class */
+  .hidden {
+    display: none !important;
+  }
+
+  /* Mobile Responsiveness */
   @media (max-width: 768px) {
+    .notes-container {
+      padding: 16px;
+    }
+
     .content-grid {
       grid-template-columns: 1fr;
+      gap: 20px;
     }
+
+    .card-3d {
+      padding: 20px;
+    }
+
+    .card-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .notes-controls {
+      width: 100%;
+      justify-content: flex-start;
+    }
+
+    .form-footer {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .form-actions {
+      justify-content: center;
+    }
+
     .btn {
-      padding: 8px 16px;
-      max-width: 150px;
+      flex: 1;
+      justify-content: center;
     }
-    .note-card {
-      padding: 10px;
+
+    .note-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
     }
-    .note-header h3 {
-      font-size: 1rem;
+
+    .note-actions {
+      align-self: flex-end;
+    }
+
+    .note-meta {
+      gap: 12px;
+    }
+
+    .notes-stats {
+      gap: 16px;
+    }
+
+    .stat-item {
+      flex-direction: column;
+      text-align: center;
+      gap: 4px;
+    }
+
+    .sort-options {
+      justify-content: center;
+    }
+
+    .modal-content {
+      width: 95%;
+      margin: 20px;
+    }
+
+    .modal-footer {
+      flex-direction: column;
     }
   }
 
   @media (max-width: 480px) {
     .page-title {
-      font-size: 1.5rem;
+      font-size: 1.8rem;
     }
+
+    .page-subtitle {
+      font-size: 1rem;
+    }
+
+    .card-3d {
+      padding: 16px;
+    }
+
+    .note-card-inner {
+      padding: 16px;
+    }
+
     .btn {
-      padding: 6px 12px;
-      max-width: 120px;
-    }
-    .note-header {
-      flex-direction: column;
-      gap: 5px;
-    }
-    .note-content {
+      padding: 10px 16px;
       font-size: 0.9rem;
+    }
+
+    .btn-small {
+      padding: 6px 12px;
+      font-size: 0.8rem;
+    }
+
+    .note-title {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+
+    .note-tags {
+      gap: 6px;
+    }
+
+    .note-tag {
+      font-size: 0.7rem;
+      padding: 3px 6px;
+    }
+
+    .empty-state {
+      padding: 40px 16px;
+    }
+
+    .empty-icon {
+      font-size: 3.5rem;
+    }
+  }
+
+  /* Print styles */
+  @media print {
+    .notes-controls,
+    .form-actions,
+    .note-actions,
+    .modal,
+    .btn {
+      display: none !important;
+    }
+
+    .card-3d {
+      box-shadow: none;
+      border: 1px solid #ccc;
+      background: white;
+      color: black;
+    }
+
+    .page-title {
+      color: black;
+    }
+
+    .note-text {
+      color: black;
+    }
+  }
+
+  /* Active toggle button styles */
+  .btn.active {
+    background: var(--accent) !important;
+    color: white !important;
+    box-shadow: 0 4px 15px rgba(255, 64, 96, 0.3);
+  }
+
+  .btn.active:hover {
+    background: linear-gradient(135deg, #ff1a40, #6b88c0) !important;
+  }
+  .search-highlight {
+    background: var(--accent);
+    color: white;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-weight: 600;
+  }
+
+  .no-results {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--border-radius-sm);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 20px;
+  }
+
+  .no-results-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+
+  .no-results h4 {
+    color: var(--text-light);
+    margin-bottom: 8px;
+  }
+
+  .no-results p {
+    margin-bottom: 20px;
+  }
+
+  .no-results strong {
+    color: var(--accent);
+  }
+    .card-3d {
+      border: 2px solid var(--accent);
+    }
+
+    .btn {
+      border: 2px solid currentColor;
+    }
+
+    .note-card {
+      border: 1px solid var(--accent);
+    }
+
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+
+    .card-3d:hover {
+      transform: none;
+    }
+
+    .btn:hover {
+      transform: none;
+    }
+
+    .note-card:hover {
+      transform: none;
     }
   }
 </style>
 
 {% block scripts %}
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const textarea = document.querySelector('.add-note-form textarea');
+  document.addEventListener('DOMContentLoaded', function() {
+    // Character counter and progress bar
+    const textarea = document.getElementById('note-input');
     const charCount = document.getElementById('char-count');
-    if (textarea) {
-      textarea.addEventListener('input', () => {
-        charCount.textContent = textarea.value.length;
+    const progressBar = document.getElementById('char-progress-bar');
+    const submitBtn = document.getElementById('submit-btn');
+    const clearBtn = document.getElementById('clear-btn');
+
+    if (textarea && charCount && progressBar) {
+      function updateCharCounter() {
+        const length = textarea.value.length;
+        const maxLength = parseInt(textarea.getAttribute('maxlength'));
+        const percentage = (length / maxLength) * 100;
+
+        charCount.textContent = length;
+        progressBar.style.width = percentage + '%';
+
+        // Change color based on usage
+        if (percentage < 50) {
+          progressBar.style.background = 'var(--success)';
+        } else if (percentage < 80) {
+          progressBar.style.background = 'var(--warning)';
+        } else {
+          progressBar.style.background = 'var(--danger)';
+        }
+
+        // Disable submit if empty or too long
+        if (submitBtn) {
+          submitBtn.disabled = length === 0 || length > maxLength;
+          submitBtn.style.opacity = submitBtn.disabled ? '0.5' : '1';
+        }
+      }
+
+      textarea.addEventListener('input', updateCharCounter);
+      updateCharCounter(); // Initial call
+    }
+
+    // Clear button functionality
+    if (clearBtn && textarea) {
+      clearBtn.addEventListener('click', function() {
+        if (textarea.value.length > 0) {
+          if (confirm('Are you sure you want to clear your note?')) {
+            textarea.value = '';
+            textarea.focus();
+            if (charCount) charCount.textContent = '0';
+            if (progressBar) {
+              progressBar.style.width = '0%';
+              progressBar.style.background = 'var(--success)';
+            }
+          }
+        }
+      });
+    }
+
+    // Search functionality
+    const searchToggle = document.getElementById('search-toggle');
+    const searchContainer = document.getElementById('search-container');
+    const searchInput = document.getElementById('search-input');
+    const notesList = document.getElementById('notes-list');
+
+    if (searchToggle && searchContainer && searchInput) {
+      // Show search container by default if there are notes
+      if (document.querySelectorAll('.note-card').length > 0) {
+        searchContainer.style.display = 'block';
+        updateToggleButton(searchToggle, true);
+      }
+
+      searchToggle.addEventListener('click', function() {
+        const isCurrentlyVisible = searchContainer.style.display === 'block';
+        
+        if (isCurrentlyVisible) {
+          // Hide search
+          searchContainer.style.display = 'none';
+          searchInput.value = '';
+          showAllNotes();
+          updateToggleButton(this, false);
+        } else {
+          // Show search
+          searchContainer.style.display = 'block';
+          updateToggleButton(this, true);
+          setTimeout(() => {
+            searchInput.focus();
+          }, 100);
+          
+          // Close sort if open
+          const sortContainer = document.getElementById('sort-container');
+          const sortToggle = document.getElementById('sort-toggle');
+          if (sortContainer && sortToggle) {
+            sortContainer.style.display = 'none';
+            updateToggleButton(sortToggle, false);
+          }
+        }
+      });
+
+      searchInput.addEventListener('input', function() {
+        const query = this.value.toLowerCase().trim();
+        filterNotes(query);
+      });
+
+      // Allow Enter key to focus on first visible note
+      searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          const firstVisibleNote = document.querySelector('.note-card[style*="block"], .note-card:not([style*="none"])');
+          if (firstVisibleNote) {
+            firstVisibleNote.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }
+      });
+    }
+
+    function filterNotes(query) {
+      const noteCards = document.querySelectorAll('.note-card');
+      let visibleCount = 0;
+
+      noteCards.forEach(card => {
+        const noteText = card.querySelector('.note-text');
+        if (noteText) {
+          const text = noteText.textContent.toLowerCase();
+          const noteTitle = card.querySelector('.note-title');
+          const titleText = noteTitle ? noteTitle.textContent.toLowerCase() : '';
+          
+          const isMatch = query === '' || text.includes(query) || titleText.includes(query);
+          
+          if (isMatch) {
+            card.style.display = 'block';
+            card.style.opacity = '1';
+            visibleCount++;
+            
+            // Highlight matching text
+            if (query && query.length > 0) {
+              highlightText(noteText, query);
+            } else {
+              removeHighlights(noteText);
+            }
+          } else {
+            card.style.display = 'none';
+            card.style.opacity = '0';
+          }
+        }
+      });
+
+      // Update notes count if exists
+      const notesCount = document.querySelector('.notes-count');
+      if (notesCount) {
+        const totalNotes = noteCards.length;
+        if (query && query.length > 0) {
+          notesCount.textContent = `(${visibleCount}/${totalNotes})`;
+          notesCount.style.color = visibleCount === 0 ? 'var(--danger)' : 'var(--accent)';
+        } else {
+          notesCount.textContent = `(${totalNotes})`;
+          notesCount.style.color = 'var(--accent)';
+        }
+      }
+
+      // Show "no results" message
+      showNoResultsMessage(visibleCount, query);
+    }
+
+    function highlightText(element, query) {
+      const originalText = element.dataset.originalText || element.textContent;
+      element.dataset.originalText = originalText;
+      
+      const regex = new RegExp(`(${escapeRegExp(query)})`, 'gi');
+      const highlightedText = originalText.replace(regex, '<mark class="search-highlight">$1</mark>');
+      element.innerHTML = highlightedText;
+    }
+
+    function removeHighlights(element) {
+      if (element.dataset.originalText) {
+        element.textContent = element.dataset.originalText;
+        delete element.dataset.originalText;
+      }
+    }
+
+    function escapeRegExp(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function showNoResultsMessage(visibleCount, query) {
+      const existingMessage = document.getElementById('no-results-message');
+      if (existingMessage) {
+        existingMessage.remove();
+      }
+
+      if (visibleCount === 0 && query && query.length > 0) {
+        const message = document.createElement('div');
+        message.id = 'no-results-message';
+        message.className = 'no-results';
+        message.innerHTML = `
+          <div class="no-results-icon">🔍</div>
+          <h4>No notes found</h4>
+          <p>No notes contain "<strong>${escapeHtml(query)}</strong>"</p>
+          <button class="btn btn-outline btn-small" onclick="document.getElementById('search-input').value=''; showAllNotes(); this.parentElement.remove();">
+            <span class="btn-text">Clear Search</span>
+          </button>
+        `;
+        
+        const notesList = document.getElementById('notes-list');
+        if (notesList) {
+          notesList.appendChild(message);
+        }
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function showAllNotes() {
+      const noteCards = document.querySelectorAll('.note-card');
+      noteCards.forEach(card => {
+        card.style.display = 'block';
+        card.style.opacity = '1';
+        
+        // Remove highlights
+        const noteText = card.querySelector('.note-text');
+        if (noteText) {
+          removeHighlights(noteText);
+        }
+      });
+      
+      // Reset notes count
+      const notesCount = document.querySelector('.notes-count');
+      if (notesCount) {
+        const totalNotes = noteCards.length;
+        notesCount.textContent = `(${totalNotes})`;
+        notesCount.style.color = 'var(--accent)';
+      }
+
+      // Remove no results message
+      const noResultsMessage = document.getElementById('no-results-message');
+      if (noResultsMessage) {
+        noResultsMessage.remove();
+      }
+    }
+
+    // Sort functionality
+    const sortToggle = document.getElementById('sort-toggle');
+    const sortContainer = document.getElementById('sort-container');
+    const sortButtons = document.querySelectorAll('.sort-btn');
+
+    if (sortToggle && sortContainer) {
+      sortToggle.addEventListener('click', function() {
+        const isCurrentlyVisible = sortContainer.style.display === 'block';
+        
+        if (isCurrentlyVisible) {
+          // Hide sort
+          sortContainer.style.display = 'none';
+          updateToggleButton(this, false);
+        } else {
+          // Show sort
+          sortContainer.style.display = 'block';
+          updateToggleButton(this, true);
+          
+          // Close search if open
+          const searchContainer = document.getElementById('search-container');
+          const searchToggle = document.getElementById('search-toggle');
+          const searchInput = document.getElementById('search-input');
+          
+          if (searchContainer && searchToggle && searchInput) {
+            searchContainer.style.display = 'none';
+            searchInput.value = '';
+            showAllNotes();
+            updateToggleButton(searchToggle, false);
+          }
+        }
+      });
+    }
+
+    // Helper function to update toggle button appearance
+    function updateToggleButton(button, isActive) {
+      const btnText = button.querySelector('.btn-text');
+      const btnIcon = button.querySelector('.btn-icon');
+      
+      if (button.id === 'search-toggle') {
+        if (btnText) btnText.textContent = isActive ? 'Hide Search' : 'Search';
+        if (btnIcon) btnIcon.textContent = isActive ? '✖️' : '🔍';
+        button.classList.toggle('active', isActive);
+      } else if (button.id === 'sort-toggle') {
+        if (btnText) btnText.textContent = isActive ? 'Hide Sort' : 'Sort';
+        if (btnIcon) btnIcon.textContent = isActive ? '✖️' : '📅';
+        button.classList.toggle('active', isActive);
+      }
+    }
+
+    sortButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        // Update active state
+        sortButtons.forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+
+        // Sort notes
+        const sortType = this.dataset.sort;
+        sortNotes(sortType);
+      });
+    });
+
+    function sortNotes(sortType) {
+      const notesList = document.getElementById('notes-list');
+      if (!notesList) return;
+
+      const noteCards = Array.from(notesList.children);
+      
+      noteCards.sort((a, b) => {
+        switch (sortType) {
+          case 'newest':
+            return new Date(b.dataset.timestamp) - new Date(a.dataset.timestamp);
+          case 'oldest':
+            return new Date(a.dataset.timestamp) - new Date(b.dataset.timestamp);
+          case 'longest':
+            return parseInt(b.dataset.length) - parseInt(a.dataset.length);
+          case 'shortest':
+            return parseInt(a.dataset.length) - parseInt(b.dataset.length);
+          default:
+            return 0;
+        }
+      });
+
+      // Re-append sorted cards
+      noteCards.forEach(card => {
+        notesList.appendChild(card);
+      });
+
+      // Add animation
+      noteCards.forEach((card, index) => {
+        card.style.animation = `fadeInUp 0.3s ease-out ${index * 0.05}s both`;
+      });
+    }
+
+    // Modal functionality
+    const deleteModal = document.getElementById('delete-modal');
+    const deleteForm = document.getElementById('delete-form');
+    const notePreview = document.getElementById('note-preview');
+    const modalClose = document.getElementById('modal-close');
+    const cancelDelete = document.getElementById('cancel-delete');
+
+    // Handle delete button clicks
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const noteId = this.dataset.noteId;
+        const preview = this.dataset.notePreview;
+        
+        notePreview.textContent = preview;
+        deleteForm.action = `/delete_note/${noteId}`;
+        deleteModal.style.display = 'flex';
+        
+        // Trap focus in modal
+        trapFocus(deleteModal);
+      });
+    });
+
+    // Close modal handlers
+    [modalClose, cancelDelete].forEach(btn => {
+      if (btn) {
+        btn.addEventListener('click', closeModal);
+      }
+    });
+
+    // Close on overlay click
+    if (deleteModal) {
+      deleteModal.querySelector('.modal-overlay').addEventListener('click', closeModal);
+    }
+
+    // Close on escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && deleteModal.style.display === 'flex') {
+        closeModal();
+      }
+    });
+
+    function closeModal() {
+      if (deleteModal) {
+        deleteModal.style.display = 'none';
+        // Return focus to the delete button that opened the modal
+        const activeDeleteBtn = document.querySelector('.delete-btn:focus');
+        if (activeDeleteBtn) {
+          activeDeleteBtn.focus();
+        }
+      }
+    }
+
+    function trapFocus(modal) {
+      const focusableElements = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      if (firstElement) {
+        firstElement.focus();
+      }
+
+      modal.addEventListener('keydown', function(e) {
+        const isTabPressed = (e.key === 'Tab' || e.keyCode === 9);
+        if (!isTabPressed) return;
+
+        if (e.shiftKey) { // Shift + Tab
+          if (document.activeElement === firstElement) {
+            e.preventDefault();
+            lastElement.focus();
+          }
+        } else { // Tab
+          if (document.activeElement === lastElement) {
+            e.preventDefault();
+            firstElement.focus();
+          }
+        }
       });
     }
   });

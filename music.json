@@ -5,5 +5,26 @@
         "url": "https://youtube.com/embed/zgaCZOQCpp8?si=cU7VtE1mfCrNf7G3",
         "thumbnail": "https://img.youtube.com/vi/zgaCZOQCpp8/hqdefault.jpg",
         "placement": "Romantic"
+    },
+    {
+        "song": "Let Her Go",
+        "artist": "Passenger",
+        "url": "https://youtube.com/embed/yz1N2j6XPNY?si=KpMXtOd_ZveuKRNZ",
+        "thumbnail": "https://img.youtube.com/vi/yz1N2j6XPNY/hqdefault.jpg",
+        "placement": "Romantic"
+    },
+    {
+        "song": "SARANGOLA",
+        "artist": "BEN&BEN",
+        "url": "https://youtube.com/embed/gEIpajaddVU?si=2WWR2oE50TGqi7p-",
+        "thumbnail": "https://img.youtube.com/vi/gEIpajaddVU/hqdefault.jpg",
+        "placement": "Romantic"
+    },
+    {
+        "song": "back to friends",
+        "artist": "sombr",
+        "url": "https://youtube.com/embed/5auhyokDUXw?si=oQH3r05itqe2OzPs",
+        "thumbnail": "https://img.youtube.com/vi/5auhyokDUXw/hqdefault.jpg",
+        "placement": "Romantic"
     }
 ]
