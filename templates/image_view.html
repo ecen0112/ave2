@@ -1,623 +1,1694 @@
 {% extends "base.html" %}
 {% block title %}View Photo - Our Journey{% endblock %}
 {% block content %}
-<div class="photo-view-container" role="main">
-  <h1 class="page-title" id="photo-title">Photo</h1>
-  <div class="photo-card" role="region" aria-labelledby="photo-title">
-    <div class="image-wrapper">
-      <img 
-        src="{{ url_for('static', filename='uploads/' + image.filename) }}" 
-        alt="Photo uploaded on {{ image.uploaded_at|datetime }} titled {{ image.filename }}" 
-        class="photo-image"
-        aria-labelledby="photo-title"
-        loading="lazy"
-        data-fallback="{{ url_for('static', filename='images/placeholder.jpg') }}"
-        onerror="handleImageError(this)"
-      >
-      <div class="image-overlay"></div>
-      <div class="image-loading" aria-live="polite">Loading image...</div>
-    </div>
-    <div class="photo-info">
-      <p class="upload-timestamp">Uploaded: {{ image.uploaded_at|datetime }}</p>
-      <p class="current-timestamp">Viewed: Mon, Sep 22, 09:49 PM PST</p>
-    </div>
-   {% if image.note %}
-  <div class="note-display" role="region">
-    <p class="note-text">Note: {{ image.note }}</p>
-    {% if session.get('role') == 'erl' or session.get('role') == 'love' %}
-      <form 
-        method="post" 
-        action="{{ url_for('delete_image_note', idx=idx) }}" 
-        class="delete-note-form" 
-        id="delete-note-form-{{ idx }}"
-      >
-        <button 
-          type="button" 
-          class="btn delete-note-btn" 
-          onclick="openDeleteNoteModal('{{ idx }}')"
-          aria-label="Open delete note confirmation"
-        >
-          <span class="btn-text">Delete Note</span>
-          <span class="loading-spinner" style="display:none;">⏳</span>
-        </button>
-      </form>
-    {% endif %}
-  </div>
-{% endif %}
-    {% if session.get('role') == 'erl' or session.get('role') == 'love' %}
-      <div class="note-section" role="region">
-        <button 
-          type="button" 
-          class="btn toggle-note-btn" 
-          onclick="toggleNoteForm()"
-          aria-expanded="false"
-          aria-controls="note-form"
-        >
-          <span class="btn-text">{% if image.note %}Edit Note{% else %}Add Note{% endif %}</span>
-          <span class="toggle-icon">▼</span>
-        </button>
-        <form 
-          method="post" 
-          action="{{ url_for('view_image', idx=idx) }}" 
-          class="note-form" 
-          id="note-form"
-          style="display:none;"
-          onsubmit="return validateAndSubmitNote();"
-        >
-          <textarea 
-            name="note" 
-            class="note-input" 
-            placeholder="Add a note about this photo..." 
-            rows="3"
-            maxlength="500"
-            required
-            {% if image.note %}value="{{ image.note }}"{% endif %}
-            aria-label="Note input"
-          ></textarea>
-          <div class="char-counter">Characters: <span id="char-count">{% if image.note %}{{ image.note|length }}{% else %}0{% endif %}</span>/500</div>
-          <button 
-            type="submit" 
-            class="btn note-btn" 
-            aria-label="Save note to this photo"
-          >
-            <span class="btn-text">Save Note</span>
-            <span class="loading-spinner" style="display:none;">⏳</span>
-          </button>
-        </form>
+<div class="image-view-container">
+  <!-- Navigation Header -->
+  <header class="view-header">
+    <div class="nav-controls">
+      <a href="{{ url_for('gallery') }}" class="btn btn-outline back-btn">
+        <span class="btn-icon">←</span>
+        <span class="btn-text">Back to Gallery</span>
+      </a>
+      <div class="image-counter">
+        <span class="current-index">{{ idx + 1 }}</span>
+        <span class="separator">/</span>
+        <span class="total-count" id="totalCount">--</span>
       </div>
-      <form 
-        method="post" 
-        action="{{ url_for('delete_image', idx=idx) }}" 
-        class="delete-form" 
-        id="delete-form-{{ idx }}"
-      >
-        <button 
-          type="button" 
-          class="btn delete-btn" 
-          onclick="openDeleteModal('{{ idx }}')"
-          aria-label="Open delete confirmation for this photo"
-        >
-          <span class="btn-text">Delete Photo</span>
-          <span class="loading-spinner" style="display:none;">⏳</span>
+    </div>
+    <h1 class="page-title">📷 Photo Viewer</h1>
+    <div class="view-actions">
+      <button class="btn btn-outline" id="fullscreenBtn" onclick="toggleFullscreen()">
+        <span class="btn-icon">🔍</span>
+        <span class="btn-text">Fullscreen</span>
+      </button>
+      <button class="btn btn-outline" id="infoToggle" onclick="toggleInfo()">
+        <span class="btn-icon">ℹ️</span>
+        <span class="btn-text">Info</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Image Display -->
+  <section class="image-section">
+    <div class="image-container" id="imageContainer">
+      <div class="image-wrapper">
+        <!-- Navigation Arrows -->
+        <button class="nav-arrow nav-prev" onclick="navigateImage(-1)" aria-label="Previous image">
+          <span>‹</span>
         </button>
-      </form>
-    {% endif %}
-  </div>
+        <button class="nav-arrow nav-next" onclick="navigateImage(1)" aria-label="Next image">
+          <span>›</span>
+        </button>
+
+        <!-- Main Image -->
+        <div class="image-display" id="imageDisplay">
+          <img 
+            src="{{ url_for('static', filename='uploads/' + image.filename) }}" 
+            alt="Photo: {{ image.filename }}" 
+            class="main-image"
+            id="mainImage"
+            loading="eager"
+            onload="handleImageLoad()"
+            onerror="handleImageError(this)"
+          >
+          
+          <!-- Loading Overlay -->
+          <div class="image-loading" id="imageLoading">
+            <div class="loading-spinner">⏳</div>
+            <div class="loading-text">Loading image...</div>
+          </div>
+          
+          <!-- Error Overlay -->
+          <div class="image-error" id="imageError" style="display: none;">
+            <div class="error-icon">⚠️</div>
+            <div class="error-text">Failed to load image</div>
+            <button class="btn btn-small" onclick="retryImageLoad()">Retry</button>
+          </div>
+          
+          <!-- Image Overlay for Zoom -->
+          <div class="zoom-overlay" id="zoomOverlay"></div>
+        </div>
+        
+        <!-- Zoom Controls -->
+        <div class="zoom-controls" id="zoomControls" style="display: none;">
+          <button class="zoom-btn" onclick="zoomImage(-0.2)" aria-label="Zoom out">-</button>
+          <span class="zoom-level" id="zoomLevel">100%</span>
+          <button class="zoom-btn" onclick="zoomImage(0.2)" aria-label="Zoom in">+</button>
+          <button class="zoom-btn" onclick="resetZoom()" aria-label="Reset zoom">Reset</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Image Information Panel -->
+  <aside class="info-panel" id="infoPanel">
+    <div class="info-content">
+      <!-- Basic Info -->
+      <div class="info-section">
+        <h3 class="info-title">
+          <span class="info-icon">📋</span>
+          Image Details
+        </h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Filename:</span>
+            <span class="info-value">{{ image.filename }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Uploaded:</span>
+            <span class="info-value">{{ image.uploaded_at|datetime }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Size:</span>
+            <span class="info-value" id="imageSize">Calculating...</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Dimensions:</span>
+            <span class="info-value" id="imageDimensions">Loading...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Note Section -->
+      <div class="info-section">
+        <h3 class="info-title">
+          <span class="info-icon">📝</span>
+          Notes
+        </h3>
+        
+        {% if image.note %}
+          <div class="current-note">
+            <div class="note-content">{{ image.note }}</div>
+            {% if session.get('role') == 'erl' or session.get('role') == 'love' %}
+              <div class="note-actions">
+                <button class="btn btn-small btn-outline" onclick="editNote()">
+                  <span class="btn-icon">✏️</span>
+                  <span class="btn-text">Edit</span>
+                </button>
+                <button class="btn btn-small btn-danger" onclick="openDeleteNoteModal()">
+                  <span class="btn-icon">🗑️</span>
+                  <span class="btn-text">Delete</span>
+                </button>
+              </div>
+            {% endif %}
+          </div>
+        {% else %}
+          <div class="no-note">
+            <p class="no-note-text">No note added yet</p>
+            {% if session.get('role') == 'erl' or session.get('role') == 'love' %}
+              <button class="btn btn-primary" onclick="addNote()">
+                <span class="btn-icon">➕</span>
+                <span class="btn-text">Add Note</span>
+              </button>
+            {% endif %}
+          </div>
+        {% endif %}
+
+        <!-- Note Form -->
+        {% if session.get('role') == 'erl' or session.get('role') == 'love' %}
+          <form method="post" class="note-form" id="noteForm" style="display: none;">
+            <div class="form-group">
+              <label for="noteInput" class="form-label">Add a note about this photo:</label>
+              <textarea 
+                id="noteInput"
+                name="note" 
+                class="note-textarea"
+                placeholder="Describe this memory, add context, or share your thoughts..." 
+                rows="4"
+                maxlength="500"
+                required
+              >{% if image.note %}{{ image.note }}{% endif %}</textarea>
+              <div class="textarea-footer">
+                <div class="char-counter">
+                  <span id="charCount">{% if image.note %}{{ image.note|length }}{% else %}0{% endif %}</span>
+                  <span class="char-limit">/500</span>
+                </div>
+                <div class="form-actions">
+                  <button type="button" class="btn btn-outline btn-small" onclick="cancelNote()">
+                    <span class="btn-text">Cancel</span>
+                  </button>
+                  <button type="submit" class="btn btn-primary btn-small" id="saveNoteBtn">
+                    <span class="btn-icon">💾</span>
+                    <span class="btn-text">Save Note</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        {% endif %}
+      </div>
+
+      <!-- Actions Section -->
+      {% if session.get('role') == 'erl' or session.get('role') == 'love' %}
+        <div class="info-section">
+          <h3 class="info-title">
+            <span class="info-icon">⚙️</span>
+            Actions
+          </h3>
+          <div class="action-buttons">
+            <button class="btn btn-outline" onclick="downloadImage()">
+              <span class="btn-icon">⬇️</span>
+              <span class="btn-text">Download</span>
+            </button>
+            <button class="btn btn-outline" onclick="shareImage()">
+              <span class="btn-icon">📤</span>
+              <span class="btn-text">Share</span>
+            </button>
+            {% if session.get('role') == 'erl' %}
+              <button class="btn btn-danger" onclick="openDeleteModal()">
+                <span class="btn-icon">🗑️</span>
+                <span class="btn-text">Delete Photo</span>
+              </button>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </aside>
 </div>
 
-<!-- Delete Confirmation Modal -->
-<div id="delete-modal" class="modal" style="display:none;" role="dialog" aria-labelledby="delete-modal-title">
+<!-- Delete Photo Modal -->
+<div id="deleteModal" class="modal" style="display: none;">
+  <div class="modal-overlay" onclick="closeDeleteModal()"></div>
   <div class="modal-content">
-    <h3 class="modal-title" id="delete-modal-title">Confirm Deletion</h3>
-    <p class="modal-message">Are you sure you want to delete this image? This action cannot be undone.</p>
-    <div class="modal-buttons">
-      <button type="button" class="btn cancel-btn" onclick="closeDeleteModal()">Cancel</button>
-      <button type="submit" class="btn confirm-delete-btn" form="delete-form-{index}" style="display:none;">Delete</button>
+    <div class="modal-header">
+      <h3 class="modal-title">🗑️ Delete Photo</h3>
+      <button class="modal-close" onclick="closeDeleteModal()" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="delete-preview">
+        <img src="{{ url_for('static', filename='uploads/' + image.filename) }}" alt="Preview" class="preview-image">
+      </div>
+      <p class="modal-message">Are you sure you want to delete this photo? This action cannot be undone.</p>
+      <div class="warning-text">
+        <strong>⚠️ This will also delete:</strong>
+        <ul>
+          <li>The image file permanently</li>
+          <li>Any notes associated with this photo</li>
+        </ul>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" onclick="closeDeleteModal()">
+        <span class="btn-text">Cancel</span>
+      </button>
+      <form method="post" action="{{ url_for('delete_image', idx=idx) }}" style="display: inline;">
+        <button type="submit" class="btn btn-danger">
+          <span class="btn-icon">🗑️</span>
+          <span class="btn-text">Delete Forever</span>
+        </button>
+      </form>
     </div>
   </div>
 </div>
 
-<!-- Delete Note Confirmation Modal -->
-<div id="delete-note-modal" class="modal" style="display:none;" role="dialog" aria-labelledby="delete-note-modal-title">
+<!-- Delete Note Modal -->
+<div id="deleteNoteModal" class="modal" style="display: none;">
+  <div class="modal-overlay" onclick="closeDeleteNoteModal()"></div>
   <div class="modal-content">
-    <h3 class="modal-title" id="delete-note-modal-title">Confirm Note Deletion</h3>
-    <p class="modal-message">Are you sure you want to delete this note? This action cannot be undone.</p>
-    <div class="modal-buttons">
-      <button type="button" class="btn cancel-btn" onclick="closeDeleteNoteModal()">Cancel</button>
-      <button type="submit" class="btn confirm-delete-note-btn" form="delete-note-form-{index}" style="display:none;">Delete</button>
+    <div class="modal-header">
+      <h3 class="modal-title">📝 Delete Note</h3>
+      <button class="modal-close" onclick="closeDeleteNoteModal()" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-message">Are you sure you want to delete this note?</p>
+      <div class="note-preview-box">
+        "{{ image.note[:100] }}{% if image.note and image.note|length > 100 %}...{% endif %}"
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" onclick="closeDeleteNoteModal()">
+        <span class="btn-text">Cancel</span>
+      </button>
+      <form method="post" action="{{ url_for('delete_image_note', idx=idx) }}" style="display: inline;">
+        <button type="submit" class="btn btn-danger">
+          <span class="btn-icon">🗑️</span>
+          <span class="btn-text">Delete Note</span>
+        </button>
+      </form>
     </div>
   </div>
 </div>
 
 <style>
   :root {
-    --accent: #ff5a7a;
-    --accent-2: #a6c1ee;
+    --accent: #ff4060;
+    --accent-2: #8ba8e0;
+    --accent-3: #6c5ce7;
+    --success: #00b894;
+    --warning: #fdcb6e;
+    --danger: #e17055;
+    --bg-dark: #1a1a2e;
+    --bg-darker: #16213e;
+    --text-light: #f5f5f5;
+    --text-muted: #b8c5d1;
+    --shadow: rgba(0, 0, 0, 0.3);
+    --shadow-light: rgba(255, 255, 255, 0.1);
+    --card-bg: rgba(255, 255, 255, 0.08);
+    --card-bg-hover: rgba(255, 255, 255, 0.12);
+    --border-radius: 16px;
+    --border-radius-sm: 8px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .photo-view-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-darker) 100%);
+    min-height: 100vh;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: var(--text-light);
+    overflow-x: hidden;
+  }
+
+  .image-view-container {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    grid-template-rows: auto 1fr;
+    grid-template-areas: 
+      "header header"
+      "image info";
+    height: 100vh;
+    gap: 0;
+  }
+
+  /* Header */
+  .view-header {
+    grid-area: header;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .nav-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .image-counter {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.1);
+    padding: 6px 12px;
+    border-radius: 20px;
+  }
+
+  .current-index {
+    color: var(--accent);
+    font-weight: 600;
   }
 
   .page-title {
-    font-size: 2rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: var(--accent);
-    margin-bottom: 24px;
     text-align: center;
-    animation: fadeIn 0.5s ease-out;
   }
 
-  .photo-card {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(8px);
-    border-radius: 18px;
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
-    padding: 20px;
-    text-align: center;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  .view-actions {
+    display: flex;
+    gap: 8px;
   }
 
-  .photo-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25);
+  /* Image Section */
+  .image-section {
+    grid-area: image;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-darker);
+  }
+
+  .image-container {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
   }
 
   .image-wrapper {
     position: relative;
+    max-width: 100%;
+    max-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .image-display {
+    position: relative;
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: var(--border-radius);
     overflow: hidden;
-    border-radius: 12px;
-    margin-bottom: 16px;
+    box-shadow: 0 8px 32px var(--shadow);
   }
 
-  .photo-image {
-    max-width: 95%;
-    height: auto;
-    border-radius: 12px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    object-fit: cover;
+  .main-image {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+    transition: var(--transition);
+    cursor: zoom-in;
   }
 
-  .photo-image:hover {
-    transform: scale(1.02);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  .main-image.zoomed {
+    cursor: zoom-out;
+    transform-origin: center;
   }
 
-  .photo-image.error {
-    filter: grayscale(100%);
-    opacity: 0.7;
-    border: 2px solid #ff4060;
-  }
-
-  .image-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(255, 90, 122, 0.1), rgba(166, 193, 238, 0.1));
-    border-radius: 12px;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-
-  .image-wrapper:hover .image-overlay {
-    opacity: 1;
-  }
-
-  .image-loading {
+  /* Navigation Arrows */
+  .nav-arrow {
     position: absolute;
     top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #fff;
-    font-size: 1rem;
-    background: rgba(0, 0, 0, 0.5);
-    padding: 8px 16px;
-    border-radius: 8px;
-    display: none;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    opacity: 0.8;
+    transition: var(--transition);
+    backdrop-filter: blur(10px);
+    z-index: 10;
   }
 
-  .image-wrapper img[loading="lazy"]:not([src]) + .image-loading {
-    display: block;
+  .nav-arrow:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.9);
+    transform: translateY(-50%) scale(1.1);
   }
 
-  .photo-info {
-    margin-top: 16px;
-    color: #ffffff;
-    font-size: 0.9rem;
+  .nav-prev {
+    left: 20px;
+  }
+
+  .nav-next {
+    right: 20px;
+  }
+
+  /* Loading improvements */
+  .image-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(26, 26, 46, 0.95), rgba(22, 33, 62, 0.95));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    color: white;
+    border-radius: var(--border-radius);
+    backdrop-filter: blur(10px);
+  }
+
+  .loading-spinner {
+    font-size: 2rem;
+    animation: spin 1s linear infinite;
+  }
+
+  .loading-text {
     text-align: center;
-  }
-
-  .upload-timestamp, .current-timestamp {
-    margin: 4px 0;
-    font-style: italic;
+    font-size: 1rem;
+    max-width: 250px;
+    line-height: 1.4;
     opacity: 0.9;
   }
 
-  .current-timestamp {
-    color: #a6c1ee;
-    font-size: 0.85rem;
+  /* Image skeleton loader */
+  .image-skeleton {
+    width: 100%;
+    height: 400px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading-skeleton 1.5s infinite;
+    border-radius: var(--border-radius);
   }
 
-  .note-display {
-    margin-top: 16px;
-    padding: 10px;
-    background: rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    text-align: left;
+  @keyframes loading-skeleton {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
   }
 
-  .note-text {
-    margin: 0;
-    color: #ffffff;
-    word-wrap: break-word;
-    max-width: 100%;
-  }
-
-  .note-section {
-    margin-top: 20px;
+  /* Better error state */
+  .image-error {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(225, 112, 85, 0.9), rgba(214, 48, 49, 0.9));
     display: flex;
     flex-direction: column;
-    gap: 10px;
     align-items: center;
+    justify-content: center;
+    gap: 16px;
+    color: white;
+    border-radius: var(--border-radius);
+    backdrop-filter: blur(10px);
   }
 
-  .toggle-note-btn {
-    background: linear-gradient(135deg, #2196F3, #42A5F5);
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: transform 0.3s ease, background 0.3s ease;
+  .error-icon {
+    font-size: 3rem;
+    animation: shake 0.5s ease-in-out;
+  }
+
+  .error-text {
+    font-size: 1.1rem;
+    font-weight: 500;
+    text-align: center;
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+  }
+
+  /* Zoom Controls */
+  .zoom-controls {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 25px;
+    padding: 8px 16px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
+    z-index: 20;
+  }
+
+  .zoom-btn {
+    background: none;
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
     justify-content: center;
-    width: 100%;
-    max-width: 200px;
-    margin: 0 auto;
+    font-weight: bold;
+    transition: var(--transition);
   }
 
-  .toggle-note-btn:hover {
-    transform: translateY(-2px);
-    background: linear-gradient(135deg, #1976D2, #1E88E5);
+  .zoom-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
   }
 
-  .toggle-note-btn .toggle-icon {
+  .zoom-level {
+    color: white;
+    font-size: 0.9rem;
+    min-width: 50px;
+    text-align: center;
+  }
+
+  /* Hidden state and transitions */
+  .info-panel {
+    grid-area: info;
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    overflow-y: auto;
+    height: calc(100vh - 80px);
     transition: transform 0.3s ease;
+    transform: translateX(0);
   }
 
-  .toggle-note-btn[aria-expanded="true"] .toggle-icon {
-    transform: rotate(180deg);
+  .info-panel.hidden {
+    transform: translateX(100%);
+  }
+
+  .image-view-container.info-hidden {
+    grid-template-columns: 1fr;
+  }
+
+  .image-view-container.info-hidden .info-panel {
+    display: none;
+  }
+
+  .info-content {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .info-section {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 24px;
+  }
+
+  .info-section:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .info-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.2rem;
+    color: var(--text-light);
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+
+  .info-icon {
+    font-size: 1.1em;
+  }
+
+  .info-grid {
+    display: grid;
+    gap: 12px;
+  }
+
+  .info-item {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .info-label {
+    font-weight: 500;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+
+  .info-value {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    word-break: break-all;
+  }
+
+  /* Notes Section */
+  .current-note {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 16px;
+    border-radius: var(--border-radius-sm);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .note-content {
+    color: var(--text-light);
+    line-height: 1.6;
+    margin-bottom: 16px;
+    word-wrap: break-word;
+  }
+
+  .note-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .no-note {
+    text-align: center;
+    padding: 32px 16px;
+  }
+
+  .no-note-text {
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    font-style: italic;
   }
 
   .note-form {
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
-    animation: slideIn 0.3s ease-out;
-    background: rgba(0, 0, 0, 0.1);
-    padding: 15px;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    animation: slideDown 0.3s ease-out;
   }
 
-  .note-input {
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .form-label {
+    font-weight: 500;
+    color: var(--text-light);
+    font-size: 0.95rem;
+  }
+
+  .note-textarea {
     width: 100%;
     padding: 12px;
-    border-radius: 8px;
-    border: 1px solid var(--accent);
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
+    border: 2px solid transparent;
+    border-radius: var(--border-radius-sm);
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-light);
+    font-family: inherit;
+    font-size: 0.95rem;
+    line-height: 1.5;
     resize: vertical;
-    margin-bottom: 10px;
-    font-size: 1rem;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    transition: var(--transition);
   }
 
-  .note-input:focus {
-    border-color: #ff5a7a;
-    box-shadow: 0 0 5px rgba(255, 90, 122, 0.5);
+  .note-textarea:focus {
     outline: none;
+    border-color: var(--accent);
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .note-textarea::placeholder {
+    color: var(--text-muted);
+  }
+
+  .textarea-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
   }
 
   .char-counter {
-    font-size: 0.9rem;
-    color: #cccccc;
-    text-align: right;
-    margin-bottom: 10px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
   }
 
-  .note-btn {
-    background: linear-gradient(135deg, var(--accent), var(--accent-2));
-    color: white;
-    padding: 12px 24px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: transform 0.3s ease, background 0.3s ease;
+  .char-limit {
+    opacity: 0.7;
+  }
+
+  .form-actions {
     display: flex;
-    align-items: center;
-    gap: 10px;
-    justify-content: center;
-    width: 100%;
-    max-width: 220px;
-    margin: 0 auto;
+    gap: 8px;
   }
 
-  .note-btn:hover {
-    transform: translateY(-2px);
-    background: linear-gradient(135deg, #ff4060, #8ba8e0);
+  .action-buttons {
+    display: grid;
+    gap: 12px;
   }
 
-  .note-btn:active .btn-text {
-    display: none;
-  }
-
-  .note-btn:active .loading-spinner {
-    display: inline-block;
-  }
-
-  .delete-form, .delete-note-form {
-    margin-top: 10px;
-  }
-
-  .delete-btn, .delete-note-btn {
-    background: linear-gradient(135deg, #ff4060, #8ba8e0);
-    color: white;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: transform 0.3s ease, background 0.3s ease;
-    display: flex;
+  /* Button Styles */
+  .btn {
+    display: inline-flex;
     align-items: center;
     gap: 8px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
     justify-content: center;
+    min-width: fit-content;
+  }
+
+  .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
     width: 100%;
-    max-width: 180px;
-    margin: 0 auto;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: var(--transition);
   }
 
-  .delete-btn:hover, .delete-note-btn:hover {
+  .btn:hover::before {
+    left: 100%;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 64, 96, 0.3);
+  }
+
+  .btn-primary:hover {
     transform: translateY(-2px);
-    background: linear-gradient(135deg, #ff1a40, #6b88c0);
+    box-shadow: 0 8px 25px rgba(255, 64, 96, 0.4);
   }
 
-  .delete-btn:active .btn-text,
-  .delete-note-btn:active .btn-text {
-    display: none;
+  .btn-outline {
+    background: transparent;
+    color: var(--text-light);
+    border: 1px solid rgba(255, 255, 255, 0.3);
   }
 
-  .delete-btn:active .loading-spinner,
-  .delete-note-btn:active .loading-spinner {
-    display: inline-block;
+  .btn-outline:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--accent);
+  }
+
+  .btn-danger {
+    background: linear-gradient(135deg, var(--danger), #d63031);
+    color: white;
+    box-shadow: 0 4px 15px rgba(225, 112, 85, 0.3);
+  }
+
+  .btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(225, 112, 85, 0.4);
+  }
+
+  .btn-small {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+
+  .btn-icon {
+    font-size: 1em;
   }
 
   /* Modal Styles */
   .modal {
     position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.6);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    backdrop-filter: blur(5px);
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
   }
 
   .modal-content {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(8px);
-    border-radius: 12px;
-    padding: 20px;
+    position: relative;
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius);
+    box-shadow: 0 16px 40px var(--shadow);
+    max-width: 500px;
     width: 90%;
-    max-width: 400px;
-    text-align: center;
-    animation: fadeIn 0.3s ease-out;
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+    max-height: 80vh;
+    overflow: auto;
+    animation: scaleIn 0.3s ease-out;
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .modal-title {
+    font-size: 1.3rem;
+    color: var(--text-light);
+    font-weight: 600;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
     font-size: 1.5rem;
-    color: var(--accent);
-    margin-bottom: 15px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: var(--transition);
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-light);
+  }
+
+  .modal-body {
+    padding: 24px;
   }
 
   .modal-message {
-    color: #ffffff;
+    color: var(--text-light);
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  .delete-preview {
+    text-align: center;
     margin-bottom: 20px;
-    font-size: 1rem;
   }
 
-  .modal-buttons {
+  .preview-image {
+    max-width: 200px;
+    max-height: 150px;
+    border-radius: var(--border-radius-sm);
+    object-fit: cover;
+  }
+
+  .warning-text {
+    background: rgba(225, 112, 85, 0.1);
+    border: 1px solid rgba(225, 112, 85, 0.3);
+    padding: 16px;
+    border-radius: var(--border-radius-sm);
+    color: var(--text-light);
+    font-size: 0.9rem;
+  }
+
+  .warning-text ul {
+    margin-top: 8px;
+    padding-left: 20px;
+  }
+
+  .note-preview-box {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 12px;
+    border-radius: var(--border-radius-sm);
+    font-style: italic;
+    color: var(--text-muted);
+    border-left: 4px solid var(--accent);
+  }
+
+  .modal-footer {
     display: flex;
-    justify-content: space-around;
+    gap: 12px;
+    justify-content: flex-end;
+    padding: 16px 24px 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
   }
 
-  .cancel-btn {
-    background: #cccccc;
-    color: #333;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: transform 0.3s ease, background 0.3s ease;
-    width: 120px;
-  }
-
-  .cancel-btn:hover {
-    transform: translateY(-2px);
-    background: #999999;
-  }
-
-  .confirm-delete-btn, .confirm-delete-note-btn {
-    background: linear-gradient(135deg, #ff4060, #8ba8e0);
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: transform 0.3s ease, background 0.3s ease;
-    width: 120px;
-  }
-
-  .confirm-delete-btn:hover, .confirm-delete-note-btn:hover {
-    transform: translateY(-2px);
-    background: linear-gradient(135deg, #ff1a40, #6b88c0);
-  }
-
+  /* Animations */
   @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* Responsive Design */
+  @media (max-width: 1024px) {
+    .image-view-container {
+      grid-template-columns: 1fr;
+      grid-template-areas: 
+        "header"
+        "image"
+        "info";
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .info-panel {
+      height: auto;
+      max-height: 50vh;
+    }
+
+    .nav-arrow {
+      width: 40px;
+      height: 40px;
+      font-size: 1.2rem;
+    }
+
+    .nav-prev {
+      left: 10px;
+    }
+
+    .nav-next {
+      right: 10px;
+    }
   }
 
   @media (max-width: 768px) {
-    .page-title { font-size: 1.8rem; }
-    .photo-image { max-width: 100%; }
-    .photo-card { padding: 15px; }
-    .note-input { max-width: 100%; }
-    .note-btn, .delete-btn, .delete-note-btn, .toggle-note-btn { 
-      padding: 8px 16px; 
-      max-width: 150px; 
+    .view-header {
+      flex-direction: column;
+      gap: 12px;
+      padding: 12px 16px;
     }
-    .note-form { padding: 10px; }
-    .modal-content { width: 95%; }
-    .cancel-btn, .confirm-delete-btn, .confirm-delete-note-btn { 
-      padding: 8px 16px; 
-      width: 100px; 
+
+    .nav-controls {
+      order: 2;
+    }
+
+    .page-title {
+      order: 1;
+      font-size: 1.3rem;
+    }
+
+    .view-actions {
+      order: 3;
+    }
+
+    .info-content {
+      padding: 16px;
+      gap: 24px;
+    }
+
+    .info-item {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+
+    .textarea-footer {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .form-actions {
+      justify-content: center;
+    }
+
+    .modal-content {
+      width: 95%;
+      margin: 20px;
+    }
+
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+      padding: 16px;
+    }
+
+    .modal-footer {
+      flex-direction: column;
+    }
+
+    .btn {
+      width: 100%;
     }
   }
 
   @media (max-width: 480px) {
-    .page-title { font-size: 1.5rem; }
-    .photo-info { font-size: 0.8rem; }
-    .note-input { max-width: 100%; }
-    .note-btn, .delete-btn, .delete-note-btn, .toggle-note-btn { 
-      padding: 6px 12px; 
-      max-width: 120px; 
+    .main-image {
+      max-height: 60vh;
     }
-    .modal-title { font-size: 1.2rem; }
-    .modal-message { font-size: 0.9rem; }
+
+    .nav-arrow {
+      width: 35px;
+      height: 35px;
+      font-size: 1rem;
+    }
+
+    .zoom-controls {
+      bottom: 10px;
+      padding: 6px 12px;
+      gap: 8px;
+    }
+
+    .zoom-btn {
+      width: 28px;
+      height: 28px;
+      font-size: 0.9rem;
+    }
+
+    .image-counter {
+      font-size: 0.8rem;
+    }
+
+    .btn-small {
+      padding: 4px 8px;
+      font-size: 0.75rem;
+    }
+  }
+
+  /* Print Styles */
+  @media print {
+    .view-header,
+    .info-panel,
+    .nav-arrow,
+    .zoom-controls,
+    .modal {
+      display: none !important;
+    }
+
+    .image-view-container {
+      grid-template-areas: "image";
+      grid-template-columns: 1fr;
+    }
+
+    .main-image {
+      max-height: none;
+      width: 100%;
+      height: auto;
+    }
+  }
+
+  /* Accessibility Improvements */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  @media (prefers-contrast: high) {
+    .btn-outline {
+      border-width: 2px;
+    }
+
+    .info-panel {
+      border-left-width: 2px;
+    }
+
+    .modal-content {
+      border-width: 2px;
+    }
+  }
+
+  /* Focus Styles */
+  .btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .note-textarea:focus-visible {
+    box-shadow: 0 0 0 3px rgba(255, 64, 96, 0.3);
+  }
+
+  .nav-arrow:focus-visible {
+    outline: 2px solid var(--accent);
+  }
+
+  /* Hidden state */
+  .info-panel.hidden {
+    transform: translateX(100%);
+  }
+
+  /* Fullscreen styles */
+  .image-view-container.fullscreen {
+    grid-template-areas: "image";
+    grid-template-columns: 1fr;
+  }
+
+  .image-view-container.fullscreen .info-panel {
+    display: none;
+  }
+
+  .image-view-container.fullscreen .view-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    opacity: 0.9;
+    transition: opacity 0.3s ease;
+  }
+
+  .image-view-container.fullscreen:hover .view-header {
+    opacity: 1;
   }
 </style>
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='script.js') }}"></script>
 <script>
-  function openDeleteModal(index) {
-    const modal = document.getElementById("delete-modal");
-    const form = document.getElementById(`delete-form-${index}`);
-    if (modal && form) {
-      modal.style.display = "flex";
-      const confirmBtn = modal.querySelector(".confirm-delete-btn");
-      confirmBtn.setAttribute("form", `delete-form-${index}`);
-      confirmBtn.style.display = "inline-block";
-      modal.focus();
-    }
-  }
+document.addEventListener('DOMContentLoaded', function() {
+    let currentZoom = 1;
+    let isDragging = false;
+    let dragStart = { x: 0, y: 0 };
+    let imagePosition = { x: 0, y: 0 };
+    
+    const mainImage = document.getElementById('mainImage');
+    const imageContainer = document.getElementById('imageContainer');
+    const zoomControls = document.getElementById('zoomControls');
+    const zoomLevel = document.getElementById('zoomLevel');
+    const infoPanel = document.getElementById('infoPanel');
+    const noteForm = document.getElementById('noteForm');
+    const noteInput = document.getElementById('noteInput');
+    const charCount = document.getElementById('charCount');
 
-  function closeDeleteModal() {
-    const modal = document.getElementById("delete-modal");
-    if (modal) modal.style.display = "none";
-  }
+    // Initialize loading and image handling
+    let imageLoaded = false;
+    let loadingTimeout;
 
-  function openDeleteNoteModal(index) {
-    const modal = document.getElementById("delete-note-modal");
-    const form = document.getElementById(`delete-note-form-${index}`);
-    if (modal && form) {
-      modal.style.display = "flex";
-      const confirmBtn = modal.querySelector(".confirm-delete-note-btn");
-      confirmBtn.setAttribute("form", `delete-note-form-${index}`);
-      confirmBtn.style.display = "inline-block";
-      modal.focus();
-    }
-  }
+    if (mainImage) {
+        // Show loading immediately
+        showLoading();
 
-  function closeDeleteNoteModal() {
-    const modal = document.getElementById("delete-note-modal");
-    if (modal) modal.style.display = "none";
-  }
-
-  function toggleNoteForm() {
-    const form = document.getElementById("note-form");
-    const toggleBtn = document.querySelector(".toggle-note-btn");
-    const isExpanded = form.style.display !== "none";
-    form.style.display = isExpanded ? "none" : "block";
-    toggleBtn.setAttribute("aria-expanded", !isExpanded);
-    toggleBtn.classList.toggle("active", !isExpanded);
-  }
-
-  function validateAndSubmitNote() {
-    const textarea = document.querySelector('.note-input');
-    if (textarea.value.length > 500) {
-      alert("Note exceeds 500 characters limit.");
-      return false;
-    }
-    return confirm('Add this note to the image?');
-  }
-
-  function handleImageError(img) {
-    const fallbackUrl = img.getAttribute('data-fallback');
-    if (fallbackUrl) {
-      img.onerror = null; // Prevent infinite loop
-      img.src = fallbackUrl;
-      img.onload = () => {
-        if (!img.complete) {
-          img.src = 'https://via.placeholder.com/300'; // Online fallback
-          console.log('Fallback to online placeholder');
-        }
-      };
-      img.onerror = () => {
-        img.src = 'https://via.placeholder.com/300'; // Final online fallback
-        img.classList.add('error');
-        console.error('Image and placeholder failed, using online fallback');
-      };
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    const textarea = document.querySelector('.note-input');
-    const charCount = document.getElementById('char-count');
-    if (textarea) {
-      textarea.addEventListener('input', () => {
-        const length = textarea.value.length;
-        charCount.textContent = length;
-        if (length > 500) {
-          textarea.value = textarea.value.substring(0, 500);
-          charCount.textContent = 500;
-        }
-      });
-      if (textarea.value) charCount.textContent = textarea.value.length;
-    }
-
-    // Trap focus in modals
-    ['delete-modal', 'delete-note-modal'].forEach(modalId => {
-      const modal = document.getElementById(modalId);
-      if (modal) {
-        modal.addEventListener('keydown', (e) => {
-          if (e.key === 'Tab') {
-            const focusable = modal.querySelectorAll('button');
-            const first = focusable[0];
-            const last = focusable[focusable.length - 1];
-            if (e.shiftKey && document.activeElement === first) {
-              e.preventDefault();
-              last.focus();
-            } else if (!e.shiftKey && document.activeElement === last) {
-              e.preventDefault();
-              first.focus();
+        // Set a timeout for slow loading
+        loadingTimeout = setTimeout(() => {
+            if (!imageLoaded) {
+                updateLoadingText('Image is taking longer than expected...');
+                // Add retry option after 5 seconds
+                setTimeout(() => {
+                    if (!imageLoaded) {
+                        addRetryOption();
+                    }
+                }, 5000);
             }
-          }
+        }, 3000);
+
+        mainImage.addEventListener('load', function() {
+            imageLoaded = true;
+            clearTimeout(loadingTimeout);
+            updateImageInfo();
+            hideLoading();
         });
-      }
+
+        mainImage.addEventListener('error', function() {
+            imageLoaded = false;
+            clearTimeout(loadingTimeout);
+            showError();
+        });
+
+        // Force load if image is already cached
+        if (mainImage.complete) {
+            imageLoaded = true;
+            updateImageInfo();
+            hideLoading();
+        }
+    }
+
+    function showLoading() {
+        const loading = document.getElementById('imageLoading');
+        if (loading) {
+            loading.style.display = 'flex';
+        }
+    }
+
+    function updateLoadingText(text) {
+        const loadingText = document.querySelector('.loading-text');
+        if (loadingText) {
+            loadingText.textContent = text;
+        }
+    }
+
+    function addRetryOption() {
+        const loading = document.getElementById('imageLoading');
+        if (loading && !imageLoaded) {
+            const retryBtn = document.createElement('button');
+            retryBtn.className = 'btn btn-small btn-outline';
+            retryBtn.innerHTML = '<span class="btn-text">Retry Loading</span>';
+            retryBtn.onclick = function() {
+                loading.removeChild(retryBtn);
+                retryImageLoad();
+            };
+            loading.appendChild(retryBtn);
+        }
+    }
+
+    // Character counter for notes
+    if (noteInput && charCount) {
+        noteInput.addEventListener('input', function() {
+            const length = this.value.length;
+            charCount.textContent = length;
+            
+            // Prevent exceeding limit
+            if (length > 500) {
+                this.value = this.value.substring(0, 500);
+                charCount.textContent = '500';
+            }
+            
+            // Update color based on usage
+            const percentage = (length / 500) * 100;
+            if (percentage > 90) {
+                charCount.style.color = 'var(--danger)';
+            } else if (percentage > 70) {
+                charCount.style.color = 'var(--warning)';
+            } else {
+                charCount.style.color = 'var(--text-muted)';
+            }
+        });
+    }
+
+    // Image zoom functionality
+    if (mainImage) {
+        mainImage.addEventListener('click', function(e) {
+            if (currentZoom === 1) {
+                zoomImage(1); // Zoom to 200%
+            } else {
+                resetZoom();
+            }
+        });
+
+        // Mouse wheel zoom
+        mainImage.addEventListener('wheel', function(e) {
+            e.preventDefault();
+            const zoomDelta = e.deltaY > 0 ? -0.2 : 0.2;
+            zoomImage(zoomDelta);
+        });
+
+        // Drag functionality when zoomed
+        mainImage.addEventListener('mousedown', function(e) {
+            if (currentZoom > 1) {
+                isDragging = true;
+                dragStart.x = e.clientX - imagePosition.x;
+                dragStart.y = e.clientY - imagePosition.y;
+                this.style.cursor = 'grabbing';
+            }
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (isDragging) {
+                e.preventDefault();
+                imagePosition.x = e.clientX - dragStart.x;
+                imagePosition.y = e.clientY - dragStart.y;
+                updateImageTransform();
+            }
+        });
+
+        document.addEventListener('mouseup', function() {
+            if (isDragging) {
+                isDragging = false;
+                mainImage.style.cursor = currentZoom > 1 ? 'zoom-out' : 'zoom-in';
+            }
+        });
+    }
+
+    // Global functions
+    window.zoomImage = function(delta) {
+        currentZoom = Math.max(0.5, Math.min(3, currentZoom + delta));
+        updateImageTransform();
+        updateZoomControls();
+    };
+
+    window.resetZoom = function() {
+        currentZoom = 1;
+        imagePosition = { x: 0, y: 0 };
+        updateImageTransform();
+        updateZoomControls();
+    };
+
+    function updateImageTransform() {
+        if (mainImage) {
+            mainImage.style.transform = `scale(${currentZoom}) translate(${imagePosition.x / currentZoom}px, ${imagePosition.y / currentZoom}px)`;
+            mainImage.classList.toggle('zoomed', currentZoom > 1);
+        }
+    }
+
+    function updateZoomControls() {
+        if (zoomLevel) {
+            zoomLevel.textContent = Math.round(currentZoom * 100) + '%';
+        }
+        if (zoomControls) {
+            zoomControls.style.display = currentZoom > 1 ? 'flex' : 'none';
+        }
+    }
+
+    function updateImageInfo() {
+        // Update image dimensions
+        const dimensions = document.getElementById('imageDimensions');
+        if (dimensions && mainImage) {
+            dimensions.textContent = `${mainImage.naturalWidth} × ${mainImage.naturalHeight}`;
+        }
+
+        // Calculate and display file size (approximate)
+        const sizeElement = document.getElementById('imageSize');
+        if (sizeElement) {
+            // This is an approximation - in a real app you'd get this from the server
+            const approxSize = (mainImage.naturalWidth * mainImage.naturalHeight * 3) / 1024; // Rough estimate in KB
+            if (approxSize > 1024) {
+                sizeElement.textContent = (approxSize / 1024).toFixed(1) + ' MB';
+            } else {
+                sizeElement.textContent = approxSize.toFixed(0) + ' KB';
+            }
+        }
+    }
+
+    function hideLoading() {
+        const loading = document.getElementById('imageLoading');
+        if (loading) {
+            loading.style.display = 'none';
+        }
+    }
+
+    function showError() {
+        const loading = document.getElementById('imageLoading');
+        const error = document.getElementById('imageError');
+        if (loading) loading.style.display = 'none';
+        if (error) error.style.display = 'flex';
+    }
+
+    // Navigation functions
+    window.navigateImage = function(direction) {
+        // Simple navigation without template variables to avoid errors
+        const currentIndex = parseInt('{{ idx }}');
+        const baseUrl = window.location.pathname.replace(/\/\d+$/, '');
+        
+        // Calculate new index
+        let newIndex = currentIndex + direction;
+        
+        // Simple boundary check - you may need to adjust based on your gallery size
+        if (newIndex < 0) {
+            alert('This is the first image');
+            return;
+        }
+        
+        // Navigate to the new image
+        const newUrl = baseUrl + '/' + newIndex;
+        window.location.href = newUrl;
+    };
+
+    // Keyboard navigation
+    document.addEventListener('keydown', function(e) {
+        switch(e.key) {
+            case 'ArrowLeft':
+                e.preventDefault();
+                navigateImage(-1);
+                break;
+            case 'ArrowRight':
+                e.preventDefault();
+                navigateImage(1);
+                break;
+            case 'Escape':
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                }
+                closeDeleteModal();
+                closeDeleteNoteModal();
+                break;
+            case '+':
+            case '=':
+                e.preventDefault();
+                zoomImage(0.2);
+                break;
+            case '-':
+                e.preventDefault();
+                zoomImage(-0.2);
+                break;
+            case '0':
+                e.preventDefault();
+                resetZoom();
+                break;
+        }
     });
-  });
+
+    // Toggle functions
+    window.toggleFullscreen = function() {
+        const container = document.querySelector('.image-view-container');
+        const btn = document.getElementById('fullscreenBtn');
+        
+        if (!document.fullscreenElement) {
+            container.requestFullscreen().then(() => {
+                container.classList.add('fullscreen');
+                btn.querySelector('.btn-text').textContent = 'Exit Fullscreen';
+                btn.querySelector('.btn-icon').textContent = '🔍';
+            });
+        } else {
+            document.exitFullscreen().then(() => {
+                container.classList.remove('fullscreen');
+                btn.querySelector('.btn-text').textContent = 'Fullscreen';
+                btn.querySelector('.btn-icon').textContent = '🔍';
+            });
+        }
+    };
+
+    window.toggleInfo = function() {
+        const panel = document.getElementById('infoPanel');
+        const btn = document.getElementById('infoToggle');
+        const container = document.querySelector('.image-view-container');
+        
+        if (!panel || !btn) return;
+        
+        const isHidden = panel.classList.contains('hidden');
+        
+        if (isHidden) {
+            // Show panel
+            panel.classList.remove('hidden');
+            container.classList.remove('info-hidden');
+            btn.querySelector('.btn-text').textContent = 'Hide Info';
+            btn.querySelector('.btn-icon').textContent = '✖️';
+        } else {
+            // Hide panel
+            panel.classList.add('hidden');
+            container.classList.add('info-hidden');
+            btn.querySelector('.btn-text').textContent = 'Show Info';
+            btn.querySelector('.btn-icon').textContent = 'ℹ️';
+        }
+    };
+
+    // Note functions
+    window.addNote = function() {
+        if (noteForm) {
+            noteForm.style.display = 'block';
+            if (noteInput) noteInput.focus();
+        }
+    };
+
+    window.editNote = function() {
+        if (noteForm) {
+            noteForm.style.display = 'block';
+            if (noteInput) {
+                noteInput.focus();
+                noteInput.setSelectionRange(noteInput.value.length, noteInput.value.length);
+            }
+        }
+    };
+
+    window.cancelNote = function() {
+        if (noteForm) {
+            noteForm.style.display = 'none';
+            // Reset to original value if editing
+            const originalNote = '{{ image.note|e }}';
+            if (noteInput && originalNote) {
+                noteInput.value = originalNote;
+                if (charCount) charCount.textContent = originalNote.length;
+            }
+        }
+    };
+
+    // Modal functions
+    window.openDeleteModal = function() {
+        const modal = document.getElementById('deleteModal');
+        if (modal) {
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                const cancelBtn = modal.querySelector('.btn-outline');
+                if (cancelBtn) cancelBtn.focus();
+            }, 100);
+        }
+    };
+
+    window.closeDeleteModal = function() {
+        const modal = document.getElementById('deleteModal');
+        if (modal) modal.style.display = 'none';
+    };
+
+    window.openDeleteNoteModal = function() {
+        const modal = document.getElementById('deleteNoteModal');
+        if (modal) {
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                const cancelBtn = modal.querySelector('.btn-outline');
+                if (cancelBtn) cancelBtn.focus();
+            }, 100);
+        }
+    };
+
+    window.closeDeleteNoteModal = function() {
+        const modal = document.getElementById('deleteNoteModal');
+        if (modal) modal.style.display = 'none';
+    };
+
+    // Utility functions
+    window.downloadImage = function() {
+        const link = document.createElement('a');
+        link.href = mainImage.src;
+        link.download = '{{ image.filename }}';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    window.shareImage = function() {
+        if (navigator.share) {
+            navigator.share({
+                title: 'Photo from Our Journey',
+                text: '{{ image.note[:50] if image.note else "Check out this photo!" }}',
+                url: window.location.href
+            });
+        } else {
+            // Fallback: copy URL to clipboard
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                showToast('Link copied to clipboard!');
+            });
+        }
+    };
+
+    window.retryImageLoad = function() {
+        const error = document.getElementById('imageError');
+        const loading = document.getElementById('imageLoading');
+        
+        if (error) error.style.display = 'none';
+        if (loading) {
+            loading.style.display = 'flex';
+            updateLoadingText('Retrying...');
+        }
+        
+        imageLoaded = false;
+        
+        // Force reload the image with cache busting
+        if (mainImage) {
+            const originalSrc = mainImage.src;
+            const cacheBustingSrc = originalSrc + (originalSrc.includes('?') ? '&' : '?') + 'retry=' + Date.now();
+            mainImage.src = '';
+            
+            setTimeout(() => {
+                mainImage.src = cacheBustingSrc;
+                // Set another timeout for this retry attempt
+                loadingTimeout = setTimeout(() => {
+                    if (!imageLoaded) {
+                        updateLoadingText('Still loading... This might take a while.');
+                    }
+                }, 3000);
+            }, 100);
+        }
+    };
+
+    // Toast notification function
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.textContent = message;
+        toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            color: var(--text-light);
+            padding: 12px 20px;
+            border-radius: var(--border-radius-sm);
+            box-shadow: 0 8px 25px var(--shadow);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 10000;
+            animation: slideInRight 0.3s ease-out;
+            font-size: 0.9rem;
+        `;
+
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.animation = 'slideOutRight 0.3s ease-out forwards';
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }, 3000);
+    }
+
+    // Add toast animation styles
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Initialize total count
+    const totalCountElement = document.getElementById('totalCount');
+    if (totalCountElement) {
+        // You can get this from a data attribute or make an AJAX call
+        // For now, we'll use a placeholder
+        totalCountElement.textContent = '?';
+    }
+
+    // Check for URL parameters to show notifications
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('note_added') === 'true') {
+        showToast('Note added successfully!', 'success');
+    }
+    if (urlParams.get('note_updated') === 'true') {
+        showToast('Note updated successfully!', 'success');
+    }
+    if (urlParams.get('note_deleted') === 'true') {
+        showToast('Note deleted successfully', 'info');
+    }
+});
 </script>
 {% endblock %}
 {% endblock %}
