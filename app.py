@@ -746,6 +746,15 @@ def flower():
 @login_required
 def heart():
     return render_template("heart.html")
+@app.route("/cat")
+@login_required
+def cat():
+    return render_template("cat.html")
+@app.route("/jigsaw")
+@login_required
+def jigsaw():
+    gallery = db["gallery"]  # Pass the gallery data to the template
+    return render_template("jigsaw.html", gallery=gallery)
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anniversary Jigsaw Puzzle</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-pink: #ff69b4; /* Hot pink */
+            --secondary-pink: #ffafbd; /* Light pink */
+            --accent-orange: #ffc3a0; /* Peach */
+            --text-light: #fefefe;
+            --text-dark: #333;
+            --bg-dark-overlay: rgba(0, 0, 0, 0.85);
+            --border-light: #fff;
+            --background-gradient: linear-gradient(135deg, var(--secondary-pink) 0%, var(--accent-orange) 100%);
+        }
+
+        body {
+            background: var(--background-gradient);
+            overflow: hidden; /* Prevent body scroll by default */
+            font-family: 'Roboto', sans-serif;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        h1, h2, .font-pacifico {
+            font-family: 'Pacifico', cursive;
+        }
+
+        #gameContainer {
+            position: relative;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 95%; /* Responsive width */
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #startScreen, #endScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-dark-overlay);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            text-align: center;
+            padding: 15px; /* Add padding for small screens */
+            box-sizing: border-box; /* Include padding in width/height */
+        }
+        #endScreen {
+            display: none;
+        }
+
+        #gameCanvas {
+            border: 4px solid var(--border-light);
+            border-radius: 10px;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
+            background-color: rgba(255, 255, 255, 0.1); /* Background for letterboxing area */
+            margin-bottom: 15px;
+            touch-action: none; /* Prevent browser default touch actions */
+            image-rendering: -webkit-optimize-contrast; /* For sharper image scaling */
+            image-rendering: crisp-edges; /* For sharper image scaling */
+            image-rendering: pixelated; /* Safari might need this */
+        }
+
+        #referenceCanvas {
+            border: 2px solid var(--border-light);
+            border-radius: 5px;
+            margin-bottom: 15px;
+            background-color: rgba(255, 255, 255, 0.1);
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+        }
+
+        .particle-canvas {
+            position: absolute;
+            pointer-events: none;
+            top: 0;
+            left: 0;
+            z-index: 5;
+        }
+
+        #pieceArea {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center; /* Center vertically if space allows */
+            gap: 6px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 10px;
+            margin-top: 15px;
+            max-height: 200px; /* Limit height and enable scrolling */
+            overflow-y: auto;
+            width: 100%;
+            min-height: 80px;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.2);
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        }
+
+        .piece-canvas {
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            border-radius: 3px;
+            cursor: grab;
+            touch-action: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: transform 0.1s ease-out, opacity 0.3s ease-out; /* Smooth transition for return */
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+        }
+        .piece-canvas:active {
+            cursor: grabbing;
+        }
+
+        .floating-piece {
+            position: absolute;
+            z-index: 9999;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            border: 2px solid var(--primary-pink);
+            border-radius: 3px; /* Match piece-canvas */
+            pointer-events: none; /* Ensure it doesn't block events below */
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+        }
+        
+        .snap-highlight {
+            position: absolute;
+            border: 3px solid #00f0ff; /* Bright cyan highlight */
+            box-shadow: 0 0 15px 5px rgba(0, 240, 255, 0.6);
+            border-radius: 5px;
+            opacity: 0;
+            transition: opacity 0.3s ease-out;
+            pointer-events: none;
+            z-index: 6; /* Above main canvas, below floating piece */
+        }
+        .snap-highlight.active {
+            opacity: 1;
+        }
+
+        #timer, #moves {
+            position: absolute;
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 5px 10px;
+            border-radius: 8px;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            user-select: none; /* Prevent text selection */
+        }
+        #timer {
+            top: 15px;
+            left: 15px;
+        }
+        #moves {
+            top: 15px;
+            right: 15px;
+        }
+
+        .custom-select, .custom-button {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            font-weight: 500;
+            margin-bottom: 10px; /* Consistent spacing */
+        }
+
+        .custom-select {
+            background: var(--text-light);
+            color: var(--text-dark);
+            border: none;
+            width: 300px;
+            max-width: 80%;
+            appearance: none; /* Remove default arrow */
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 1.2em;
+        }
+
+        .custom-button {
+            background: var(--primary-pink);
+            color: var(--text-light);
+            border: 2px solid var(--primary-pink);
+        }
+        .custom-button:hover {
+            background: #e64a8d;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .custom-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        #errorMessage {
+            color: #ff4d4d;
+            margin-bottom: 15px;
+            display: none;
+            background: rgba(255, 0, 0, 0.2);
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        #loadingMessage {
+            display: none;
+            color: var(--text-light);
+            margin-top: 15px;
+            font-size: 1.2rem;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            body {
+                overflow-y: auto;
+            }
+            #gameContainer {
+                padding: 15px;
+                margin: 10px auto;
+            }
+            #gameCanvas, .particle-canvas {
+                width: 350px;
+                height: 350px;
+            }
+            #referenceCanvas {
+                width: 120px;
+                height: 120px;
+            }
+            .custom-select {
+                width: 90%;
+            }
+            #timer, #moves {
+                font-size: 1.2rem;
+                top: 10px;
+                padding: 3px 8px;
+            }
+            #timer { left: 10px; }
+            #moves { right: 10px; }
+            #startScreen h1, #endScreen h1 {
+                font-size: 3rem;
+            }
+            #startScreen p, #endScreen p {
+                font-size: 1rem;
+            }
+            .custom-button {
+                padding: 8px 15px;
+                font-size: 1rem;
+            }
+            #pieceArea {
+                max-height: 150px;
+                gap: 4px;
+            }
+            #loadingMessage {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #gameCanvas, .particle-canvas {
+                width: 300px;
+                height: 300px;
+            }
+            #startScreen h1, #endScreen h1 {
+                font-size: 2.5rem;
+                margin-bottom: 10px;
+            }
+            #startScreen p, #endScreen p {
+                font-size: 0.9rem;
+                margin-bottom: 8px;
+            }
+            .custom-select, .custom-button {
+                font-size: 0.95rem;
+                padding: 7px 12px;
+                margin-bottom: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="startScreen">
+            <h1 class="text-5xl font-pacifico text-primary-pink mb-4">Anniversary Jigsaw Puzzle</h1>
+            <p class="text-xl text-gray-200 mb-4">Piece together our love with a special memory!</p>
+            <p class="text-sm text-gray-300 mb-4">1. Select an image or use the default heart.<br>2. Choose a difficulty level.</p>
+            <select id="imageSelect" class="custom-select">
+                <option value="">Use Default Heart</option>
+                {# This loop would be populated by your backend, e.g., Flask #}
+                {% for image in gallery %}
+                    <option value="{{ url_for('static', filename='uploads/' + image.filename) }}">{{ image.filename }}</option>
+                {% endfor %}
+            </select>
+            <select id="difficultySelect" class="custom-select">
+                <option value="3">Easy (3x3)</option>
+                <option value="6">Medium (6x6)</option>
+                <option value="12" selected>Hard (12x12)</option>
+            </select>
+            <canvas id="referenceCanvas"></canvas>
+            <p id="errorMessage">Failed to load image. Using default heart.</p>
+            <p id="loadingMessage">Loading image...</p>
+            <button id="startButton" class="custom-button">Start Puzzle</button>
+        </div>
+
+        <div id="endScreen">
+            <h1 class="text-5xl font-pacifico text-primary-pink mb-4">Happy Anniversary!</h1>
+            <p class="text-xl text-gray-200 mb-4">Completed in <span id="finalTime">0</span>s with <span id="finalMoves">0</span> moves!</p>
+            <p class="text-lg text-gray-300 mb-6">Our love fits perfectly together!</p>
+            <button id="restartButton" class="custom-button">Play Again</button>
+        </div>
+
+        <div id="timer">Time: 0s</div>
+        <div id="moves">Moves: 0</div>
+        <canvas id="gameCanvas"></canvas>
+        <canvas id="particleCanvas" class="particle-canvas"></canvas>
+        <div id="snapHighlight" class="snap-highlight"></div>
+        <div id="pieceArea"></div>
+        <audio id="backgroundMusic" loop>
+            <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+        <audio id="snapSound">
+            <source src="https://assets.mixkit.co/sfx/download/mixkit-software-interface-button-click-990.wav" type="audio/wav">
+        </audio>
+        <audio id="completeSound">
+            <source src="https://assets.mixkit.co/sfx/download/mixkit-game-level-completed-2059.wav" type="audio/wav">
+        </audio>
+    </div>
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const particleCanvas = document.getElementById('particleCanvas');
+    const particleCtx = particleCanvas.getContext('2d');
+    const referenceCanvas = document.getElementById('referenceCanvas');
+    const referenceCtx = referenceCanvas.getContext('2d');
+    const startScreen = document.getElementById('startScreen');
+    const endScreen = document.getElementById('endScreen');
+    const finalTimeDisplay = document.getElementById('finalTime');
+    const finalMovesDisplay = document.getElementById('finalMoves');
+    const startButton = document.getElementById('startButton');
+    const restartButton = document.getElementById('restartButton');
+    const imageSelect = document.getElementById('imageSelect');
+    const difficultySelect = document.getElementById('difficultySelect');
+    const errorMessage = document.getElementById('errorMessage');
+    const loadingMessage = document.getElementById('loadingMessage');
+    const timerDisplay = document.getElementById('timer');
+    const movesDisplay = document.getElementById('moves');
+    const pieceArea = document.getElementById('pieceArea');
+    const music = document.getElementById('backgroundMusic');
+    const snapSound = document.getElementById('snapSound');
+    const completeSound = document.getElementById('completeSound');
+    const snapHighlight = document.getElementById('snapHighlight');
+
+    let pieces = [];
+    let selectedPiece = null;
+    let gameStarted = false;
+    let gameOver = false;
+    let timeElapsed = 0;
+    let moves = 0;
+    let timerInterval;
+    let particles = [];
+    let gridSize = parseInt(difficultySelect.value);
+    let puzzleImage = new Image();
+    let imageLoaded = false;
+    let imageAspectRatio = 1;
+
+    // Display dimensions for the image *within* the square canvas (maintaining aspect ratio)
+    let displayWidth = 0;
+    let displayHeight = 0;
+    let displayOffsetX = 0;
+    let displayOffsetY = 0;
+
+    // Base sizes for main canvas and reference canvas
+    const GAME_CANVAS_BASE_SIZE = 600;
+    const REFERENCE_CANVAS_BASE_SIZE = 200;
+    const PIECE_AREA_MAX_PIECE_SIZE = 80;
+
+    // Epsilon for robust floating-point comparisons (half a pixel)
+    const EPSILON = 0.5;
+
+    // --- Responsive Canvas Sizing ---
+    function setupCanvasDimensions() {
+        const viewportWidth = window.innerWidth;
+        let canvasSize = GAME_CANVAS_BASE_SIZE;
+        let refCanvasSize = REFERENCE_CANVAS_BASE_SIZE;
+
+        if (viewportWidth <= 768) { // Tablet/Mobile
+            canvasSize = 350;
+            refCanvasSize = 120;
+        }
+        if (viewportWidth <= 480) { // Smaller Mobile
+            canvasSize = 300;
+            refCanvasSize = 100;
+        }
+
+        canvas.width = canvas.height = canvasSize;
+        particleCanvas.width = particleCanvas.height = canvasSize;
+        referenceCanvas.width = referenceCanvas.height = refCanvasSize;
+    }
+
+    // --- Drawing Functions ---
+    function drawHeart(ctx, x, y, size) {
+        ctx.fillStyle = '#ff4d4d';
+        ctx.beginPath();
+        ctx.moveTo(x, y + size / 4);
+        ctx.bezierCurveTo(x - size / 2, y - size / 4, x - size, y + size / 2, x, y + size);
+        ctx.bezierCurveTo(x + size, y + size / 2, x + size / 2, y - size / 4, x, y + size / 4);
+        ctx.fill();
+    }
+
+    function drawPiece(targetCtx, piece, renderWidth, renderHeight, clearFirst = true) {
+        if (clearFirst) {
+            targetCtx.clearRect(0, 0, renderWidth, renderHeight);
+        }
+        targetCtx.save();
+        targetCtx.translate(renderWidth / 2, renderHeight / 2);
+
+        if (imageLoaded) {
+            targetCtx.drawImage(
+                puzzleImage,
+                piece.sourceX, piece.sourceY, piece.sourceWidth, piece.sourceHeight,
+                -renderWidth / 2, -renderHeight / 2, renderWidth, renderHeight
+            );
+        } else {
+            const heartSize = Math.min(renderWidth, renderHeight) * 0.4;
+            drawHeart(targetCtx, 0, 0, heartSize);
+        }
+        targetCtx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+        targetCtx.strokeRect(-renderWidth / 2, -renderHeight / 2, renderWidth, renderHeight);
+        targetCtx.restore();
+    }
+
+    function drawPuzzle() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.save();
+        ctx.globalAlpha = 0.3;
+        if (imageLoaded) {
+            ctx.drawImage(puzzleImage, 0, 0, puzzleImage.naturalWidth, puzzleImage.naturalHeight,
+                          displayOffsetX, displayOffsetY, displayWidth, displayHeight);
+        } else {
+            const heartSize = Math.min(displayWidth, displayHeight) * 0.4;
+            drawHeart(ctx, canvas.width / 2, canvas.height / 2, heartSize);
+        }
+        ctx.restore();
+
+        if (displayOffsetX > 0 || displayOffsetY > 0) {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.fillRect(displayOffsetX, displayOffsetY, displayWidth, displayHeight);
+        }
+
+        pieces.forEach(piece => {
+            if (piece.isOnBoard) {
+                ctx.save();
+                ctx.translate(piece.x + piece.gameCanvasPieceWidth / 2, piece.y + piece.gameCanvasPieceHeight / 2);
+                if (imageLoaded) {
+                    ctx.drawImage(
+                        puzzleImage,
+                        piece.sourceX, piece.sourceY, piece.sourceWidth, piece.sourceHeight,
+                        -piece.gameCanvasPieceWidth / 2, -piece.gameCanvasPieceHeight / 2, piece.gameCanvasPieceWidth, piece.gameCanvasPieceHeight
+                    );
+                } else {
+                    const heartSize = Math.min(piece.gameCanvasPieceWidth, piece.gameCanvasPieceHeight) * 0.4;
+                    drawHeart(ctx, 0, 0, heartSize);
+                }
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+                ctx.strokeRect(-piece.gameCanvasPieceWidth / 2, -piece.gameCanvasPieceHeight / 2, piece.gameCanvasPieceWidth, piece.gameCanvasPieceHeight);
+                ctx.restore();
+            }
+        });
+    }
+
+    function drawReferenceImage() {
+        referenceCtx.clearRect(0, 0, referenceCanvas.width, referenceCanvas.height);
+
+        const refCanvasWidth = referenceCanvas.width;
+        const refCanvasHeight = referenceCanvas.height;
+        let refDisplayWidth, refDisplayHeight, refDisplayOffsetX, refDisplayOffsetY;
+
+        if (imageLoaded) {
+            if (imageAspectRatio > refCanvasWidth / refCanvasHeight) {
+                refDisplayWidth = refCanvasWidth;
+                refDisplayHeight = refCanvasWidth / imageAspectRatio;
+            } else {
+                refDisplayWidth = refCanvasHeight * imageAspectRatio;
+                refDisplayHeight = refCanvasHeight;
+            }
+            refDisplayOffsetX = (refCanvasWidth - refDisplayWidth) / 2;
+            refDisplayOffsetY = (refCanvasHeight - refDisplayHeight) / 2;
+            referenceCtx.drawImage(puzzleImage, 0, 0, puzzleImage.naturalWidth, puzzleImage.naturalHeight, refDisplayOffsetX, refDisplayOffsetY, refDisplayWidth, refDisplayHeight);
+        } else {
+            const heartSize = Math.min(refCanvasWidth, refCanvasHeight) * 0.4;
+            drawHeart(referenceCtx, refCanvasWidth / 2, refCanvasHeight / 2, heartSize);
+        }
+    }
+
+    // --- Particle Effects ---
+    function createParticles(x, y) {
+        for (let i = 0; i < 15; i++) {
+            particles.push({
+                x: x,
+                y: y,
+                vx: (Math.random() - 0.5) * 7,
+                vy: (Math.random() - 0.5) * 7 - 2,
+                size: Math.random() * 4 + 2,
+                life: 45,
+                color: `hsl(${Math.random() * 30 + 330}, 100%, 70%)`
+            });
+        }
+    }
+
+    function updateParticles() {
+        particleCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+        particles = particles.filter(p => p.life > 0);
+        particles.forEach(p => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.2;
+            p.life--;
+            particleCtx.fillStyle = p.color;
+            particleCtx.globalAlpha = p.life / 45;
+            particleCtx.beginPath();
+            particleCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            particleCtx.fill();
+        });
+        if (gameStarted && !gameOver && particles.length > 0) {
+            requestAnimationFrame(updateParticles);
+        } else if (!gameStarted || gameOver) {
+            particles = [];
+            particleCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+        }
+        particleCtx.globalAlpha = 1;
+    }
+
+    // --- Puzzle Initialization ---
+    function initPuzzle() {
+        pieces = [];
+        pieceArea.innerHTML = '';
+
+        const gameCanvasPieceWidth = displayWidth / gridSize;
+        const gameCanvasPieceHeight = displayHeight / gridSize;
+
+        const sourcePieceWidth = puzzleImage.naturalWidth / gridSize;
+        const sourcePieceHeight = puzzleImage.naturalHeight / gridSize;
+
+        const dynamicPieceAreaSize = Math.min(PIECE_AREA_MAX_PIECE_SIZE, (canvas.width / gridSize) * 0.8);
+        const pieceAreaRenderWidth = dynamicPieceAreaSize;
+        const pieceAreaRenderHeight = dynamicPieceAreaSize;
+
+        for (let row = 0; row < gridSize; row++) {
+            for (let col = 0; col < gridSize; col++) {
+                const index = row * gridSize + col;
+                const pieceCanvas = document.createElement('canvas');
+                pieceCanvas.className = 'piece-canvas';
+                pieceCanvas.width = pieceAreaRenderWidth;
+                pieceCanvas.height = pieceAreaRenderHeight;
+                pieceCanvas.dataset.index = index;
+
+                const pieceCtx = pieceCanvas.getContext('2d');
+                const piece = {
+                    x: 0,
+                    y: 0,
+                    correctX: col * gameCanvasPieceWidth + displayOffsetX,
+                    correctY: row * gameCanvasPieceHeight + displayOffsetY,
+                    gameCanvasPieceWidth: gameCanvasPieceWidth,
+                    gameCanvasPieceHeight: gameCanvasPieceHeight,
+                    sourceX: col * sourcePieceWidth,
+                    sourceY: row * sourcePieceHeight,
+                    sourceWidth: sourcePieceWidth,
+                    sourceHeight: sourcePieceHeight,
+                    canvas: pieceCanvas,
+                    ctx: pieceCtx,
+                    isOnBoard: false,
+                    isCorrectlyPlaced: false, // New flag to track correct placement
+                    pieceAreaRenderWidth: pieceAreaRenderWidth,
+                    pieceAreaRenderHeight: pieceAreaRenderHeight,
+                };
+                pieces.push(piece);
+
+                drawPiece(piece.ctx, piece, piece.pieceAreaRenderWidth, piece.pieceAreaRenderHeight);
+                pieceArea.appendChild(pieceCanvas);
+            }
+        }
+        shufflePieceArea();
+    }
+
+    function shufflePieceArea() {
+        const children = Array.from(pieceArea.children);
+        while (children.length) {
+            pieceArea.appendChild(children.splice(Math.floor(Math.random() * children.length), 1)[0]);
+        }
+    }
+
+    function checkPuzzleSolved() {
+        const allOnBoard = pieces.every(piece => piece.isOnBoard);
+        if (!allOnBoard) {
+            console.log('Not all pieces are on board:', pieces.filter(p => !p.isOnBoard));
+            return false;
+        }
+
+        const allCorrect = pieces.every(piece =>
+            Math.abs(piece.x - piece.correctX) < EPSILON &&
+            Math.abs(piece.y - piece.correctY) < EPSILON
+        );
+
+        if (!allCorrect) {
+            console.log('Not all pieces are correctly placed:', pieces.filter(p =>
+                Math.abs(p.x - p.correctX) >= EPSILON || Math.abs(p.y - p.correctY) >= EPSILON
+            ).map(p => ({
+                index: pieces.indexOf(p),
+                x: p.x,
+                y: p.y,
+                correctX: p.correctX,
+                correctY: p.correctY
+            })));
+        }
+
+        return allOnBoard && allCorrect;
+    }
+
+    // --- Dragging Logic ---
+    let isDragging = false;
+    let offsetX, offsetY;
+    let floatingPieceCanvas = null;
+
+    function startDragging(e, piece) {
+        if (!gameStarted || gameOver || piece.isCorrectlyPlaced) return; // Prevent dragging correctly placed pieces
+        e.preventDefault();
+
+        selectedPiece = piece;
+        isDragging = true;
+
+        const clientX = e.clientX || e.touches[0].clientX;
+        const clientY = e.clientY || e.touches[0].clientY;
+
+        floatingPieceCanvas = document.createElement('canvas');
+        floatingPieceCanvas.className = 'floating-piece';
+        floatingPieceCanvas.width = selectedPiece.gameCanvasPieceWidth;
+        floatingPieceCanvas.height = selectedPiece.gameCanvasPieceHeight;
+        document.body.appendChild(floatingPieceCanvas);
+        const floatingCtx = floatingPieceCanvas.getContext('2d');
+        drawPiece(floatingCtx, selectedPiece, selectedPiece.gameCanvasPieceWidth, selectedPiece.gameCanvasPieceHeight);
+
+        const rect = selectedPiece.canvas.getBoundingClientRect();
+        offsetX = clientX - rect.left - (rect.width / 2);
+        offsetY = clientY - rect.top - (rect.height / 2);
+
+        floatingPieceCanvas.style.left = `${clientX - offsetX}px`;
+        floatingPieceCanvas.style.top = `${clientY - offsetY}px`;
+
+        if (selectedPiece.isOnBoard) {
+            selectedPiece.isOnBoard = false;
+            selectedPiece.isCorrectlyPlaced = false;
+            drawPuzzle();
+        } else {
+            selectedPiece.canvas.style.opacity = '0';
+            selectedPiece.canvas.style.pointerEvents = 'none';
+        }
+    }
+
+    function movePiece(e) {
+        if (isDragging && selectedPiece && floatingPieceCanvas) {
+            e.preventDefault();
+            const clientX = e.clientX || e.touches[0].clientX;
+            const clientY = e.clientY || e.touches[0].clientY;
+
+            floatingPieceCanvas.style.left = `${clientX - offsetX}px`;
+            floatingPieceCanvas.style.top = `${clientY - offsetY}px`;
+
+            const canvasRect = canvas.getBoundingClientRect();
+            const floatingRect = floatingPieceCanvas.getBoundingClientRect();
+            const dropX_center_on_canvas = (floatingRect.left + floatingRect.width / 2) - canvasRect.left;
+            const dropY_center_on_canvas = (floatingRect.top + floatingRect.height / 2) - canvasRect.top;
+
+            if (dropX_center_on_canvas >= displayOffsetX && dropX_center_on_canvas <= displayOffsetX + displayWidth &&
+                dropY_center_on_canvas >= displayOffsetY && dropY_center_on_canvas <= displayOffsetY + displayHeight) {
+                const snapAreaX = dropX_center_on_canvas - displayOffsetX;
+                const snapAreaY = dropY_center_on_canvas - displayOffsetY;
+                const snappedCol = Math.round(snapAreaX / selectedPiece.gameCanvasPieceWidth);
+                const snappedRow = Math.round(snapAreaY / selectedPiece.gameCanvasPieceHeight);
+                const targetCellX = snappedCol * selectedPiece.gameCanvasPieceWidth + displayOffsetX;
+                const targetCellY = snappedRow * selectedPiece.gameCanvasPieceHeight + displayOffsetY;
+
+                if (Math.abs(selectedPiece.correctX - targetCellX) < EPSILON && Math.abs(selectedPiece.correctY - targetCellY) < EPSILON) {
+                    showSnapHighlight(targetCellX, targetCellY, selectedPiece.gameCanvasPieceWidth, selectedPiece.gameCanvasPieceHeight);
+                } else {
+                    snapHighlight.classList.remove('active');
+                }
+            } else {
+                snapHighlight.classList.remove('active');
+            }
+        }
+    }
+
+    function stopDragging(e) {
+        if (isDragging && selectedPiece && floatingPieceCanvas) {
+            moves++;
+            movesDisplay.textContent = `Moves: ${moves}`;
+
+            const clientX = e.clientX || e.changedTouches[0].clientX;
+            const clientY = e.clientY || e.changedTouches[0].clientY;
+
+            const canvasRect = canvas.getBoundingClientRect();
+            const floatingRect = floatingPieceCanvas.getBoundingClientRect();
+            const dropX_center_on_canvas = (floatingRect.left + floatingRect.width / 2) - canvasRect.left;
+            const dropY_center_on_canvas = (floatingRect.top + floatingRect.height / 2) - canvasRect.top;
+
+            let piecePlacedSuccessfully = false;
+
+            if (dropX_center_on_canvas >= displayOffsetX && dropX_center_on_canvas <= displayOffsetX + displayWidth &&
+                dropY_center_on_canvas >= displayOffsetY && dropY_center_on_canvas <= displayOffsetY + displayHeight) {
+
+                const snapAreaX = dropX_center_on_canvas - displayOffsetX;
+                const snapAreaY = dropY_center_on_canvas - displayOffsetY;
+
+                const snappedCol = Math.round(snapAreaX / selectedPiece.gameCanvasPieceWidth);
+                const snappedRow = Math.round(snapAreaY / selectedPiece.gameCanvasPieceHeight);
+                const targetCellX = snappedCol * selectedPiece.gameCanvasPieceWidth + displayOffsetX;
+                const targetCellY = snappedRow * selectedPiece.gameCanvasPieceHeight + displayOffsetY;
+
+                const correctPieceForThisSpot = pieces.find(p =>
+                    Math.abs(p.correctX - targetCellX) < EPSILON &&
+                    Math.abs(p.correctY - targetCellY) < EPSILON
+                );
+
+                const snapTolerance = Math.min(selectedPiece.gameCanvasPieceWidth, selectedPiece.gameCanvasPieceHeight) * 0.2;
+
+                const occupyingPiece = pieces.find(p =>
+                    p.isOnBoard &&
+                    Math.abs(p.x - targetCellX) < EPSILON &&
+                    Math.abs(p.y - targetCellY) < EPSILON &&
+                    p !== selectedPiece
+                );
+
+                if (correctPieceForThisSpot === selectedPiece &&
+                    Math.abs(dropX_center_on_canvas - (targetCellX + selectedPiece.gameCanvasPieceWidth / 2)) < snapTolerance &&
+                    Math.abs(dropY_center_on_canvas - (targetCellY + selectedPiece.gameCanvasPieceHeight / 2)) < snapTolerance &&
+                    !occupyingPiece) {
+                    selectedPiece.isOnBoard = true;
+                    selectedPiece.isCorrectlyPlaced = true; // Mark as correctly placed
+                    selectedPiece.x = targetCellX;
+                    selectedPiece.y = targetCellY;
+
+                    console.log(`Piece ${pieces.indexOf(selectedPiece)} placed at (${targetCellX}, ${targetCellY}), correct: (${selectedPiece.correctX}, ${selectedPiece.correctY})`);
+
+                    showSnapHighlight(selectedPiece.x, selectedPiece.y, selectedPiece.gameCanvasPieceWidth, selectedPiece.gameCanvasPieceHeight);
+                    createParticles(selectedPiece.x + selectedPiece.gameCanvasPieceWidth / 2, selectedPiece.y + selectedPiece.gameCanvasPieceHeight / 2);
+                    snapSound.play();
+
+                    selectedPiece.canvas.style.opacity = '0';
+                    selectedPiece.canvas.style.pointerEvents = 'none';
+                    piecePlacedSuccessfully = true;
+
+                    // Immediately check if puzzle is solved
+                    if (checkPuzzleSolved()) {
+                        console.log('Puzzle solved!');
+                        gameOver = true;
+                        endScreen.style.display = 'flex';
+                        finalTimeDisplay.textContent = timeElapsed;
+                        finalMovesDisplay.textContent = moves;
+                        clearInterval(timerInterval);
+                        music.pause();
+                        completeSound.play();
+                    }
+                }
+            }
+
+            if (!piecePlacedSuccessfully) {
+                selectedPiece.isOnBoard = false;
+                selectedPiece.isCorrectlyPlaced = false;
+                selectedPiece.canvas.style.opacity = '1';
+                selectedPiece.canvas.style.pointerEvents = 'auto';
+                drawPiece(selectedPiece.ctx, selectedPiece, selectedPiece.pieceAreaRenderWidth, selectedPiece.pieceAreaRenderHeight);
+                console.log(`Piece ${pieces.indexOf(selectedPiece)} returned to piece area`);
+            }
+
+            floatingPieceCanvas.remove();
+            floatingPieceCanvas = null;
+
+            drawPuzzle();
+            isDragging = false;
+            selectedPiece = null;
+            requestAnimationFrame(updateParticles);
+        }
+    }
+
+    function showSnapHighlight(x, y, width, height) {
+        const canvasRect = canvas.getBoundingClientRect();
+        const gameContainerRect = gameContainer.getBoundingClientRect();
+
+        snapHighlight.style.left = `${canvasRect.left - gameContainerRect.left + x}px`;
+        snapHighlight.style.top = `${canvasRect.top - gameContainerRect.top + y}px`;
+        snapHighlight.style.width = `${width}px`;
+        snapHighlight.style.height = `${height}px`;
+        snapHighlight.classList.add('active');
+        setTimeout(() => {
+            snapHighlight.classList.remove('active');
+        }, 500);
+    }
+
+    // --- Event Listeners ---
+    document.addEventListener('mousemove', movePiece, { passive: false });
+    document.addEventListener('mouseup', stopDragging);
+    document.addEventListener('touchmove', movePiece, { passive: false });
+    document.addEventListener('touchend', stopDragging);
+
+    canvas.addEventListener('mousedown', (e) => {
+        if (e.button !== 0 || !gameStarted || gameOver) return;
+        const clientX = e.clientX;
+        const clientY = e.clientY;
+        const canvasRect = canvas.getBoundingClientRect();
+        const mouseX = clientX - canvasRect.left;
+        const mouseY = clientY - canvasRect.top;
+
+        for (let i = pieces.length - 1; i >= 0; i--) {
+            const piece = pieces[i];
+            if (piece.isOnBoard && !piece.isCorrectlyPlaced &&
+                mouseX >= piece.x - EPSILON && mouseX < piece.x + piece.gameCanvasPieceWidth + EPSILON &&
+                mouseY >= piece.y - EPSILON && mouseY < piece.y + piece.gameCanvasPieceHeight + EPSILON) {
+                piece.isOnBoard = false;
+                piece.isCorrectlyPlaced = false;
+                piece.canvas.style.opacity = '1';
+                piece.canvas.style.pointerEvents = 'auto';
+                drawPiece(piece.ctx, piece, piece.pieceAreaRenderWidth, piece.pieceAreaRenderHeight);
+                startDragging(e, piece);
+                drawPuzzle();
+                break;
+            }
+        }
+    });
+
+    canvas.addEventListener('touchstart', (e) => {
+        if (e.touches.length > 1 || !gameStarted || gameOver) return;
+        e.preventDefault();
+        const clientX = e.touches[0].clientX;
+        const clientY = e.touches[0].clientY;
+        const canvasRect = canvas.getBoundingClientRect();
+        const touchX = clientX - canvasRect.left;
+        const touchY = clientY - canvasRect.top;
+
+        for (let i = pieces.length - 1; i >= 0; i--) {
+            const piece = pieces[i];
+            if (piece.isOnBoard && !piece.isCorrectlyPlaced &&
+                touchX >= piece.x - EPSILON && touchX < piece.x + piece.gameCanvasPieceWidth + EPSILON &&
+                touchY >= piece.y - EPSILON && touchY < piece.y + piece.gameCanvasPieceHeight + EPSILON) {
+                piece.isOnBoard = false;
+                piece.isCorrectlyPlaced = false;
+                piece.canvas.style.opacity = '1';
+                piece.canvas.style.pointerEvents = 'auto';
+                drawPiece(piece.ctx, piece, piece.pieceAreaRenderWidth, piece.pieceAreaRenderHeight);
+                startDragging(e, piece);
+                drawPuzzle();
+                break;
+            }
+        }
+    }, { passive: false });
+
+    pieceArea.addEventListener('mousedown', (e) => {
+        if (e.button !== 0 || !gameStarted || gameOver) return;
+        const pieceCanvas = e.target.closest('.piece-canvas');
+        if (pieceCanvas) {
+            const index = parseInt(pieceCanvas.dataset.index);
+            const piece = pieces[index];
+            if (!piece.isOnBoard && !piece.isCorrectlyPlaced) {
+                startDragging(e, piece);
+            }
+        }
+    });
+
+    pieceArea.addEventListener('touchstart', (e) => {
+        if (e.touches.length > 1 || !gameStarted || gameOver) return;
+        e.preventDefault();
+        const pieceCanvas = e.target.closest('.piece-canvas');
+        if (pieceCanvas) {
+            const index = parseInt(pieceCanvas.dataset.index);
+            const piece = pieces[index];
+            if (!piece.isOnBoard && !piece.isCorrectlyPlaced) {
+                startDragging(e, piece);
+            }
+        }
+    }, { passive: false });
+
+    // --- Timer Functionality ---
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timeElapsed++;
+            timerDisplay.textContent = `Time: ${timeElapsed}s`;
+        }, 1000);
+    }
+
+    // --- Image Loading ---
+    function loadImage(url) {
+        return new Promise((resolve) => {
+            loadingMessage.style.display = 'block';
+            puzzleImage.onload = () => {
+                imageLoaded = true;
+                errorMessage.style.display = 'none';
+                loadingMessage.style.display = 'none';
+                imageAspectRatio = puzzleImage.naturalWidth / puzzleImage.naturalHeight;
+                calculateDisplayDimensions();
+                drawReferenceImage();
+                resolve();
+            };
+            puzzleImage.onerror = () => {
+                imageLoaded = false;
+                errorMessage.style.display = 'block';
+                loadingMessage.style.display = 'none';
+                imageAspectRatio = 1;
+                calculateDisplayDimensions();
+                drawReferenceImage();
+                resolve();
+            };
+            puzzleImage.src = url;
+        });
+    }
+
+    function calculateDisplayDimensions() {
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+
+        if (imageAspectRatio > canvasWidth / canvasHeight) {
+            displayWidth = canvasWidth;
+            displayHeight = canvasWidth / imageAspectRatio;
+        } else {
+            displayWidth = canvasHeight * imageAspectRatio;
+            displayHeight = canvasHeight;
+        }
+
+        displayOffsetX = (canvasWidth - displayWidth) / 2;
+        displayOffsetY = (canvasHeight - displayHeight) / 2;
+    }
+
+    // --- Game State Management ---
+    async function initializeGameAssets() {
+        startButton.disabled = true;
+        loadingMessage.style.display = 'block';
+
+        setupCanvasDimensions();
+
+        const imageUrl = imageSelect.value;
+        if (imageUrl) {
+            await loadImage(imageUrl);
+        } else {
+            imageLoaded = false;
+            errorMessage.style.display = 'none';
+            imageAspectRatio = 1;
+            calculateDisplayDimensions();
+            drawReferenceImage();
+            loadingMessage.style.display = 'none';
+        }
+
+        startButton.disabled = false;
+        initPuzzle();
+        drawPuzzle();
+    }
+
+    startButton.addEventListener('click', async () => {
+        gameStarted = true;
+        startScreen.style.display = 'none';
+
+        gameOver = false;
+        timeElapsed = 0;
+        moves = 0;
+        timerDisplay.textContent = 'Time: 0s';
+        movesDisplay.textContent = 'Moves: 0';
+        clearInterval(timerInterval);
+        particles = [];
+        particleCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+
+        gridSize = parseInt(difficultySelect.value);
+
+        await initializeGameAssets();
+
+        startTimer();
+        music.play();
+        requestAnimationFrame(updateParticles);
+    });
+
+    restartButton.addEventListener('click', () => {
+        gameStarted = false;
+        gameOver = false;
+        timeElapsed = 0;
+        moves = 0;
+        timerDisplay.textContent = 'Time: 0s';
+        movesDisplay.textContent = 'Moves: 0';
+        endScreen.style.display = 'none';
+        startScreen.style.display = 'flex';
+        clearInterval(timerInterval);
+        music.pause();
+        music.currentTime = 0;
+
+        imageSelect.value = '';
+        difficultySelect.value = '12';
+        errorMessage.style.display = 'none';
+
+        initializeGameAssets();
+    });
+
+    imageSelect.addEventListener('change', initializeGameAssets);
+    difficultySelect.addEventListener('change', () => {
+        gridSize = parseInt(difficultySelect.value);
+        initializeGameAssets();
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        initializeGameAssets();
+    });
+
+    window.addEventListener('resize', () => {
+        if (gameStarted && !gameOver) {
+            alert("Window resized! The puzzle will reset to adapt to the new screen size. Please start a new game.");
+        }
+        gameStarted = false;
+        gameOver = false;
+        clearInterval(timerInterval);
+        music.pause();
+        music.currentTime = 0;
+        endScreen.style.display = 'none';
+        startScreen.style.display = 'flex';
+
+        initializeGameAssets();
+    });
+</script>
+</body>
+</html>
